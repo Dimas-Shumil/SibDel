@@ -1,218 +1,7 @@
-// COLORS
-
-$bgr-page: #f5ead4;
-$bgr-page-soft: #f8f0df;
-$bgr-page-light: #fff9ee;
-
-$bgr-hero: #ead8b6;
-$bgr-button: #4f5b24;
-$bgr-button-hover: #3f491c;
-$bgr-button-light: rgba(255, 249, 238, 0.58);
-
-$color-text: #4a321e;
-$color-text-soft: #6f5439;
-$color-text-muted: #8b7258;
-$color-text-light: #fffaf0;
-
-$color-forest: #4f5b24;
-$color-forest-dark: #354019;
-$color-forest-soft: #71784a;
-
-$color-border: rgba(100, 70, 40, 0.28);
-$color-border-strong: rgba(77, 52, 29, 0.44);
-$color-border-light: rgba(255, 250, 240, 0.46);
-
-$color-shadow: rgba(74, 50, 30, 0.14);
-
-// TYPOGRAPHY
-
-$font-title: 'Bodoni Moda', Georgia, serif;
-$font-text: 'Manrope', Arial, sans-serif;
-$font-mono: 'Roboto Mono', monospace;
-
-$fs-body: 16px;
-
-$lh-text: 1.55;
-
-// LAYOUT
-
-$container-3880: 3680px;
-$container-2560: 2460px;
-$container-main: 1720px;
-
-$page-padding-3880: 48px;
-$page-padding-2560: 36px;
-$page-padding-desktop: 28px;
-$page-padding-notebook: 20px;
-$page-padding-tablet: 18px;
-$page-padding-mobile: 12px;
-$page-padding-phone: 8px;
-
-// RADIUS
-
-$radius-large: 28px;
-$radius-medium: 14px;
-$radius-small: 10px;
-
-// TRANSITIONS
-
-$ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-
-$transition-base: 0.35s $ease-premium;
-
-// BASE
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  min-width: 320px;
-
-  font-family: $font-text;
-
-  text-rendering: geometricPrecision;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  scroll-behavior: smooth;
-  scrollbar-color: $color-forest $bgr-page-soft;
-  scrollbar-width: thin;
-}
-
-body {
-  min-width: 320px;
-  margin: 0;
-
-  font-family: $font-text;
-  font-size: $fs-body;
-  font-weight: 400;
-  line-height: $lh-text;
-
-  color: $color-text;
-  background:
-    radial-gradient(
-      circle at 12% 0%,
-      rgba(255, 250, 239, 0.82),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 88% 8%,
-      rgba(212, 187, 139, 0.18),
-      transparent 32%
-    ),
-    linear-gradient(
-      180deg,
-      $bgr-page-light 0%,
-      $bgr-page-soft 42%,
-      $bgr-page 100%
-    );
-
-  overflow-x: hidden;
-}
-
-body::selection {
-  color: $color-text-light;
-  background: $color-forest;
-}
-
-body.is-lock {
-  overflow: hidden;
-}
-
-img,
-picture,
-video,
-svg {
-  display: block;
-  max-width: 100%;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  border: 0;
-}
-
-ul,
-ol {
-  list-style: none;
-}
-
-main {
-  display: block;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: $bgr-page-soft;
-}
-
-::-webkit-scrollbar-thumb {
-  border: 2px solid $bgr-page-soft;
-  border-radius: 999px;
-
-  background: linear-gradient(
-    180deg,
-    $color-forest-soft 0%,
-    $color-forest 48%,
-    $color-forest-dark 100%
-  );
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: $color-forest-dark;
-}
-
-@font-face {
-  font-family: 'Roboto Mono';
-  src: url('/site/fonts/roboto-mono/RobotoMono-Regular.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto Mono';
-  src: url('/site/fonts/roboto-mono/RobotoMono-Medium.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto Mono';
-  src: url('/site/fonts/roboto-mono/RobotoMono-SemiBold.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto Mono';
-  src: url('/site/fonts/roboto-mono/RobotoMono-Bold.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-}
+@use 'variables' as *;
+@use 'base';
+@use 'header';
+@use 'footer';
 
 // быстрая навигация
 
@@ -3064,10 +2853,15 @@ main {
   }
 }
 
+// популярные продукты
+
 .popular-products {
   width: 100%;
 
-  padding: 54px $page-padding-3880 0;
+  padding:
+    48px
+    $page-padding-3880
+    0;
 
   &__container {
     width: 100%;
@@ -3081,13 +2875,15 @@ main {
     align-items: center;
     justify-content: space-between;
 
-    gap: 30px;
+    gap: 24px;
 
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   &__title {
-    font-size: clamp(26px, 0.9vw, 34px);
+    margin: 0;
+
+    font-size: clamp(24px, 0.82vw, 32px);
     font-weight: 700;
     line-height: 1.15;
 
@@ -3098,13 +2894,13 @@ main {
     display: flex;
     align-items: center;
 
-    gap: 18px;
+    gap: 16px;
   }
 
   &__all {
     position: relative;
 
-    font-size: clamp(14px, 0.45vw, 17px);
+    font-size: clamp(13px, 0.4vw, 16px);
     font-weight: 500;
 
     color: $color-text-soft;
@@ -3129,12 +2925,11 @@ main {
       transition: transform $transition-base;
     }
 
-    &:hover {
-      color: $color-forest-dark;
+    &:focus-visible {
+      outline: 2px solid $color-forest;
+      outline-offset: 5px;
 
-      &::after {
-        transform: scaleX(1);
-      }
+      border-radius: 2px;
     }
   }
 
@@ -3142,7 +2937,7 @@ main {
     display: flex;
     align-items: center;
 
-    gap: 8px;
+    gap: 7px;
   }
 
   &__button {
@@ -3150,8 +2945,8 @@ main {
     align-items: center;
     justify-content: center;
 
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
 
     padding: 0;
 
@@ -3159,7 +2954,7 @@ main {
     border-radius: 50%;
 
     color: $color-text-soft;
-    background: rgba(255, 249, 238, 0.48);
+    background: rgba(255, 249, 238, 0.58);
 
     cursor: pointer;
 
@@ -3170,18 +2965,17 @@ main {
       transform $transition-base,
       opacity $transition-base;
 
-    &:hover {
-      color: $color-text-light;
+    &:active {
+      transform: scale(0.94);
+    }
 
-      border-color: $color-forest;
-
-      background: $color-forest;
-
-      transform: translateY(-2px);
+    &:focus-visible {
+      outline: 2px solid $color-forest;
+      outline-offset: 3px;
     }
 
     &.swiper-button-disabled {
-      opacity: 0.3;
+      opacity: 0.28;
 
       pointer-events: none;
     }
@@ -3197,7 +2991,11 @@ main {
     align-items: stretch;
   }
 
-  &__slide {
+  &__slide.swiper-slide {
+    flex: 0 0 280px;
+
+    width: 280px;
+    max-width: 280px;
     height: auto;
   }
 
@@ -3205,85 +3003,79 @@ main {
     display: flex;
     flex-direction: column;
 
+    width: 100%;
     height: 100%;
-    min-height: 470px;
+    min-height: 365px;
 
     overflow: hidden;
 
     border: 1px solid $color-border;
     border-radius: $radius-medium;
 
-    background: rgba(255, 249, 238, 0.46);
-
-    box-shadow:
-      0 10px 28px rgba(74, 50, 30, 0.035),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: rgba(255, 249, 238, 0.5);
 
     transition:
-      transform $transition-base,
-      border-color $transition-base,
-      box-shadow $transition-base;
-
-    &:hover {
-      transform: translateY(-4px);
-
-      border-color: rgba(79, 91, 36, 0.42);
-
-      box-shadow:
-        0 16px 36px rgba(74, 50, 30, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.45);
-
-      .popular-products__image {
-        transform: scale(1.045);
-      }
-    }
+      transform 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease;
   }
 
   &__image-wrapper {
     position: relative;
 
     width: 100%;
-    aspect-ratio: 1.12 / 1;
 
-    overflow: hidden;
-
-    background: rgba(255, 249, 238, 0.62);
+    padding:
+      10px
+      10px
+      0;
   }
 
   &__image-link {
     display: block;
 
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1.16 / 1;
+
+    overflow: hidden;
+
+    border-radius: $radius-medium;
+
+    background: $bgr-page-soft;
   }
 
   &__image {
+    display: block;
+
     width: 100%;
     height: 100%;
 
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
 
-    padding: 18px;
-
-    transition: transform $transition-base;
+    transition: transform 300ms ease;
   }
 
   &__badge {
     position: absolute;
-    top: 14px;
-    left: 14px;
+    z-index: 2;
+
+    top: 19px;
+    left: 19px;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    min-height: 36px;
+    min-height: 30px;
 
-    padding: 7px 13px;
+    padding:
+      6px
+      10px;
 
-    border-radius: 10px;
+    border-radius: 9px;
 
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 1;
 
@@ -3301,6 +3093,8 @@ main {
 
   &__favorite {
     position: absolute;
+    z-index: 2;
+
     top: 14px;
     right: 14px;
 
@@ -3308,14 +3102,14 @@ main {
     align-items: center;
     justify-content: center;
 
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
 
     padding: 0;
 
     border: 0;
 
-    font-size: 29px;
+    font-size: 26px;
     line-height: 1;
 
     color: $color-text-soft;
@@ -3324,13 +3118,18 @@ main {
     cursor: pointer;
 
     transition:
-      color $transition-base,
-      transform $transition-base;
+      color 180ms ease,
+      transform 180ms ease;
 
-    &:hover {
-      color: $color-forest;
+    &:active {
+      transform: scale(0.88);
+    }
 
-      transform: scale(1.08);
+    &:focus-visible {
+      outline: 2px solid $color-forest;
+      outline-offset: 2px;
+
+      border-radius: 50%;
     }
   }
 
@@ -3339,29 +3138,35 @@ main {
     flex: 1;
     flex-direction: column;
 
-    padding: 18px 18px 16px;
+    padding:
+      14px
+      14px
+      13px;
   }
 
   &__name {
-    font-size: clamp(16px, 0.52vw, 20px);
+    font-size: clamp(14px, 0.42vw, 16px);
     font-weight: 650;
-    line-height: 1.25;
+    line-height: 1.3;
 
     color: $color-text;
 
-    transition: color $transition-base;
+    transition: color 180ms ease;
 
-    &:hover {
-      color: $color-forest-dark;
+    &:focus-visible {
+      outline: 2px solid $color-forest;
+      outline-offset: 3px;
+
+      border-radius: 2px;
     }
   }
 
   &__weight {
     display: block;
 
-    margin-top: 7px;
+    margin-top: 5px;
 
-    font-size: clamp(13px, 0.4vw, 15px);
+    font-size: clamp(12px, 0.34vw, 14px);
 
     color: $color-text-muted;
   }
@@ -3371,10 +3176,10 @@ main {
     align-items: flex-end;
     justify-content: space-between;
 
-    gap: 14px;
+    gap: 10px;
 
     margin-top: auto;
-    padding-top: 24px;
+    padding-top: 16px;
   }
 
   &__price {
@@ -3382,11 +3187,11 @@ main {
     align-items: baseline;
     flex-wrap: wrap;
 
-    gap: 9px;
+    gap: 7px;
   }
 
   &__price-current {
-    font-size: clamp(23px, 0.72vw, 28px);
+    font-size: clamp(20px, 0.58vw, 24px);
     font-weight: 700;
     line-height: 1;
 
@@ -3396,7 +3201,7 @@ main {
   &__price-old {
     position: relative;
 
-    font-size: clamp(13px, 0.42vw, 16px);
+    font-size: clamp(12px, 0.34vw, 14px);
     font-weight: 500;
 
     color: $color-text-muted;
@@ -3424,15 +3229,15 @@ main {
 
     flex: 0 0 auto;
 
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 
     padding: 0;
 
     border: 0;
     border-radius: 9px;
 
-    font-size: 20px;
+    font-size: 17px;
 
     color: $color-text-light;
     background: $color-forest;
@@ -3440,70 +3245,156 @@ main {
     cursor: pointer;
 
     transition:
-      background $transition-base,
-      transform $transition-base,
-      box-shadow $transition-base;
+      background 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
 
-    &:hover {
+    &:active {
+      transform: scale(0.92);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-forest-dark;
+      outline-offset: 3px;
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .popular-products {
+    &__all:hover {
+      color: $color-forest-dark;
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+
+    &__button:hover {
+      color: $color-text-light;
+
+      border-color: $color-forest;
+
+      background: $color-forest;
+
+      transform: translateY(-2px);
+    }
+
+    &__card:hover {
+      transform: translateY(-3px);
+
+      border-color: rgba(79, 91, 36, 0.34);
+
+      box-shadow: 0 10px 24px rgba(58, 42, 25, 0.07);
+    }
+
+    &__card:hover &__image {
+      transform: scale(1.025);
+    }
+
+    &__name:hover {
+      color: $color-forest-dark;
+    }
+
+    &__favorite:hover {
+      color: $color-forest;
+
+      transform: scale(1.07);
+    }
+
+    &__cart:hover {
       background: $color-forest-dark;
 
       transform: translateY(-2px);
 
-      box-shadow: 0 10px 22px rgba(53, 64, 25, 0.16);
+      box-shadow: 0 7px 16px rgba(53, 64, 25, 0.16);
     }
   }
 }
 
 @media (max-width: 2999px) {
   .popular-products {
-    padding: 48px $page-padding-2560 0;
+    padding:
+      44px
+      $page-padding-2560
+      0;
 
     &__container {
       max-width: $container-2560;
     }
 
-    &__card {
-      min-height: 440px;
+    &__slide.swiper-slide {
+      flex-basis: 270px;
+
+      width: 270px;
+      max-width: 270px;
     }
   }
 }
 
 @media (max-width: 1919px) {
   .popular-products {
-    padding: 42px $page-padding-desktop 0;
+    padding:
+      40px
+      $page-padding-desktop
+      0;
 
     &__container {
       max-width: $container-main;
     }
 
+    &__header {
+      margin-bottom: 18px;
+    }
+
     &__title {
-      font-size: 26px;
+      font-size: 25px;
+    }
+
+    &__slide.swiper-slide {
+      flex-basis: 250px;
+
+      width: 250px;
+      max-width: 250px;
     }
 
     &__card {
-      min-height: 410px;
+      min-height: 345px;
     }
 
     &__content {
-      padding: 15px 15px 14px;
+      padding:
+        12px
+        13px
+        12px;
     }
 
     &__name {
-      font-size: 15px;
+      font-size: 14px;
     }
 
     &__cart {
-      width: 42px;
-      height: 42px;
+      width: 38px;
+      height: 38px;
 
-      font-size: 18px;
+      font-size: 16px;
     }
   }
 }
 
 @media (max-width: 1365px) {
   .popular-products {
-    padding: 38px $page-padding-notebook 0;
+    padding:
+      36px
+      $page-padding-notebook
+      0;
+
+    &__slide.swiper-slide {
+      flex-basis: 238px;
+
+      width: 238px;
+      max-width: 238px;
+    }
   }
 }
 
@@ -3512,19 +3403,33 @@ main {
     padding-right: $page-padding-tablet;
     padding-left: $page-padding-tablet;
 
+    &__container {
+      overflow: hidden;
+    }
+
     &__slider {
       overflow: visible;
     }
 
-    &__container {
-      overflow: hidden;
+    &__slide.swiper-slide {
+      flex-basis: 228px;
+
+      width: 228px;
+      max-width: 228px;
     }
   }
 }
 
 @media (max-width: 767px) {
   .popular-products {
-    padding: 32px $page-padding-mobile 0;
+    padding:
+      32px
+      $page-padding-mobile
+      0;
+
+    &__header {
+      margin-bottom: 16px;
+    }
 
     &__title {
       font-size: 22px;
@@ -3539,56 +3444,122 @@ main {
       height: 32px;
     }
 
-    &__card {
-      min-height: 370px;
+    &__slide.swiper-slide {
+      flex-basis: 212px;
+
+      width: 212px;
+      max-width: 212px;
     }
 
-    &__image {
-      padding: 14px;
+    &__card {
+      min-height: 310px;
+    }
+
+    &__image-wrapper {
+      padding:
+        8px
+        8px
+        0;
+    }
+
+    &__image-link {
+      border-radius: 11px;
     }
 
     &__badge {
-      top: 10px;
-      left: 10px;
+      top: 15px;
+      left: 15px;
+
+      min-height: 27px;
+
+      padding:
+        5px
+        8px;
+
+      font-size: 11px;
     }
 
     &__favorite {
-      top: 8px;
-      right: 8px;
+      top: 10px;
+      right: 10px;
+
+      width: 32px;
+      height: 32px;
+
+      font-size: 24px;
     }
 
     &__content {
-      padding: 13px 13px 12px;
+      padding:
+        11px
+        11px
+        10px;
     }
 
     &__name {
-      font-size: 14px;
+      font-size: 13px;
     }
 
     &__weight {
-      font-size: 12px;
+      margin-top: 4px;
+
+      font-size: 11px;
+    }
+
+    &__bottom {
+      padding-top: 13px;
     }
 
     &__price-current {
-      font-size: 21px;
+      font-size: 19px;
+    }
+
+    &__cart {
+      width: 36px;
+      height: 36px;
+
+      font-size: 15px;
     }
   }
 }
 
 @media (max-width: 479px) {
   .popular-products {
-    padding: 28px $page-padding-phone 0;
+    padding:
+      28px
+      $page-padding-phone
+      0;
 
     &__title {
       font-size: 20px;
     }
 
+    &__slide.swiper-slide {
+      flex-basis: 200px;
+
+      width: 200px;
+      max-width: 200px;
+    }
+
     &__card {
-      min-height: 350px;
+      min-height: 300px;
     }
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .popular-products {
+    &__card,
+    &__image,
+    &__button,
+    &__favorite,
+    &__cart,
+    &__all,
+    &__all::after {
+      transition: none;
+    }
+  }
+}
 // отзывы
 
 .reviews {
@@ -4219,10 +4190,7 @@ main {
 
 @media (max-width: 2999px) {
   .delivery-contacts {
-    padding:
-      48px
-      $page-padding-2560
-      48px;
+    padding: 48px $page-padding-2560 48px;
 
     &__container {
       max-width: $container-2560;
@@ -4232,10 +4200,7 @@ main {
 
     &__delivery-info,
     &__contacts-info {
-      padding:
-        30px
-        30px
-        28px;
+      padding: 30px 30px 28px;
     }
 
     &__delivery-image-wrapper,
@@ -4248,10 +4213,7 @@ main {
 
 @media (max-width: 1919px) {
   .delivery-contacts {
-    padding:
-      42px
-      $page-padding-desktop
-      42px;
+    padding: 42px $page-padding-desktop 42px;
 
     &__container {
       max-width: $container-main;
@@ -4273,10 +4235,7 @@ main {
 
     &__delivery-info,
     &__contacts-info {
-      padding:
-        26px
-        26px
-        24px;
+      padding: 26px 26px 24px;
     }
 
     &__title {
@@ -4317,10 +4276,7 @@ main {
 
 @media (max-width: 1365px) {
   .delivery-contacts {
-    padding:
-      38px
-      $page-padding-notebook
-      38px;
+    padding: 38px $page-padding-notebook 38px;
 
     &__container {
       grid-template-columns: 1fr;
@@ -4337,9 +4293,7 @@ main {
 
     &__delivery-info,
     &__contacts-info {
-      padding:
-        26px
-        24px;
+      padding: 26px 24px;
     }
 
     &__delivery-image-wrapper,
@@ -4352,10 +4306,7 @@ main {
 
 @media (max-width: 1023px) {
   .delivery-contacts {
-    padding:
-      36px
-      $page-padding-tablet
-      36px;
+    padding: 36px $page-padding-tablet 36px;
 
     &__delivery,
     &__contacts {
@@ -4366,9 +4317,7 @@ main {
 
     &__delivery-info,
     &__contacts-info {
-      padding:
-        24px
-        22px;
+      padding: 24px 22px;
     }
 
     &__title {
@@ -4401,10 +4350,7 @@ main {
 
 @media (max-width: 767px) {
   .delivery-contacts {
-    padding:
-      32px
-      $page-padding-mobile
-      32px;
+    padding: 32px $page-padding-mobile 32px;
 
     &__container {
       gap: 12px;
@@ -4417,9 +4363,7 @@ main {
 
     &__delivery-info,
     &__contacts-info {
-      padding:
-        22px
-        20px;
+      padding: 22px 20px;
     }
 
     &__title {
@@ -4472,10 +4416,7 @@ main {
 
 @media (max-width: 479px) {
   .delivery-contacts {
-    padding:
-      28px
-      $page-padding-phone
-      28px;
+    padding: 28px $page-padding-phone 28px;
 
     &__container {
       gap: 10px;
@@ -4483,9 +4424,7 @@ main {
 
     &__delivery-info,
     &__contacts-info {
-      padding:
-        20px
-        16px;
+      padding: 20px 16px;
     }
 
     &__title {
@@ -4520,550 +4459,5 @@ main {
     &__map-frame {
       min-height: 220px;
     }
-  }
-}
-
-.footer {
-  width: 100%;
-
-  padding:
-    0
-    $page-padding-3880
-    28px;
-
-  &__container {
-    width: 100%;
-    max-width: $container-3880;
-
-    margin: 0 auto;
-
-    overflow: hidden;
-
-    border: 1px solid $color-border;
-    border-radius: $radius-medium;
-
-    background:
-      linear-gradient(
-        145deg,
-        rgba(255, 249, 238, 0.72),
-        rgba(239, 222, 188, 0.5)
-      );
-
-    box-shadow:
-      0 10px 28px rgba(74, 50, 30, 0.035),
-      inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  }
-
-  &__main {
-    display: grid;
-    grid-template-columns:
-      minmax(320px, 1.25fr)
-      repeat(3, minmax(180px, 0.75fr));
-
-    gap: 72px;
-
-    padding:
-      48px
-      54px
-      42px;
-  }
-
-  &__brand {
-    min-width: 0;
-  }
-
-  &__logo {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 14px;
-
-    color: $color-forest-dark;
-  }
-
-  &__logo-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 48px;
-    height: 58px;
-
-    font-size: 38px;
-    line-height: 1;
-
-    color: $color-forest;
-  }
-
-  &__logo-text {
-    display: flex;
-    flex-direction: column;
-
-    font-size: clamp(20px, 0.72vw, 28px);
-    font-weight: 750;
-    line-height: 1.04;
-    letter-spacing: 0.025em;
-
-    text-transform: uppercase;
-  }
-
-  &__description {
-    margin-top: 16px;
-
-    font-size: clamp(14px, 0.45vw, 17px);
-    line-height: 1.45;
-
-    color: $color-text-soft;
-
-    span {
-      display: block;
-    }
-  }
-
-  &__socials {
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    margin-top: 22px;
-  }
-
-  &__social {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 40px;
-    height: 40px;
-
-    border: 1px solid $color-border;
-    border-radius: 50%;
-
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1;
-
-    color: $color-text-soft;
-    background: rgba(255, 249, 238, 0.42);
-
-    transition:
-      color $transition-base,
-      border-color $transition-base,
-      background $transition-base,
-      transform $transition-base;
-
-    &:hover {
-      color: $color-text-light;
-
-      border-color: $color-forest;
-
-      background: $color-forest;
-
-      transform: translateY(-2px);
-    }
-  }
-
-  &__column {
-    min-width: 0;
-  }
-
-  &__column-title {
-    margin: 0 0 16px;
-
-    font-size: clamp(15px, 0.5vw, 19px);
-    font-weight: 700;
-    line-height: 1.2;
-
-    color: $color-text;
-  }
-
-  &__links {
-    display: flex;
-    flex-direction: column;
-
-    gap: 10px;
-  }
-
-  &__link {
-    position: relative;
-
-    display: inline-block;
-
-    font-size: clamp(13px, 0.42vw, 16px);
-    font-weight: 450;
-    line-height: 1.35;
-
-    color: $color-text-soft;
-
-    transition:
-      color $transition-base,
-      transform $transition-base;
-
-    &:hover {
-      color: $color-forest-dark;
-
-      transform: translateX(3px);
-    }
-  }
-
-  &__bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 30px;
-
-    padding:
-      18px
-      54px;
-
-    border-top: 1px solid $color-border;
-  }
-
-  &__copyright {
-    margin: 0;
-
-    font-size: clamp(11px, 0.35vw, 13px);
-    line-height: 1.4;
-
-    color: $color-text-muted;
-  }
-
-  &__legal {
-    display: flex;
-    align-items: center;
-
-    gap: 28px;
-  }
-
-  &__legal-link {
-    position: relative;
-
-    font-size: clamp(11px, 0.35vw, 13px);
-    line-height: 1.4;
-
-    color: $color-text-muted;
-
-    transition: color $transition-base;
-
-    &::after {
-      content: "";
-
-      position: absolute;
-      right: 0;
-      bottom: -3px;
-      left: 0;
-
-      height: 1px;
-
-      background: $color-forest;
-
-      transform: scaleX(0);
-      transform-origin: left;
-
-      transition: transform $transition-base;
-    }
-
-    &:hover {
-      color: $color-forest-dark;
-
-      &::after {
-        transform: scaleX(1);
-      }
-    }
-  }
-}
-
-@media (max-width: 2999px) {
-  .footer {
-    padding:
-      0
-      $page-padding-2560
-      26px;
-
-    &__container {
-      max-width: $container-2560;
-    }
-
-    &__main {
-      gap: 58px;
-
-      padding:
-        44px
-        46px
-        38px;
-    }
-
-    &__bottom {
-      padding:
-        17px
-        46px;
-    }
-  }
-}
-
-@media (max-width: 1919px) {
-  .footer {
-    padding:
-      0
-      $page-padding-desktop
-      24px;
-
-    &__container {
-      max-width: $container-main;
-    }
-
-    &__main {
-      grid-template-columns:
-        minmax(260px, 1.2fr)
-        repeat(3, minmax(150px, 0.7fr));
-
-      gap: 42px;
-
-      padding:
-        38px
-        38px
-        34px;
-    }
-
-    &__logo-icon {
-      width: 42px;
-      height: 50px;
-
-      font-size: 32px;
-    }
-
-    &__logo-text {
-      font-size: 21px;
-    }
-
-    &__description {
-      font-size: 13px;
-    }
-
-    &__column-title {
-      font-size: 15px;
-    }
-
-    &__link {
-      font-size: 13px;
-    }
-
-    &__bottom {
-      padding:
-        16px
-        38px;
-    }
-  }
-}
-
-@media (max-width: 1365px) {
-  .footer {
-    padding:
-      0
-      $page-padding-notebook
-      22px;
-
-    &__main {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-
-      gap:
-        34px
-        46px;
-
-      padding:
-        34px
-        32px;
-    }
-
-    &__brand {
-      grid-column: auto;
-    }
-
-    &__bottom {
-      padding:
-        16px
-        32px;
-    }
-  }
-}
-
-@media (max-width: 1023px) {
-  .footer {
-    padding-right: $page-padding-tablet;
-    padding-left: $page-padding-tablet;
-
-    &__main {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-
-      gap:
-        30px
-        36px;
-
-      padding:
-        30px
-        26px;
-    }
-
-    &__bottom {
-      align-items: flex-start;
-
-      padding:
-        15px
-        26px;
-    }
-
-    &__legal {
-      gap: 18px;
-    }
-  }
-}
-
-@media (max-width: 767px) {
-  .footer {
-    padding:
-      0
-      $page-padding-mobile
-      18px;
-
-    &__main {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-
-      gap:
-        28px
-        22px;
-
-      padding:
-        26px
-        20px;
-    }
-
-    &__logo {
-      gap: 10px;
-    }
-
-    &__logo-icon {
-      width: 36px;
-      height: 42px;
-
-      font-size: 28px;
-    }
-
-    &__logo-text {
-      font-size: 16px;
-    }
-
-    &__description {
-      margin-top: 12px;
-
-      font-size: 11px;
-    }
-
-    &__socials {
-      flex-wrap: wrap;
-
-      margin-top: 16px;
-    }
-
-    &__social {
-      width: 34px;
-      height: 34px;
-
-      font-size: 9px;
-    }
-
-    &__column-title {
-      margin-bottom: 13px;
-
-      font-size: 14px;
-    }
-
-    &__links {
-      gap: 8px;
-    }
-
-    &__link {
-      font-size: 12px;
-    }
-
-    &__bottom {
-      flex-direction: column;
-
-      gap: 12px;
-
-      padding:
-        15px
-        20px;
-    }
-
-    &__legal {
-      flex-wrap: wrap;
-
-      gap:
-        8px
-        18px;
-    }
-
-    &__copyright,
-    &__legal-link {
-      font-size: 10px;
-    }
-  }
-}
-
-@media (max-width: 479px) {
-  .footer {
-    padding:
-      0
-      $page-padding-phone
-      14px;
-
-    &__main {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-
-      gap:
-        24px
-        16px;
-
-      padding:
-        22px
-        16px;
-    }
-
-    &__brand {
-      grid-column: 1 / -1;
-    }
-
-    &__logo-text {
-      font-size: 15px;
-    }
-
-    &__column-title {
-      font-size: 13px;
-    }
-
-    &__link {
-      font-size: 11px;
-    }
-
-    &__bottom {
-      padding:
-        14px
-        16px;
-    }
-  }
-}
-
-// ACCESSIBILITY
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
   }
 }

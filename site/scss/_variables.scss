@@ -1,0 +1,61 @@
+// COLORS
+
+$bgr-page: #f5ead4;
+$bgr-page-soft: #f5ead4;
+$bgr-page-light: #f5ead4;
+
+$bgr-hero: #ead8b6;
+$bgr-button: #4f5b24;
+$bgr-button-hover: #3f491c;
+$bgr-button-light: rgba(255, 249, 238, 0.58);
+
+$color-text: #4a321e;
+$color-text-soft: #6f5439;
+$color-text-muted: #8b7258;
+$color-text-light: #fffaf0;
+
+$color-forest: #4f5b24;
+$color-forest-dark: #354019;
+$color-forest-soft: #71784a;
+
+$color-border: rgba(100, 70, 40, 0.28);
+$color-border-strong: rgba(77, 52, 29, 0.44);
+$color-border-light: rgba(255, 250, 240, 0.46);
+
+$color-shadow: rgba(74, 50, 30, 0.14);
+
+// TYPOGRAPHY
+
+$font-title: 'Bodoni Moda', Georgia, serif;
+$font-text: 'Manrope', Arial, sans-serif;
+$font-mono: 'Roboto Mono', monospace;
+
+$fs-body: 16px;
+
+$lh-text: 1.55;
+
+// LAYOUT
+
+$container-3880: 3680px;
+$container-2560: 2460px;
+$container-main: 1720px;
+
+$page-padding-3880: 48px;
+$page-padding-2560: 36px;
+$page-padding-desktop: 28px;
+$page-padding-notebook: 20px;
+$page-padding-tablet: 18px;
+$page-padding-mobile: 12px;
+$page-padding-phone: 8px;
+
+// RADIUS
+
+$radius-large: 28px;
+$radius-medium: 14px;
+$radius-small: 10px;
+
+// TRANSITIONS
+
+$ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+
+$transition-base: 0.35s $ease-premium;

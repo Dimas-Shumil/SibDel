@@ -30,15 +30,6 @@ export async function verifyMailConnection() {
   try {
     await mailTransporter.verify();
 
-    logger.info(
-      {
-        smtpHost: env.SMTP_HOST,
-        smtpPort: env.SMTP_PORT,
-        smtpSecure: env.SMTP_SECURE,
-      },
-      "SMTP connection verified",
-    );
-
     return true;
   } catch (error) {
     logger.error(

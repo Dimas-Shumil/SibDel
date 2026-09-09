@@ -1,0 +1,168 @@
+@use 'variables' as *;
+
+// BASE
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  min-width: 320px;
+
+  font-family: $font-text;
+
+  text-rendering: geometricPrecision;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  scroll-behavior: smooth;
+  scrollbar-color: $color-forest $bgr-page-soft;
+  scrollbar-width: thin;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+
+  font-family: $font-text;
+  font-size: $fs-body;
+  font-weight: 400;
+  line-height: $lh-text;
+
+  color: $color-text;
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(255, 250, 239, 0.82),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(212, 187, 139, 0.18),
+      transparent 32%
+    ),
+    linear-gradient(
+      180deg,
+      $bgr-page-light 0%,
+      $bgr-page-soft 42%,
+      $bgr-page 100%
+    );
+
+  overflow-x: hidden;
+}
+
+body::selection {
+  color: $color-text-light;
+  background: $color-forest;
+}
+
+body.is-lock {
+  overflow: hidden;
+}
+
+img,
+picture,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+main {
+  display: block;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bgr-page-soft;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid $bgr-page-soft;
+  border-radius: 999px;
+
+  background: linear-gradient(
+    180deg,
+    $color-forest-soft 0%,
+    $color-forest 48%,
+    $color-forest-dark 100%
+  );
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: $color-forest-dark;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('/site/fonts/roboto-mono/RobotoMono-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('/site/fonts/roboto-mono/RobotoMono-Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('/site/fonts/roboto-mono/RobotoMono-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('/site/fonts/roboto-mono/RobotoMono-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+// ACCESSIBILITY
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

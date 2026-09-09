@@ -68,6 +68,32 @@ function closeHttpServer() {
   });
 }
 
+async function verifySmtpInBackground() {
+  try {
+    const smtpAvailable =
+      await verifyMailConnection();
+
+    if (smtpAvailable) {
+      console.log(
+        "SMTP готов к отправке писем",
+      );
+
+      return;
+    }
+
+    logger.warn(
+      "SMTP is unavailable. Application will continue without email notifications.",
+    );
+  } catch (error) {
+    logger.warn(
+      {
+        err: error,
+      },
+      "SMTP verification failed. Application will continue without email notifications.",
+    );
+  }
+}
+
 async function shutdown(
   reason,
   exitCode = 0,
@@ -136,29 +162,13 @@ async function startServer() {
   try {
     await connectDatabase();
 
-    logger.info(
-      "PostgreSQL connection established",
-    );
-
-    const smtpAvailable =
-      await verifyMailConnection();
-
-    if (!smtpAvailable) {
-      logger.warn(
-        "SMTP is unavailable. Application will continue without email notifications.",
-      );
-    }
-
     await listen();
 
-    logger.info(
-      {
-        host: env.HOST,
-        port: env.PORT,
-        environment: env.NODE_ENV,
-      },
-      "HTTP server listening",
+    console.log(
+      `Сервер запущен: http://localhost:${env.PORT}`,
     );
+
+    void verifySmtpInBackground();
   } catch (error) {
     logger.fatal(
       {

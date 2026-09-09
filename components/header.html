@@ -1,0 +1,156 @@
+<header class="header">
+      <div class="header__container">
+        <a
+          class="header__logo"
+          href="/"
+          aria-label="Сибирские Деликатесы — на главную"
+        >
+          <svg class="header__logo-mark" viewBox="0 0 56 72" aria-hidden="true">
+            <path
+              d="M28 2 17 20h7L12 35h10L7 53h16v15h10V53h16L34 35h10L32 20h7L28 2Z"
+              fill="currentColor"
+            />
+          </svg>
+
+          <span class="header__logo-text">
+            <span>Сибирские</span>
+            <span>Деликатесы</span>
+          </span>
+        </a>
+
+        <a class="header__catalog" href="/catalog.html">
+          <span class="header__catalog-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+
+          <span class="header__catalog-text">Каталог</span>
+        </a>
+
+        <form
+          class="header__search"
+          action="/catalog.html"
+          method="get"
+          role="search"
+        >
+          <label class="header__search-label" for="header-search">
+            Поиск по товарам и категориям
+          </label>
+
+          <input
+            class="header__search-input"
+            id="header-search"
+            name="q"
+            type="search"
+            placeholder="Поиск по товарам и категориям"
+            autocomplete="off"
+          />
+
+          <button
+            class="header__search-button"
+            type="submit"
+            aria-label="Найти"
+          >
+            <svg
+              class="header__search-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="6.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="m16 16 4 4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </form>
+
+        <a class="header__phone" href="tel:+78005552828">
+          <span class="header__phone-number"> 8 800 555-28-28 </span>
+
+          <span class="header__phone-time"> Ежедневно с 8:00 до 21:00 </span>
+        </a>
+
+        <div class="header__actions">
+          <a class="header__action" href="/login.html">
+            <svg
+              class="header__action-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="7"
+                r="4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="M4.5 21c.6-5 3-7.5 7.5-7.5S18.9 16 19.5 21"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+
+            <span class="header__action-text">Войти</span>
+          </a>
+
+          <a class="header__action" href="/favorites.html">
+            <svg
+              class="header__action-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+            </svg>
+
+            <span class="header__action-text">Избранное</span>
+          </a>
+
+          <a class="header__action header__action--cart" href="/cart.html">
+            <span class="header__cart-icon-wrapper">
+              <svg
+                class="header__action-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 4h2l2.2 10.2h10.7L20.5 7H6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="9" cy="19" r="1.4" fill="currentColor" />
+                <circle cx="17" cy="19" r="1.4" fill="currentColor" />
+              </svg>
+
+              <span class="header__cart-count" aria-label="3 товара"> 3 </span>
+            </span>
+
+            <span class="header__action-text">Корзина</span>
+          </a>
+        </div>
+      </div>
+    </header>
