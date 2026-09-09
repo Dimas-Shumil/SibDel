@@ -15,8 +15,10 @@
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js",
     "admin:create-owner": "node prisma/create-owner.js",
-    "css": "sass site/scss/main.scss site/css/main.css --style=expanded --no-source-map",
-    "css:watch": "sass --watch site/scss/main.scss:site/css/main.css --style=expanded --no-source-map",
+    "scss": "sass --no-source-map --style=expanded site/scss:site/css && sass --no-source-map --style=compressed site/scss/main.scss:site/css/main.min.css site/scss/catalog.scss:site/css/catalog.min.css site/scss/product.scss:site/css/product.min.css site/scss/cart.scss:site/css/cart.min.css site/scss/checkout.scss:site/css/checkout.min.css site/scss/account.scss:site/css/account.min.css site/scss/admin.scss:site/css/admin.min.css",
+    "css": "npm run scss",
+    "scss:watch": "sass --watch site/scss:site/css --style=expanded --no-source-map",
+    "css:watch": "npm run scss:watch",
     "security:audit": "npm audit --omit=dev"
   },
   "dependencies": {
@@ -44,7 +46,7 @@
   },
   "overrides": {
     "deepmerge-ts": "8.0.2",
-    "mysql2": "3.22.0"
+    "mysql2": "3.23.1"
   },
   "engines": {
     "node": ">=24.0.0 <25"

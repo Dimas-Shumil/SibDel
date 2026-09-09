@@ -99,6 +99,38 @@ app.get("/api/health", async (_req, res) => {
   }
 });
 
+app.use(
+  "/site",
+  express.static(sitePath, {
+    dotfiles: "deny",
+    index: false,
+  }),
+);
+
+app.use(
+  "/components",
+  express.static(componentsPath, {
+    dotfiles: "deny",
+    index: false,
+  }),
+);
+
+app.use(
+  "/uploads",
+  express.static(uploadsPath, {
+    dotfiles: "deny",
+    index: false,
+  }),
+);
+
+app.use(
+  express.static(publicPath, {
+    dotfiles: "deny",
+    extensions: ["html"],
+    index: "index.html",
+  }),
+);
+
 app.use("/api", apiRateLimiter);
 
 app.use(
@@ -126,30 +158,6 @@ app.use(
   authRouter,
 );
 
-app.use(
-  "/site",
-  express.static(sitePath, {
-    dotfiles: "deny",
-    index: false,
-  }),
-);
-
-app.use(
-  "/components",
-  express.static(componentsPath, {
-    dotfiles: "deny",
-    index: false,
-  }),
-);
-
-app.use(
-  "/uploads",
-  express.static(uploadsPath, {
-    dotfiles: "deny",
-    index: false,
-  }),
-);
-
 app.get("/admin/login", (_req, res) => {
   return res.sendFile(
     path.join(adminPagesPath, "login.html"),
@@ -163,14 +171,6 @@ app.use(
     dotfiles: "deny",
     extensions: ["html"],
     index: "dashboard.html",
-  }),
-);
-
-app.use(
-  express.static(publicPath, {
-    dotfiles: "deny",
-    extensions: ["html"],
-    index: "index.html",
   }),
 );
 
