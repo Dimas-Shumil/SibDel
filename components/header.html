@@ -109,20 +109,24 @@
             <span class="header__action-text">Войти</span>
           </a>
 
-          <a class="header__action" href="/favorites.html">
-            <svg
-              class="header__action-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linejoin="round"
-              />
-            </svg>
+          <a class="header__action header__action--favorites" href="/favorites.html">
+            <span class="header__favorite-icon-wrapper">
+              <svg
+                class="header__action-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linejoin="round"
+                />
+              </svg>
+
+              <span class="header__favorites-count" aria-label="Избранное пусто" hidden>0</span>
+            </span>
 
             <span class="header__action-text">Избранное</span>
           </a>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Избранные товары Сибирских Деликатесов — сохранённые продукты, которые легко добавить в корзину."
+    />
+
+    <link rel="stylesheet" href="/site/css/main.min.css" />
+    <link rel="stylesheet" href="/site/css/cart.min.css" />
+
+    <title>Избранное — Сибирские Деликатесы</title>
+  </head>
+
+  <body>
+    <div data-component="header"></div>
+
+    <main class="favorites-page" data-favorites-page>
+      <section class="commerce-intro" aria-labelledby="favorites-title">
+        <div class="commerce-intro__container">
+          <nav class="commerce-breadcrumbs" aria-label="Хлебные крошки">
+            <a class="commerce-breadcrumbs__link" href="/">Главная</a>
+            <span class="commerce-breadcrumbs__separator" aria-hidden="true">/</span>
+            <span class="commerce-breadcrumbs__current" aria-current="page">Избранное</span>
+          </nav>
+
+          <div class="commerce-intro__heading">
+            <div>
+              <h1 class="commerce-intro__title" id="favorites-title">Избранное</h1>
+              <p class="commerce-intro__description">
+                Сохранённые продукты собраны в одном месте. Добавляйте доступные товары
+                в корзину по одному или сразу все.
+              </p>
+            </div>
+            <span class="commerce-intro__count" data-favorites-heading-count>6 товаров</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="favorites-content" aria-label="Избранные товары">
+        <div class="favorites-content__container">
+          <div class="favorites-toolbar" data-favorites-toolbar>
+            <div class="favorites-toolbar__info">
+              <h2 class="favorites-toolbar__title">Сохранённые товары</h2>
+              <span class="favorites-toolbar__count" data-favorites-count>6 товаров</span>
+            </div>
+
+            <div class="favorites-toolbar__actions">
+              <button class="favorites-toolbar__secondary" type="button" data-favorites-clear>Очистить избранное</button>
+              <button class="favorites-toolbar__primary" type="button" data-favorites-add-all>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg>
+                <span>Добавить доступные в корзину</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="favorites-grid" data-favorites-grid>
+            <article class="favorite-card" data-favorite-card data-product-id="preview-taezhnaya" data-product-slug="kolbasa-taezhnaya" data-available="true">
+              <div class="favorite-card__media">
+                <a class="favorite-card__image-link" href="/product.html?slug=kolbasa-taezhnaya">
+                  <img class="favorite-card__image" src="/site/images/kol-taezh.webp" alt="Колбаса Таёжная сырокопчёная" width="1448" height="1086" loading="lazy" />
+                </a>
+                <span class="favorite-card__badge favorite-card__badge--hit">Хит</span>
+                <button class="favorite-card__remove" type="button" aria-label="Убрать Колбасу Таёжную из избранного" data-favorite-remove>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg>
+                </button>
+              </div>
+              <div class="favorite-card__body">
+                <a class="favorite-card__title" href="/product.html?slug=kolbasa-taezhnaya">Колбаса «Таёжная» сырокопчёная</a>
+                <span class="favorite-card__measure">300 г</span>
+                <div class="favorite-card__rating"><span aria-hidden="true">★★★★★</span><small>128</small></div>
+                <div class="favorite-card__stock favorite-card__stock--available"><span aria-hidden="true"></span>В наличии</div>
+                <div class="favorite-card__bottom">
+                  <div class="favorite-card__prices"><strong>749 ₽</strong><del>999 ₽</del></div>
+                  <button class="favorite-card__cart" type="button" aria-label="Добавить Колбасу Таёжную в корзину" data-favorite-add-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg></button>
+                </div>
+              </div>
+            </article>
+
+            <article class="favorite-card" data-favorite-card data-product-id="preview-altay-cheese" data-product-slug="syr-altayskiy" data-available="true">
+              <div class="favorite-card__media">
+                <a class="favorite-card__image-link" href="/product.html?slug=syr-altayskiy"><img class="favorite-card__image" src="/site/images/altay-cheese.webp" alt="Сыр Алтайский выдержанный" width="1448" height="1086" loading="lazy" /></a>
+                <span class="favorite-card__badge favorite-card__badge--discount">-20%</span>
+                <button class="favorite-card__remove" type="button" aria-label="Убрать Сыр Алтайский из избранного" data-favorite-remove><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></button>
+              </div>
+              <div class="favorite-card__body">
+                <a class="favorite-card__title" href="/product.html?slug=syr-altayskiy">Сыр Алтайский выдержанный</a><span class="favorite-card__measure">200 г</span>
+                <div class="favorite-card__rating"><span aria-hidden="true">★★★★★</span><small>96</small></div>
+                <div class="favorite-card__stock favorite-card__stock--available"><span aria-hidden="true"></span>В наличии</div>
+                <div class="favorite-card__bottom"><div class="favorite-card__prices"><strong>679 ₽</strong><del>799 ₽</del></div><button class="favorite-card__cart" type="button" aria-label="Добавить Сыр Алтайский в корзину" data-favorite-add-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg></button></div>
+              </div>
+            </article>
+
+            <article class="favorite-card" data-favorite-card data-product-id="preview-forel" data-product-slug="forel-slabosolenaya" data-available="true">
+              <div class="favorite-card__media">
+                <a class="favorite-card__image-link" href="/product.html?slug=forel-slabosolenaya"><img class="favorite-card__image" src="/site/images/forel.webp" alt="Форель слабосолёная" width="1254" height="1254" loading="lazy" /></a>
+                <span class="favorite-card__badge favorite-card__badge--discount">-15%</span>
+                <button class="favorite-card__remove" type="button" aria-label="Убрать Форель слабосолёную из избранного" data-favorite-remove><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></button>
+              </div>
+              <div class="favorite-card__body">
+                <a class="favorite-card__title" href="/product.html?slug=forel-slabosolenaya">Форель слабосолёная филе-кусок</a><span class="favorite-card__measure">200 г</span>
+                <div class="favorite-card__rating"><span aria-hidden="true">★★★★★</span><small>53</small></div>
+                <div class="favorite-card__stock favorite-card__stock--available"><span aria-hidden="true"></span>В наличии</div>
+                <div class="favorite-card__bottom"><div class="favorite-card__prices"><strong>549 ₽</strong><del>699 ₽</del></div><button class="favorite-card__cart" type="button" aria-label="Добавить Форель в корзину" data-favorite-add-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg></button></div>
+              </div>
+            </article>
+
+            <article class="favorite-card" data-favorite-card data-product-id="preview-vetchina" data-product-slug="vetchina-sibirskaya" data-available="true">
+              <div class="favorite-card__media">
+                <a class="favorite-card__image-link" href="/product.html?slug=vetchina-sibirskaya"><img class="favorite-card__image" src="/site/images/vetchina.webp" alt="Ветчина Сибирская" width="1254" height="1254" loading="lazy" /></a>
+                <span class="favorite-card__badge favorite-card__badge--new">Новинка</span>
+                <button class="favorite-card__remove" type="button" aria-label="Убрать Ветчину Сибирскую из избранного" data-favorite-remove><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></button>
+              </div>
+              <div class="favorite-card__body">
+                <a class="favorite-card__title" href="/product.html?slug=vetchina-sibirskaya">Ветчина «Сибирская» из индейки</a><span class="favorite-card__measure">400 г</span>
+                <div class="favorite-card__rating"><span aria-hidden="true">★★★★★</span><small>41</small></div>
+                <div class="favorite-card__stock favorite-card__stock--available"><span aria-hidden="true"></span>В наличии</div>
+                <div class="favorite-card__bottom"><div class="favorite-card__prices"><strong>299 ₽</strong></div><button class="favorite-card__cart" type="button" aria-label="Добавить Ветчину Сибирскую в корзину" data-favorite-add-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg></button></div>
+              </div>
+            </article>
+
+            <article class="favorite-card" data-favorite-card data-product-id="preview-milk" data-product-slug="moloko-otbornoe" data-available="true">
+              <div class="favorite-card__media">
+                <a class="favorite-card__image-link" href="/product.html?slug=moloko-otbornoe"><img class="favorite-card__image" src="/site/images/milk.webp" alt="Молоко отборное" width="1254" height="1254" loading="lazy" /></a>
+                <button class="favorite-card__remove" type="button" aria-label="Убрать Молоко отборное из избранного" data-favorite-remove><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></button>
+              </div>
+              <div class="favorite-card__body">
+                <a class="favorite-card__title" href="/product.html?slug=moloko-otbornoe">Молоко отборное 3,4–4,5%</a><span class="favorite-card__measure">1 л</span>
+                <div class="favorite-card__rating"><span aria-hidden="true">★★★★★</span><small>64</small></div>
+                <div class="favorite-card__stock favorite-card__stock--available"><span aria-hidden="true"></span>В наличии</div>
+                <div class="favorite-card__bottom"><div class="favorite-card__prices"><strong>129 ₽</strong></div><button class="favorite-card__cart" type="button" aria-label="Добавить Молоко в корзину" data-favorite-add-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg></button></div>
+              </div>
+            </article>
+
+            <article class="favorite-card" data-favorite-card data-product-id="preview-pelmeni" data-product-slug="pelmeni-domashnie" data-available="false">
+              <div class="favorite-card__media">
+                <a class="favorite-card__image-link" href="/product.html?slug=pelmeni-domashnie"><img class="favorite-card__image" src="/site/images/prlmeni.webp" alt="Пельмени Домашние" width="1254" height="1254" loading="lazy" /></a>
+                <button class="favorite-card__remove" type="button" aria-label="Убрать Пельмени Домашние из избранного" data-favorite-remove><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></button>
+              </div>
+              <div class="favorite-card__body">
+                <a class="favorite-card__title" href="/product.html?slug=pelmeni-domashnie">Пельмени «Домашние» ручной лепки</a><span class="favorite-card__measure">800 г</span>
+                <div class="favorite-card__rating"><span aria-hidden="true">★★★★★</span><small>112</small></div>
+                <div class="favorite-card__stock favorite-card__stock--unavailable"><span aria-hidden="true"></span>Временно нет</div>
+                <div class="favorite-card__bottom"><div class="favorite-card__prices"><strong>449 ₽</strong></div><button class="favorite-card__cart favorite-card__cart--disabled" type="button" disabled aria-label="Пельмени временно недоступны"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7" /><circle cx="10" cy="18" r="1.3" /><circle cx="17" cy="18" r="1.3" /></svg></button></div>
+              </div>
+            </article>
+          </div>
+
+          <section class="commerce-empty" data-favorites-empty hidden aria-labelledby="favorites-empty-title">
+            <span class="commerce-empty__icon" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 54 12.5 35C4.8 27.2 5.3 15.3 14.6 11.5 21.3 8.8 26.9 12.5 32 18c5.1-5.5 10.7-9.2 17.4-6.5 9.3 3.8 9.8 15.7 2.1 23.5L32 54Z" /></svg></span>
+            <h2 class="commerce-empty__title" id="favorites-empty-title">В избранном пока ничего нет</h2>
+            <p class="commerce-empty__text">Нажимайте на сердце у понравившихся продуктов, чтобы быстро вернуться к ним позже.</p>
+            <a class="commerce-empty__button" href="/catalog.html">Выбрать продукты</a>
+          </section>
+        </div>
+      </section>
+
+      <div class="commerce-toast" role="status" aria-live="polite" aria-atomic="true" data-commerce-toast hidden>
+        <span class="commerce-toast__text" data-commerce-toast-text></span>
+        <button class="commerce-toast__undo" type="button" data-commerce-toast-undo hidden>Вернуть</button>
+      </div>
+    </main>
+
+    <div data-component="footer"></div>
+
+    <script src="/site/js/main.js" defer></script>
+    <script src="/site/js/cart.js" defer></script>
+  </body>
+</html>

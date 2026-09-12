@@ -175,25 +175,134 @@ function initCatalogViewSwitcher() {
   });
 }
 
+function parseCatalogMoney(value) {
+  return (
+    Number(
+      String(value || '')
+        .replace(/\s/g, '')
+        .replace(',', '.')
+        .replace(/[^0-9.]/g, ''),
+    ) || 0
+  );
+}
+
+function getCatalogCardCommerceItem(card) {
+  const link = card?.querySelector('.catalog-product-card__title');
+  const image = card?.querySelector('.catalog-product-card__image');
+  const measure = card?.querySelector('.catalog-product-card__measure');
+  const price = card?.querySelector('.catalog-product-card__price');
+  const oldPrice = card?.querySelector('.catalog-product-card__old-price');
+  const rating = card?.querySelector('.catalog-product-card__rating');
+  const reviews = card?.querySelector('.catalog-product-card__reviews');
+  const badge = card?.querySelector('.catalog-product-card__badge');
+
+  if (!link) {
+    return null;
+  }
+
+  const url = new URL(link.href, window.location.origin);
+  const slug =
+    url.searchParams.get('slug') ||
+    url.pathname.split('/').filter(Boolean).pop() ||
+    link.textContent.trim().toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-');
+
+  return {
+    productId: slug,
+    slug,
+    title: link.textContent.trim(),
+    image: image?.getAttribute('src') || '',
+    measure: measure?.textContent?.trim() || '',
+    badge: badge?.textContent?.trim() || '',
+    rating: rating?.getAttribute('aria-label') || '',
+    reviewCount: reviews?.textContent?.trim() || '',
+    unitPrice: parseCatalogMoney(price?.textContent),
+    oldUnitPrice: parseCatalogMoney(oldPrice?.textContent),
+    quantity: 1,
+    min: 1,
+    max: 99,
+    step: 1,
+    available: true,
+  };
+}
+
 function initCatalogProductActions() {
-  const favoriteButtons = document.querySelectorAll('[data-favorite]');
-  const cartButtons = document.querySelectorAll('[data-cart-toggle]');
+  const grid = document.querySelector('[data-product-grid]');
 
-  favoriteButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const isActive = button.classList.toggle('is-active');
+  if (!grid) {
+    return;
+  }
 
-      button.setAttribute('aria-pressed', String(isActive));
+  const syncButtons = () => {
+    const commerce = window.SibDelCommerce;
+
+    grid.querySelectorAll('.catalog-product-card').forEach((card) => {
+      const item = getCatalogCardCommerceItem(card);
+
+      if (!item || !commerce) {
+        return;
+      }
+
+      const key = item.slug || item.productId;
+      const favoriteButton = card.querySelector('[data-favorite]');
+      const cartButton = card.querySelector('[data-cart-toggle]');
+      const isFavorite = commerce.isFavorite(key);
+      const isInCart = commerce.isInCart(key);
+
+      favoriteButton?.classList.toggle('is-active', isFavorite);
+      favoriteButton?.setAttribute('aria-pressed', String(isFavorite));
+      cartButton?.classList.toggle('is-added', isInCart);
+      cartButton?.setAttribute('aria-pressed', String(isInCart));
     });
+  };
+
+  grid.addEventListener('click', (event) => {
+    const card = event.target.closest('.catalog-product-card');
+
+    if (!card) {
+      return;
+    }
+
+    const item = getCatalogCardCommerceItem(card);
+
+    if (!item) {
+      return;
+    }
+
+    const favoriteButton = event.target.closest('[data-favorite]');
+
+    if (favoriteButton) {
+      const shouldFavorite = !favoriteButton.classList.contains('is-active');
+
+      favoriteButton.classList.toggle('is-active', shouldFavorite);
+      favoriteButton.setAttribute('aria-pressed', String(shouldFavorite));
+
+      document.dispatchEvent(
+        new CustomEvent('sibdel:favorite-toggle-request', {
+          detail: {
+            ...item,
+            isFavorite: shouldFavorite,
+          },
+        }),
+      );
+      return;
+    }
+
+    const cartButton = event.target.closest('[data-cart-toggle]');
+
+    if (cartButton) {
+      document.dispatchEvent(
+        new CustomEvent('sibdel:add-to-cart-request', {
+          detail: item,
+        }),
+      );
+
+      cartButton.classList.add('is-added');
+      cartButton.setAttribute('aria-pressed', 'true');
+    }
   });
 
-  cartButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const isAdded = button.classList.toggle('is-added');
-
-      button.setAttribute('aria-pressed', String(isAdded));
-    });
-  });
+  document.addEventListener('sibdel:commerce-ui-updated', syncButtons);
+  syncButtons();
 }
 
 function initCatalogShowMore() {

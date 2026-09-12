@@ -8,9 +8,8 @@
       content="Колбаса «Таёжная» сырокопчёная — натуральный сибирский деликатес. Состав, характеристики, доставка и отзывы."
     />
 
-    <link rel="stylesheet" href="/site/css/swiper-bundle.min.css" />
     <link rel="stylesheet" href="/site/css/main.min.css" />
-    <link rel="stylesheet" href="/site/css/product.min.css" />
+    <link rel="stylesheet" href="/site/css/product.min.css?v=20260912-1" />
 
     <title>Колбаса «Таёжная» — Сибирские Деликатесы</title>
   </head>
@@ -199,7 +198,7 @@
               </button>
             </div>
 
-            <div class="product-gallery__stage">
+            <div class="product-gallery__stage" tabindex="0" aria-label="Галерея товара">
               <span class="product-gallery__badge" data-product-badge>Хит продаж</span>
 
               <button
@@ -225,6 +224,28 @@
                   <path d="m15 15 5 5M10.5 8v5M8 10.5h5" />
                 </svg>
               </button>
+
+              <button
+                class="product-gallery__nav product-gallery__nav--prev"
+                type="button"
+                aria-label="Предыдущее фото"
+                data-gallery-prev
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
+              </button>
+
+              <button
+                class="product-gallery__nav product-gallery__nav--next"
+                type="button"
+                aria-label="Следующее фото"
+                data-gallery-next
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+              </button>
+
+              <span class="product-gallery__counter" aria-live="polite">
+                <span data-gallery-current>1</span>/<span data-gallery-total>4</span>
+              </span>
 
               <img
                 class="product-gallery__main-image"
@@ -636,20 +657,10 @@
               <span class="related-products__eyebrow">Вам может понравиться</span>
               <h2 class="related-products__title" id="related-products-title">Похожие товары</h2>
             </div>
-
-            <div class="related-products__controls" aria-label="Навигация по похожим товарам">
-              <button class="related-products__button related-products__button--prev" type="button" aria-label="Предыдущие товары">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
-              </button>
-              <button class="related-products__button related-products__button--next" type="button" aria-label="Следующие товары">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
-              </button>
-            </div>
           </div>
 
-          <div class="related-products__slider swiper" data-related-products>
-            <div class="related-products__wrapper swiper-wrapper">
-              <article class="related-product-card swiper-slide">
+          <div class="related-products__grid" data-related-products>
+              <article class="related-product-card">
                 <a class="related-product-card__media" href="/product.html?slug=vetchina-sibirskaya">
                   <img src="/site/images/vetchina.webp" alt="Ветчина Сибирская" width="1448" height="1086" loading="lazy" />
                   <span class="related-product-card__badge related-product-card__badge--discount">-15%</span>
@@ -662,7 +673,7 @@
                 </div>
               </article>
 
-              <article class="related-product-card swiper-slide">
+              <article class="related-product-card">
                 <a class="related-product-card__media" href="/product.html?slug=syr-altayskiy">
                   <img src="/site/images/altay-cheese.webp" alt="Сыр Алтайский выдержанный" width="1448" height="1086" loading="lazy" />
                   <span class="related-product-card__badge related-product-card__badge--discount">-20%</span>
@@ -675,7 +686,7 @@
                 </div>
               </article>
 
-              <article class="related-product-card swiper-slide">
+              <article class="related-product-card">
                 <a class="related-product-card__media" href="/product.html?slug=forel-slabosolenaya">
                   <img src="/site/images/forel.webp" alt="Форель слабосолёная" width="1448" height="1086" loading="lazy" />
                   <span class="related-product-card__badge related-product-card__badge--new">Новинка</span>
@@ -688,7 +699,7 @@
                 </div>
               </article>
 
-              <article class="related-product-card swiper-slide">
+              <article class="related-product-card">
                 <a class="related-product-card__media" href="/product.html?slug=pelmeni-domashnie">
                   <img src="/site/images/prlmeni.webp" alt="Пельмени Домашние" width="1448" height="1086" loading="lazy" />
                 </a>
@@ -700,7 +711,7 @@
                 </div>
               </article>
 
-              <article class="related-product-card swiper-slide">
+              <article class="related-product-card">
                 <a class="related-product-card__media" href="/product.html?slug=moloko-otbornoe">
                   <img src="/site/images/milk.webp" alt="Молоко отборное" width="1448" height="1086" loading="lazy" />
                 </a>
@@ -712,7 +723,7 @@
                 </div>
               </article>
 
-              <article class="related-product-card swiper-slide">
+              <article class="related-product-card">
                 <a class="related-product-card__media" href="/product.html?slug=nabor-delikatesov">
                   <img src="/site/images/production/meat-pol.webp" alt="Набор мясных деликатесов" width="1448" height="1086" loading="lazy" />
                   <span class="related-product-card__badge related-product-card__badge--hit">Хит</span>
@@ -724,7 +735,7 @@
                   <div class="related-product-card__bottom"><strong>1 590 ₽</strong><button type="button" aria-label="Добавить набор деликатесов в корзину"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2 9h9.7l2.1-6H7"/><circle cx="10" cy="18" r="1.3"/><circle cx="17" cy="18" r="1.3"/></svg></button></div>
                 </div>
               </article>
-            </div>
+
           </div>
         </div>
       </section>
@@ -742,7 +753,6 @@
       </div>
     </div>
 
-    <script src="/site/js/swiper-bundle.min.js" defer></script>
     <script src="/site/js/main.js" defer></script>
     <script src="/site/js/product.js" defer></script>
   </body>

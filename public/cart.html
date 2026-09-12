@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Корзина Сибирских Деликатесов — проверьте состав заказа, количество товаров и перейдите к оформлению."
+    />
+
+    <link rel="stylesheet" href="/site/css/main.min.css" />
+    <link rel="stylesheet" href="/site/css/cart.min.css" />
+
+    <title>Корзина — Сибирские Деликатесы</title>
+  </head>
+
+  <body>
+    <div data-component="header"></div>
+
+    <main class="cart-page" data-cart-page data-free-delivery-threshold="3000">
+      <section class="commerce-intro" aria-labelledby="cart-title">
+        <div class="commerce-intro__container">
+          <nav class="commerce-breadcrumbs" aria-label="Хлебные крошки">
+            <a class="commerce-breadcrumbs__link" href="/">Главная</a>
+            <span class="commerce-breadcrumbs__separator" aria-hidden="true">/</span>
+            <span class="commerce-breadcrumbs__current" aria-current="page">Корзина</span>
+          </nav>
+
+          <div class="commerce-intro__heading">
+            <div>
+              <h1 class="commerce-intro__title" id="cart-title">Корзина</h1>
+              <p class="commerce-intro__description">
+                Проверьте товары и количество. Итоговые цены, скидки и доступность
+                будут подтверждены сервером при оформлении заказа.
+              </p>
+            </div>
+
+            <span class="commerce-intro__count" data-cart-heading-count>4 товара</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cart-content" aria-label="Состав корзины">
+        <div class="cart-content__container">
+          <div class="cart-content__main" data-cart-content>
+            <div class="cart-delivery-progress" data-delivery-progress>
+              <div class="cart-delivery-progress__head">
+                <span class="cart-delivery-progress__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 7h11v9H3zM14 10h3l4 4v2h-7z" />
+                    <circle cx="7" cy="18" r="2" />
+                    <circle cx="17" cy="18" r="2" />
+                  </svg>
+                </span>
+                <div class="cart-delivery-progress__copy">
+                  <strong data-delivery-progress-title>До бесплатной доставки осталось 674 ₽</strong>
+                  <span>Бесплатная доставка для заказов от 3 000 ₽</span>
+                </div>
+              </div>
+              <div class="cart-delivery-progress__track" aria-hidden="true">
+                <span class="cart-delivery-progress__bar" data-delivery-progress-bar style="width: 77.5%"></span>
+              </div>
+            </div>
+
+            <div class="cart-list-head">
+              <div class="cart-list-head__title-wrap">
+                <h2 class="cart-list-head__title">Ваш заказ</h2>
+                <span class="cart-list-head__count" data-cart-lines-count>3 позиции</span>
+              </div>
+              <button class="cart-list-head__clear" type="button" data-cart-clear>
+                Очистить корзину
+              </button>
+            </div>
+
+            <div class="cart-items" data-cart-items>
+              <article
+                class="cart-item"
+                data-cart-item
+                data-product-id="preview-taezhnaya"
+                data-product-slug="kolbasa-taezhnaya"
+                data-unit-price="749"
+                data-old-unit-price="999"
+                data-min="1"
+                data-max="12"
+                data-step="1"
+              >
+                <a class="cart-item__media" href="/product.html?slug=kolbasa-taezhnaya">
+                  <img
+                    class="cart-item__image"
+                    src="/site/images/kol-taezh.webp"
+                    alt="Колбаса Таёжная сырокопчёная"
+                    width="1448"
+                    height="1086"
+                  />
+                  <span class="cart-item__badge">Хит</span>
+                </a>
+
+                <div class="cart-item__content">
+                  <div class="cart-item__top">
+                    <div class="cart-item__name-wrap">
+                      <a class="cart-item__title" href="/product.html?slug=kolbasa-taezhnaya">
+                        Колбаса «Таёжная» сырокопчёная
+                      </a>
+                      <span class="cart-item__measure">упаковка, 300 г</span>
+                      <span class="cart-item__stock cart-item__stock--available">
+                        <span aria-hidden="true"></span>В наличии
+                      </span>
+                    </div>
+
+                    <button class="cart-item__remove" type="button" aria-label="Удалить Колбасу Таёжную из корзины" data-cart-remove>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                    </button>
+                  </div>
+
+                  <div class="cart-item__bottom">
+                    <div class="cart-quantity" data-cart-quantity>
+                      <button class="cart-quantity__button" type="button" aria-label="Уменьшить количество" data-cart-minus>−</button>
+                      <label class="cart-quantity__field">
+                        <span class="visually-hidden">Количество Колбасы Таёжной</span>
+                        <input class="cart-quantity__input" type="number" min="1" max="12" step="1" value="1" inputmode="decimal" data-cart-quantity-input />
+                      </label>
+                      <button class="cart-quantity__button" type="button" aria-label="Увеличить количество" data-cart-plus>+</button>
+                    </div>
+
+                    <button class="cart-item__favorite" type="button" data-cart-toggle-favorite>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg>
+                      <span>В избранное</span>
+                    </button>
+
+                    <div class="cart-item__prices">
+                      <del class="cart-item__old-price" data-cart-old-line-price>999 ₽</del>
+                      <strong class="cart-item__price" data-cart-line-price>749 ₽</strong>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article
+                class="cart-item"
+                data-cart-item
+                data-product-id="preview-altay-cheese"
+                data-product-slug="syr-altayskiy"
+                data-unit-price="679"
+                data-old-unit-price="799"
+                data-min="1"
+                data-max="10"
+                data-step="1"
+              >
+                <a class="cart-item__media" href="/product.html?slug=syr-altayskiy">
+                  <img
+                    class="cart-item__image"
+                    src="/site/images/altay-cheese.webp"
+                    alt="Сыр Алтайский выдержанный"
+                    width="1448"
+                    height="1086"
+                  />
+                  <span class="cart-item__badge cart-item__badge--discount">-20%</span>
+                </a>
+
+                <div class="cart-item__content">
+                  <div class="cart-item__top">
+                    <div class="cart-item__name-wrap">
+                      <a class="cart-item__title" href="/product.html?slug=syr-altayskiy">Сыр Алтайский выдержанный</a>
+                      <span class="cart-item__measure">упаковка, 200 г</span>
+                      <span class="cart-item__stock cart-item__stock--available"><span aria-hidden="true"></span>В наличии</span>
+                    </div>
+                    <button class="cart-item__remove" type="button" aria-label="Удалить Сыр Алтайский из корзины" data-cart-remove>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                    </button>
+                  </div>
+
+                  <div class="cart-item__bottom">
+                    <div class="cart-quantity" data-cart-quantity>
+                      <button class="cart-quantity__button" type="button" aria-label="Уменьшить количество" data-cart-minus>−</button>
+                      <label class="cart-quantity__field"><span class="visually-hidden">Количество Сыра Алтайского</span><input class="cart-quantity__input" type="number" min="1" max="10" step="1" value="1" inputmode="decimal" data-cart-quantity-input /></label>
+                      <button class="cart-quantity__button" type="button" aria-label="Увеличить количество" data-cart-plus>+</button>
+                    </div>
+                    <button class="cart-item__favorite" type="button" data-cart-toggle-favorite>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg>
+                      <span>В избранное</span>
+                    </button>
+                    <div class="cart-item__prices"><del class="cart-item__old-price" data-cart-old-line-price>799 ₽</del><strong class="cart-item__price" data-cart-line-price>679 ₽</strong></div>
+                  </div>
+                </div>
+              </article>
+
+              <article
+                class="cart-item"
+                data-cart-item
+                data-product-id="preview-pelmeni"
+                data-product-slug="pelmeni-domashnie"
+                data-unit-price="449"
+                data-old-unit-price="449"
+                data-min="1"
+                data-max="8"
+                data-step="1"
+              >
+                <a class="cart-item__media" href="/product.html?slug=pelmeni-domashnie">
+                  <img
+                    class="cart-item__image"
+                    src="/site/images/prlmeni.webp"
+                    alt="Пельмени Домашние ручной лепки"
+                    width="1254"
+                    height="1254"
+                  />
+                </a>
+
+                <div class="cart-item__content">
+                  <div class="cart-item__top">
+                    <div class="cart-item__name-wrap">
+                      <a class="cart-item__title" href="/product.html?slug=pelmeni-domashnie">Пельмени «Домашние» ручной лепки</a>
+                      <span class="cart-item__measure">упаковка, 800 г</span>
+                      <span class="cart-item__stock cart-item__stock--available"><span aria-hidden="true"></span>В наличии</span>
+                    </div>
+                    <button class="cart-item__remove" type="button" aria-label="Удалить Пельмени Домашние из корзины" data-cart-remove>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                    </button>
+                  </div>
+
+                  <div class="cart-item__bottom">
+                    <div class="cart-quantity" data-cart-quantity>
+                      <button class="cart-quantity__button" type="button" aria-label="Уменьшить количество" data-cart-minus>−</button>
+                      <label class="cart-quantity__field"><span class="visually-hidden">Количество Пельменей Домашних</span><input class="cart-quantity__input" type="number" min="1" max="8" step="1" value="2" inputmode="decimal" data-cart-quantity-input /></label>
+                      <button class="cart-quantity__button" type="button" aria-label="Увеличить количество" data-cart-plus>+</button>
+                    </div>
+                    <button class="cart-item__favorite" type="button" data-cart-toggle-favorite>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg>
+                      <span>В избранное</span>
+                    </button>
+                    <div class="cart-item__prices"><strong class="cart-item__price" data-cart-line-price>898 ₽</strong></div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <aside class="cart-summary" aria-label="Итого по корзине" data-cart-summary>
+            <h2 class="cart-summary__title">Ваш заказ</h2>
+
+            <dl class="cart-summary__rows">
+              <div class="cart-summary__row">
+                <dt data-cart-summary-count-label>Товары, 4 шт.</dt>
+                <dd data-cart-subtotal>2 696 ₽</dd>
+              </div>
+              <div class="cart-summary__row cart-summary__row--discount">
+                <dt>Скидка</dt>
+                <dd data-cart-discount>−370 ₽</dd>
+              </div>
+              <div class="cart-summary__row">
+                <dt>Доставка</dt>
+                <dd>рассчитаем далее</dd>
+              </div>
+            </dl>
+
+            <div class="cart-summary__total">
+              <span>Итого</span>
+              <strong data-cart-total>2 326 ₽</strong>
+            </div>
+
+            <a class="cart-summary__checkout" href="/checkout.html">Перейти к оформлению</a>
+
+            <p class="cart-summary__note">
+              Финальная сумма формируется на сервере после проверки актуальных цен,
+              скидок, остатков и условий доставки.
+            </p>
+
+            <form class="cart-promo" data-cart-promo-form novalidate>
+              <label class="cart-promo__label" for="cart-promo">Есть промокод?</label>
+              <div class="cart-promo__field">
+                <input class="cart-promo__input" id="cart-promo" name="promoCode" type="text" autocomplete="off" placeholder="Введите промокод" maxlength="32" data-cart-promo-input />
+                <button class="cart-promo__button" type="submit">Применить</button>
+              </div>
+              <p class="cart-promo__message" data-cart-promo-message aria-live="polite"></p>
+            </form>
+
+            <div class="cart-summary__benefits">
+              <div class="cart-summary-benefit">
+                <span class="cart-summary-benefit__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.7-3 7.6-8 9-5-1.4-8-4.3-8-9V6l8-3Z" /><path d="m8.5 12 2.2 2.2 4.8-5" /></svg></span>
+                <span><strong>Гарантия качества</strong><small>Проверяем каждую партию</small></span>
+              </div>
+              <div class="cart-summary-benefit">
+                <span class="cart-summary-benefit__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h3l4 4v2h-7z" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /></svg></span>
+                <span><strong>Бережная доставка</strong><small>Соблюдаем температурный режим</small></span>
+              </div>
+            </div>
+          </aside>
+
+          <section class="commerce-empty" data-cart-empty hidden aria-labelledby="cart-empty-title">
+            <span class="commerce-empty__icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64"><path d="M10 13h6l6 29h28l7-20H19" /><circle cx="27" cy="51" r="3" /><circle cx="47" cy="51" r="3" /></svg>
+            </span>
+            <h2 class="commerce-empty__title" id="cart-empty-title">Корзина пока пуста</h2>
+            <p class="commerce-empty__text">Добавьте продукты из каталога — всё выбранное появится здесь.</p>
+            <a class="commerce-empty__button" href="/catalog.html">Перейти в каталог</a>
+          </section>
+        </div>
+      </section>
+
+      <div class="cart-mobile-bar" data-cart-mobile-bar hidden>
+        <div class="cart-mobile-bar__total">
+          <span>Итого</span>
+          <strong data-cart-mobile-total>0 ₽</strong>
+        </div>
+        <a class="cart-mobile-bar__checkout" href="/checkout.html">Оформить заказ</a>
+      </div>
+
+      <div class="commerce-toast" role="status" aria-live="polite" aria-atomic="true" data-commerce-toast hidden>
+        <span class="commerce-toast__text" data-commerce-toast-text></span>
+        <button class="commerce-toast__undo" type="button" data-commerce-toast-undo hidden>Вернуть</button>
+      </div>
+    </main>
+
+    <div data-component="footer"></div>
+
+    <script src="/site/js/main.js" defer></script>
+    <script src="/site/js/cart.js" defer></script>
+  </body>
+</html>

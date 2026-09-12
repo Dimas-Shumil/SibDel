@@ -22,27 +22,76 @@ function initProductGallery() {
     return;
   }
 
+  const stage = gallery.querySelector('.product-gallery__stage');
   const mainImage = gallery.querySelector('[data-gallery-main]');
-  const thumbnails = gallery.querySelectorAll('[data-gallery-thumb]');
+  const thumbnails = Array.from(gallery.querySelectorAll('[data-gallery-thumb]'));
+  const prevButton = gallery.querySelector('[data-gallery-prev]');
+  const nextButton = gallery.querySelector('[data-gallery-next]');
+  const currentOutput = gallery.querySelector('[data-gallery-current]');
+  const totalOutput = gallery.querySelector('[data-gallery-total]');
 
-  if (!mainImage || !thumbnails.length) {
+  if (!stage || !mainImage || !thumbnails.length) {
     return;
   }
 
-  const setActiveImage = (thumbnail) => {
-    const source = thumbnail.dataset.gallerySrc;
-    const alt = thumbnail.dataset.galleryAlt || '';
+  let activeIndex = Math.max(
+    0,
+    thumbnails.findIndex((item) =>
+      item.classList.contains('product-gallery__thumb--active'),
+    ),
+  );
+  let pointerStart = null;
 
-    if (!source || source === mainImage.getAttribute('src')) {
+  mainImage.draggable = false;
+
+  if (totalOutput) {
+    totalOutput.textContent = String(thumbnails.length);
+  }
+
+  const normalizeIndex = (index) =>
+    (index + thumbnails.length) % thumbnails.length;
+
+  const updateUi = (index) => {
+    thumbnails.forEach((thumbnail, thumbnailIndex) => {
+      const isActive = thumbnailIndex === index;
+
+      thumbnail.classList.toggle('product-gallery__thumb--active', isActive);
+      thumbnail.setAttribute('aria-pressed', String(isActive));
+    });
+
+    if (currentOutput) {
+      currentOutput.textContent = String(index + 1);
+    }
+  };
+
+  const preloadAdjacent = (index) => {
+    [normalizeIndex(index - 1), normalizeIndex(index + 1)].forEach((nextIndex) => {
+      const source = thumbnails[nextIndex]?.dataset.gallerySrc;
+
+      if (source) {
+        const image = new Image();
+        image.src = source;
+      }
+    });
+  };
+
+  const showImage = (requestedIndex) => {
+    const index = normalizeIndex(requestedIndex);
+    const thumbnail = thumbnails[index];
+    const source = thumbnail?.dataset.gallerySrc;
+    const alt = thumbnail?.dataset.galleryAlt || '';
+
+    if (!thumbnail || !source) {
       return;
     }
 
-    thumbnails.forEach((item) => {
-      const isActive = item === thumbnail;
+    activeIndex = index;
+    updateUi(index);
 
-      item.classList.toggle('product-gallery__thumb--active', isActive);
-      item.setAttribute('aria-pressed', String(isActive));
-    });
+    if (source === mainImage.getAttribute('src')) {
+      preloadAdjacent(index);
+      return;
+    }
 
     mainImage.classList.add('is-changing');
 
@@ -53,6 +102,7 @@ function initProductGallery() {
       mainImage.src = source;
       mainImage.alt = alt;
       mainImage.classList.remove('is-changing');
+      preloadAdjacent(index);
     };
 
     if (preloadImage.complete) {
@@ -68,9 +118,58 @@ function initProductGallery() {
     );
   };
 
-  thumbnails.forEach((thumbnail) => {
-    thumbnail.addEventListener('click', () => setActiveImage(thumbnail));
+  thumbnails.forEach((thumbnail, index) => {
+    thumbnail.addEventListener('click', () => showImage(index));
   });
+
+  prevButton?.addEventListener('click', () => showImage(activeIndex - 1));
+  nextButton?.addEventListener('click', () => showImage(activeIndex + 1));
+
+  stage.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      showImage(activeIndex - 1);
+    }
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      showImage(activeIndex + 1);
+    }
+  });
+
+  stage.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || event.target.closest('button')) {
+      return;
+    }
+
+    pointerStart = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
+  });
+
+  stage.addEventListener('pointerup', (event) => {
+    if (!pointerStart || pointerStart.id !== event.pointerId) {
+      return;
+    }
+
+    const deltaX = event.clientX - pointerStart.x;
+    const deltaY = event.clientY - pointerStart.y;
+    pointerStart = null;
+
+    if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) {
+      return;
+    }
+
+    showImage(activeIndex + (deltaX < 0 ? 1 : -1));
+  });
+
+  stage.addEventListener('pointercancel', () => {
+    pointerStart = null;
+  });
+
+  showImage(activeIndex);
 }
 
 function initProductLightbox() {
@@ -122,10 +221,59 @@ function initProductLightbox() {
   });
 }
 
+function parseProductMoney(value) {
+  return (
+    Number(
+      String(value || '')
+        .replace(/\s/g, '')
+        .replace(',', '.')
+        .replace(/[^0-9.]/g, ''),
+    ) || 0
+  );
+}
+
+function getProductCommerceItem(quantity = 1) {
+  const page = document.querySelector('[data-product-page]');
+  const quantityControl = document.querySelector('[data-quantity-control]');
+  const image = document.querySelector('[data-product-primary-image]');
+  const name = document.querySelector('[data-product-name]');
+  const measure = document.querySelector('[data-product-unit-label]');
+  const price = document.querySelector('[data-product-price]');
+  const oldPrice = document.querySelector('[data-product-old-price]');
+  const badge = document.querySelector('[data-product-badge]');
+  const rating = document.querySelector('[data-product-rating]');
+  const reviewCount = document.querySelector('[data-product-review-count-short]');
+
+  if (!page) {
+    return null;
+  }
+
+  return {
+    productId: page.dataset.productId || page.dataset.productSlug || null,
+    slug: page.dataset.productSlug || '',
+    title: name?.textContent?.trim() || 'Товар',
+    image: image?.getAttribute('src') || '',
+    measure: measure?.textContent?.trim() || '',
+    badge: badge?.textContent?.trim() || '',
+    rating: rating?.textContent?.trim() || '',
+    reviewCount: reviewCount?.textContent?.trim() || '',
+    unitPrice: parseProductMoney(price?.textContent),
+    oldUnitPrice: parseProductMoney(oldPrice?.textContent),
+    quantity,
+    min: Number(quantityControl?.dataset.min) || 1,
+    max: Number(quantityControl?.dataset.max) || 99,
+    step: Number(quantityControl?.dataset.step) || 1,
+    available:
+      document.querySelector('[data-stock-status]')?.dataset.stockStatus !==
+      'unavailable',
+  };
+}
+
 function initProductFavorites() {
   const buttons = document.querySelectorAll('[data-product-favorite]');
+  const item = getProductCommerceItem();
 
-  if (!buttons.length) {
+  if (!buttons.length || !item) {
     return;
   }
 
@@ -141,7 +289,21 @@ function initProductFavorites() {
           ? 'В избранном'
           : 'Добавить в избранное';
       }
+
+      button.setAttribute(
+        'aria-label',
+        isActive ? 'Убрать товар из избранного' : 'Добавить товар в избранное',
+      );
     });
+  };
+
+  const syncState = () => {
+    const commerce = window.SibDelCommerce;
+    const key = item.slug || item.productId;
+
+    if (commerce && key) {
+      updateState(commerce.isFavorite(key));
+    }
   };
 
   buttons.forEach((button) => {
@@ -152,15 +314,16 @@ function initProductFavorites() {
       document.dispatchEvent(
         new CustomEvent('sibdel:favorite-toggle-request', {
           detail: {
-            productId:
-              document.querySelector('[data-product-page]')?.dataset.productId ||
-              null,
+            ...getProductCommerceItem(),
             isFavorite: isActive,
           },
         }),
       );
     });
   });
+
+  document.addEventListener('sibdel:commerce-ui-updated', syncState);
+  syncState();
 }
 
 function initProductQuantity() {
@@ -304,9 +467,8 @@ function initProductTabs() {
 function initProductCartPreview() {
   const button = document.querySelector('[data-product-add-to-cart]');
   const input = document.querySelector('[data-quantity-input]');
-  const page = document.querySelector('[data-product-page]');
 
-  if (!button || !input || !page) {
+  if (!button || !input) {
     return;
   }
 
@@ -315,14 +477,15 @@ function initProductCartPreview() {
 
   button.addEventListener('click', () => {
     const quantity = Number(input.value);
+    const item = getProductCommerceItem(quantity);
+
+    if (!item) {
+      return;
+    }
 
     document.dispatchEvent(
       new CustomEvent('sibdel:add-to-cart-request', {
-        detail: {
-          productId: page.dataset.productId || null,
-          slug: page.dataset.productSlug || null,
-          quantity,
-        },
+        detail: item,
       }),
     );
 
@@ -343,77 +506,6 @@ function initProductCartPreview() {
   });
 }
 
-function initRelatedProductsSlider() {
-  const slider = document.querySelector('[data-related-products]');
-
-  if (!slider || typeof Swiper === 'undefined') {
-    return;
-  }
-
-  const section = slider.closest('.related-products');
-  const prevButton = section?.querySelector('.related-products__button--prev');
-  const nextButton = section?.querySelector('.related-products__button--next');
-
-  const swiper = new Swiper(slider, {
-    speed: 600,
-    slidesPerView: 1,
-    spaceBetween: 10,
-    centeredSlides: false,
-    grabCursor: true,
-    watchOverflow: true,
-    roundLengths: true,
-    resizeObserver: true,
-    updateOnWindowResize: true,
-    observer: true,
-    observeParents: true,
-    observeSlideChildren: true,
-    navigation:
-      prevButton && nextButton
-        ? {
-            prevEl: prevButton,
-            nextEl: nextButton,
-          }
-        : undefined,
-    breakpoints: {
-      360: {
-        slidesPerView: 2,
-        spaceBetween: 8,
-      },
-      768: {
-        slidesPerView: 3,
-        spaceBetween: 12,
-      },
-      1024: {
-        slidesPerView: 4,
-        spaceBetween: 12,
-      },
-      1366: {
-        slidesPerView: 5,
-        spaceBetween: 14,
-      },
-      1920: {
-        slidesPerView: 6,
-        spaceBetween: 16,
-      },
-      2560: {
-        slidesPerView: 7,
-        spaceBetween: 18,
-      },
-      3000: {
-        slidesPerView: 8,
-        spaceBetween: 18,
-      },
-    },
-  });
-
-  // При будущей отрисовке похожих товаров из API/админки Swiper
-  // автоматически следит за DOM, а это событие позволяет принудительно
-  // пересчитать геометрию после пакетного рендера при необходимости.
-  document.addEventListener('sibdel:related-products-updated', () => {
-    swiper.update();
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   initProductGallery();
   initProductLightbox();
@@ -421,5 +513,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initProductQuantity();
   initProductTabs();
   initProductCartPreview();
-  initRelatedProductsSlider();
 });
