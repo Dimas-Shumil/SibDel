@@ -53,6 +53,166 @@ async function loadLayoutComponents() {
   });
 }
 
+function initSmartHeader() {
+  const header = document.querySelector('.header');
+
+  if (!header) {
+    return;
+  }
+
+  const topRevealOffset = 24;
+  const directionThreshold = 8;
+
+  let lastHandledScrollY = Math.max(window.scrollY, 0);
+  let frameRequested = false;
+
+  const showHeader = () => {
+    header.classList.remove('header--hidden');
+  };
+
+  const updateHeader = () => {
+    const currentScrollY = Math.max(window.scrollY, 0);
+    const delta = currentScrollY - lastHandledScrollY;
+
+    if (
+      currentScrollY <= topRevealOffset ||
+      header.classList.contains('header--menu-open')
+    ) {
+      showHeader();
+      lastHandledScrollY = currentScrollY;
+      frameRequested = false;
+      return;
+    }
+
+    if (Math.abs(delta) >= directionThreshold) {
+      header.classList.toggle('header--hidden', delta > 0);
+      lastHandledScrollY = currentScrollY;
+    }
+
+    frameRequested = false;
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (frameRequested) {
+        return;
+      }
+
+      frameRequested = true;
+      window.requestAnimationFrame(updateHeader);
+    },
+    { passive: true },
+  );
+
+  header.addEventListener('focusin', showHeader);
+}
+
+function initMobileHeader() {
+  const header = document.querySelector('.header');
+  const toggle = header?.querySelector('[data-header-menu-toggle]');
+  const menu = header?.querySelector('[data-header-mobile-menu]');
+  const openActions = header?.querySelector('.header__mobile-open-actions');
+  const accountLink = header?.querySelector('[data-mobile-account-link]');
+
+  if (!header || !toggle || !menu) {
+    return;
+  }
+
+  const setMenuState = (isOpen, { restoreFocus = false } = {}) => {
+    header.classList.toggle('header--menu-open', isOpen);
+    header.classList.remove('header--hidden');
+
+    document.body.classList.toggle('header-menu-open', isOpen);
+
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    toggle.setAttribute('aria-label', isOpen ? 'Закрыть меню' : 'Открыть меню');
+
+    menu.setAttribute('aria-hidden', String(!isOpen));
+    menu.inert = !isOpen;
+
+    if (openActions) {
+      openActions.setAttribute('aria-hidden', String(!isOpen));
+    }
+
+    if (!isOpen && restoreFocus) {
+      toggle.focus();
+    }
+  };
+
+  const closeMenu = (options) => {
+    setMenuState(false, options);
+  };
+
+  toggle.addEventListener('click', () => {
+    const isOpen = !header.classList.contains('header--menu-open');
+    setMenuState(isOpen);
+  });
+
+  menu.addEventListener('click', (event) => {
+    const link = event.target.closest('a');
+
+    if (link) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (
+      event.key === 'Escape' &&
+      header.classList.contains('header--menu-open')
+    ) {
+      closeMenu({ restoreFocus: true });
+    }
+  });
+
+  const desktopMedia = window.matchMedia('(min-width: 768px)');
+
+  const handleViewportChange = (event) => {
+    if (event.matches) {
+      closeMenu();
+    }
+  };
+
+  if (typeof desktopMedia.addEventListener === 'function') {
+    desktopMedia.addEventListener('change', handleViewportChange);
+  }
+
+  const applyAuthState = (isAuthenticated) => {
+    header.classList.toggle('header--authenticated', isAuthenticated);
+
+    if (accountLink) {
+      accountLink.href = isAuthenticated ? '/account/' : '/login.html';
+      accountLink.textContent = isAuthenticated
+        ? 'Личный кабинет'
+        : 'Войти в личный кабинет';
+    }
+  };
+
+  applyAuthState(false);
+
+  fetch('/api/auth/me', {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
+    credentials: 'same-origin',
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return null;
+      }
+
+      return response.json();
+    })
+    .then((data) => {
+      applyAuthState(Boolean(data?.ok && data?.user));
+    })
+    .catch(() => {
+      applyAuthState(false);
+    });
+}
+
 function initPromotionsSlider() {
   const slider = document.querySelector(
     '.promotions__slider',
@@ -584,43 +744,48 @@ function sanitizePreviewImage(value) {
 }
 
 function updateGlobalHeaderCartCount() {
-  const badge = document.querySelector('.header__cart-count');
+  const badges = document.querySelectorAll('.header__cart-count');
 
-  if (!badge || !window.SibDelCommerce) {
+  if (!badges.length || !window.SibDelCommerce) {
     return;
   }
 
   const quantity = window.SibDelCommerce.getCartQuantity();
   const rounded = Number(quantity.toFixed(3));
+  const label =
+    rounded > 0
+      ? `В корзине: ${formatPreviewQuantity(rounded)}`
+      : 'Корзина пуста';
 
-  badge.textContent = formatPreviewQuantity(rounded);
-  badge.hidden = rounded <= 0;
-  badge.setAttribute(
-    'aria-label',
-    rounded > 0 ? `В корзине: ${formatPreviewQuantity(rounded)}` : 'Корзина пуста',
-  );
+  badges.forEach((badge) => {
+    badge.textContent = formatPreviewQuantity(rounded);
+    badge.hidden = rounded <= 0;
+    badge.setAttribute('aria-label', label);
+  });
 }
 
 function updateGlobalHeaderFavoritesCount() {
-  const badge = document.querySelector('.header__favorites-count');
-  const action = document.querySelector('.header__action--favorites');
+  const badges = document.querySelectorAll('.header__favorites-count');
+  const actions = document.querySelectorAll(
+    '.header__action--favorites, .header__mobile-action--favorites',
+  );
 
   if (!window.SibDelCommerce) {
     return;
   }
 
   const count = window.SibDelCommerce.getFavorites().length;
+  const label = count > 0 ? `В избранном: ${count}` : 'Избранное пусто';
 
-  if (badge) {
+  badges.forEach((badge) => {
     badge.textContent = count > 99 ? '99+' : String(count);
     badge.hidden = count <= 0;
-    badge.setAttribute(
-      'aria-label',
-      count > 0 ? `В избранном: ${count}` : 'Избранное пусто',
-    );
-  }
+    badge.setAttribute('aria-label', label);
+  });
 
-  action?.classList.toggle('is-active', count > 0);
+  actions.forEach((action) => {
+    action.classList.toggle('is-active', count > 0);
+  });
 }
 
 function updateGlobalCommerceIndicators() {
@@ -1124,9 +1289,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGlobalCommercePreview();
 
   await loadLayoutComponents();
+  initMobileHeader();
+  initSmartHeader();
   updateGlobalCommerceIndicators();
 
-  initPromotionsSlider();
-  initPopularProductsSlider();
-  initReviewsSlider();
+  if (document.querySelector('[data-home-page]')) {
+    initPromotionsSlider();
+    initPopularProductsSlider();
+    initReviewsSlider();
+  }
 });

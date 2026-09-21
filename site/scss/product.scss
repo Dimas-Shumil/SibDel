@@ -1,4 +1,7 @@
 @use 'variables' as *;
+@use 'base';
+@use 'header';
+@use 'footer';
 
 .visually-hidden {
   position: absolute;
@@ -20,16 +23,6 @@ body {
   max-width: 100%;
   overflow-x: hidden;
   overflow-x: clip;
-}
-
-.header {
-  overflow-x: hidden;
-  overflow-x: clip;
-}
-
-.header__container,
-.header__actions {
-  min-width: 0;
 }
 
 .product-page {

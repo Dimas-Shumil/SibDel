@@ -156,5 +156,235 @@
             <span class="header__action-text">Корзина</span>
           </a>
         </div>
+
+        <div class="header__mobile-controls">
+          <a
+            class="header__mobile-primary header__mobile-primary--guest"
+            href="/login.html"
+            aria-label="Войти в личный кабинет"
+            data-mobile-primary-guest
+          >
+            <svg
+              class="header__mobile-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="7"
+                r="4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="M4.5 21c.6-5 3-7.5 7.5-7.5S18.9 16 19.5 21"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </a>
+
+          <a
+            class="header__mobile-primary header__mobile-primary--auth"
+            href="/cart.html"
+            aria-label="Корзина"
+            data-mobile-primary-auth
+          >
+            <span class="header__mobile-icon-wrap">
+              <svg
+                class="header__mobile-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 4h2l2.2 10.2h10.7L20.5 7H6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="9" cy="19" r="1.4" fill="currentColor" />
+                <circle cx="17" cy="19" r="1.4" fill="currentColor" />
+              </svg>
+
+              <span
+                class="header__cart-count header__cart-count--mobile"
+                aria-label="Корзина пуста"
+                data-mobile-cart-count
+                hidden
+              >
+                0
+              </span>
+            </span>
+          </a>
+
+          <div class="header__mobile-open-actions" aria-hidden="true">
+            <a
+              class="header__mobile-action header__mobile-action--favorites"
+              href="/favorites.html"
+              aria-label="Избранное"
+            >
+              <span class="header__mobile-icon-wrap">
+                <svg
+                  class="header__mobile-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+
+                <span
+                  class="header__favorites-count header__favorites-count--mobile"
+                  aria-label="Избранное пусто"
+                  data-mobile-favorites-count
+                  hidden
+                >
+                  0
+                </span>
+              </span>
+            </a>
+
+            <a
+              class="header__mobile-action header__mobile-action--cart"
+              href="/cart.html"
+              aria-label="Корзина"
+            >
+              <span class="header__mobile-icon-wrap">
+                <svg
+                  class="header__mobile-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 4h2l2.2 10.2h10.7L20.5 7H6"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <circle cx="9" cy="19" r="1.4" fill="currentColor" />
+                  <circle cx="17" cy="19" r="1.4" fill="currentColor" />
+                </svg>
+
+                <span
+                  class="header__cart-count header__cart-count--mobile"
+                  aria-label="Корзина пуста"
+                  data-mobile-menu-cart-count
+                  hidden
+                >
+                  0
+                </span>
+              </span>
+            </a>
+          </div>
+
+          <button
+            class="header__menu-toggle"
+            type="button"
+            aria-label="Открыть меню"
+            aria-expanded="false"
+            aria-controls="mobile-header-menu"
+            data-header-menu-toggle
+          >
+            <span class="header__menu-line"></span>
+            <span class="header__menu-line"></span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="header__mobile-menu"
+        id="mobile-header-menu"
+        aria-hidden="true"
+        inert
+        data-header-mobile-menu
+      >
+        <div class="header__mobile-menu-inner">
+          <form
+            class="header__mobile-search"
+            action="/catalog.html"
+            method="get"
+            role="search"
+          >
+            <label class="header__search-label" for="mobile-header-search">
+              Поиск по товарам и категориям
+            </label>
+
+            <input
+              class="header__mobile-search-input"
+              id="mobile-header-search"
+              name="q"
+              type="search"
+              placeholder="Поиск по товарам и категориям"
+              autocomplete="off"
+            />
+
+            <button
+              class="header__mobile-search-button"
+              type="submit"
+              aria-label="Найти"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="6.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+                <path
+                  d="m16 16 4 4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+          </form>
+
+          <nav class="header__mobile-nav" aria-label="Мобильная навигация">
+            <a class="header__mobile-nav-link header__mobile-nav-link--primary" href="/catalog.html">
+              Каталог
+            </a>
+            <a class="header__mobile-nav-link" href="/promotions.html">Акции</a>
+            <a class="header__mobile-nav-link" href="/subscription.html">
+              Подписка на выгодные цены
+            </a>
+            <a class="header__mobile-nav-link" href="/delivery.html">
+              Доставка и оплата
+            </a>
+            <a class="header__mobile-nav-link" href="/contacts.html">Магазины</a>
+            <a class="header__mobile-nav-link" href="/about.html">О нас</a>
+            <a class="header__mobile-nav-link" href="/contacts.html">Контакты</a>
+          </nav>
+
+          <div class="header__mobile-menu-footer">
+            <a
+              class="header__mobile-account-link"
+              href="/login.html"
+              data-mobile-account-link
+            >
+              Войти в личный кабинет
+            </a>
+
+            <a class="header__mobile-phone" href="tel:+78005552828">
+              <strong>8 800 555-28-28</strong>
+              <span>Ежедневно с 8:00 до 21:00</span>
+            </a>
+          </div>
+        </div>
       </div>
     </header>

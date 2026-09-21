@@ -1,4 +1,7 @@
 @use 'variables' as *;
+@use 'base';
+@use 'header';
+@use 'footer';
 
 .catalog-page {
   padding-bottom: 34px;

@@ -1,4 +1,7 @@
 @use 'variables' as *;
+@use 'base';
+@use 'header';
+@use 'footer';
 
 .visually-hidden {
   position: absolute;

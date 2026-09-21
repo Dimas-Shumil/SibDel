@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Оформление заказа в Сибирских Деликатесах — контактные данные, способ получения, оплата и проверка состава заказа."
+    />
+
+    <link rel="stylesheet" href="/site/css/checkout.min.css" />
+
+    <title>Оформление заказа — Сибирские Деликатесы</title>
+  </head>
+
+  <body>
+    <div data-component="header"></div>
+
+    <main class="checkout-page" data-checkout-page>
+      <section class="checkout-intro" aria-labelledby="checkout-title">
+        <div class="checkout-intro__container">
+          <nav class="checkout-breadcrumbs" aria-label="Хлебные крошки">
+            <a class="checkout-breadcrumbs__link" href="/">Главная</a>
+            <span class="checkout-breadcrumbs__separator" aria-hidden="true">/</span>
+            <a class="checkout-breadcrumbs__link" href="/cart.html">Корзина</a>
+            <span class="checkout-breadcrumbs__separator" aria-hidden="true">/</span>
+            <span class="checkout-breadcrumbs__current" aria-current="page">Оформление заказа</span>
+          </nav>
+
+          <div class="checkout-intro__heading">
+            <div class="checkout-intro__copy">
+              <span class="checkout-intro__eyebrow">Финальный шаг</span>
+              <h1 class="checkout-intro__title" id="checkout-title">Оформление заказа</h1>
+              <p class="checkout-intro__description">
+                Заполните данные для получения заказа. Цены, скидки, наличие и условия доставки будут окончательно подтверждены сервером при создании заказа.
+              </p>
+            </div>
+
+            <a class="checkout-intro__back" href="/cart.html">Вернуться в корзину</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="checkout-content" aria-label="Данные для оформления заказа">
+        <div class="checkout-content__container">
+          <form class="checkout-form" id="checkout-form" data-checkout-form novalidate>
+            <section class="checkout-section" aria-labelledby="checkout-contact-title">
+              <div class="checkout-section__head">
+                <span class="checkout-section__number" aria-hidden="true">01</span>
+                <div>
+                  <h2 class="checkout-section__title" id="checkout-contact-title">Контактные данные</h2>
+                  <p class="checkout-section__description">Используем их только для связи по этому заказу.</p>
+                </div>
+              </div>
+
+              <div class="checkout-fields checkout-fields--contact">
+                <div class="checkout-field">
+                  <label class="checkout-field__label" for="checkout-name">Имя</label>
+                  <input
+                    class="checkout-field__control"
+                    id="checkout-name"
+                    name="name"
+                    type="text"
+                    autocomplete="name"
+                    maxlength="80"
+                    placeholder="Как к вам обращаться"
+                    data-checkout-field="name"
+                    required
+                  />
+                  <p class="checkout-field__error" data-checkout-error="name" aria-live="polite"></p>
+                </div>
+
+                <div class="checkout-field">
+                  <label class="checkout-field__label" for="checkout-phone">Телефон</label>
+                  <input
+                    class="checkout-field__control"
+                    id="checkout-phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    inputmode="tel"
+                    maxlength="32"
+                    placeholder="+7 999 000-00-00"
+                    data-checkout-field="phone"
+                    required
+                  />
+                  <p class="checkout-field__error" data-checkout-error="phone" aria-live="polite"></p>
+                </div>
+
+                <div class="checkout-field checkout-field--wide">
+                  <label class="checkout-field__label" for="checkout-email">Email</label>
+                  <input
+                    class="checkout-field__control"
+                    id="checkout-email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    maxlength="160"
+                    placeholder="name@example.ru"
+                    data-checkout-field="email"
+                    required
+                  />
+                  <p class="checkout-field__hint">На этот адрес позже можно будет отправлять подтверждение заказа и чек.</p>
+                  <p class="checkout-field__error" data-checkout-error="email" aria-live="polite"></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="checkout-section" aria-labelledby="checkout-delivery-title">
+              <div class="checkout-section__head">
+                <span class="checkout-section__number" aria-hidden="true">02</span>
+                <div>
+                  <h2 class="checkout-section__title" id="checkout-delivery-title">Получение заказа</h2>
+                  <p class="checkout-section__description">Выберите подходящий способ получения.</p>
+                </div>
+              </div>
+
+              <fieldset class="checkout-choice" data-checkout-receive-choice>
+                <legend class="visually-hidden">Способ получения</legend>
+
+                <label class="checkout-choice-card is-selected" data-checkout-choice-card>
+                  <input class="checkout-choice-card__input" type="radio" name="receiveMethod" value="delivery" checked />
+                  <span class="checkout-choice-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3 7h11v9H3zM14 10h3l4 4v2h-7z" />
+                      <circle cx="7" cy="18" r="2" />
+                      <circle cx="17" cy="18" r="2" />
+                    </svg>
+                  </span>
+                  <span class="checkout-choice-card__copy">
+                    <strong>Доставка</strong>
+                    <small>До указанного адреса</small>
+                  </span>
+                  <span class="checkout-choice-card__mark" aria-hidden="true"></span>
+                </label>
+
+                <label class="checkout-choice-card" data-checkout-choice-card>
+                  <input class="checkout-choice-card__input" type="radio" name="receiveMethod" value="pickup" />
+                  <span class="checkout-choice-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M5 9h14l-1-5H6L5 9Z" />
+                      <path d="M6 9v10h12V9M9 19v-6h6v6" />
+                    </svg>
+                  </span>
+                  <span class="checkout-choice-card__copy">
+                    <strong>Самовывоз</strong>
+                    <small>Из доступной точки выдачи</small>
+                  </span>
+                  <span class="checkout-choice-card__mark" aria-hidden="true"></span>
+                </label>
+              </fieldset>
+
+              <div class="checkout-method-panel" data-checkout-delivery-panel>
+                <div class="checkout-method-panel__head">
+                  <h3 class="checkout-method-panel__title">Адрес доставки</h3>
+                  <p class="checkout-method-panel__text">Тариф и доступность доставки будут рассчитаны сервером по адресу.</p>
+                </div>
+
+                <div class="checkout-fields">
+                  <div class="checkout-field checkout-field--wide">
+                    <label class="checkout-field__label" for="checkout-address">Адрес</label>
+                    <input
+                      class="checkout-field__control"
+                      id="checkout-address"
+                      name="address"
+                      type="text"
+                      autocomplete="street-address"
+                      maxlength="240"
+                      placeholder="Город, улица, дом, квартира"
+                      data-checkout-field="address"
+                    />
+                    <p class="checkout-field__error" data-checkout-error="address" aria-live="polite"></p>
+                  </div>
+
+                  <div class="checkout-field">
+                    <label class="checkout-field__label" for="checkout-entrance">Подъезд</label>
+                    <input class="checkout-field__control" id="checkout-entrance" name="entrance" type="text" maxlength="20" autocomplete="off" placeholder="Необязательно" />
+                  </div>
+
+                  <div class="checkout-field">
+                    <label class="checkout-field__label" for="checkout-floor">Этаж</label>
+                    <input class="checkout-field__control" id="checkout-floor" name="floor" type="text" maxlength="20" autocomplete="off" placeholder="Необязательно" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="checkout-method-panel checkout-method-panel--notice" data-checkout-pickup-panel hidden>
+                <span class="checkout-method-panel__notice-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" /><circle cx="12" cy="9" r="2.2" /></svg>
+                </span>
+                <div>
+                  <h3 class="checkout-method-panel__title">Точка самовывоза</h3>
+                  <p class="checkout-method-panel__text">
+                    Список реальных точек самовывоза подключим из backend. Сейчас интерфейс не подставляет выдуманные адреса.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="checkout-section" aria-labelledby="checkout-time-title">
+              <div class="checkout-section__head">
+                <span class="checkout-section__number" aria-hidden="true">03</span>
+                <div>
+                  <h2 class="checkout-section__title" id="checkout-time-title">Дата и время</h2>
+                  <p class="checkout-section__description">Выбор будет зависеть от способа получения и доступных интервалов.</p>
+                </div>
+              </div>
+
+              <div class="checkout-fields">
+                <div class="checkout-field">
+                  <label class="checkout-field__label" for="checkout-date">Дата получения</label>
+                  <input
+                    class="checkout-field__control"
+                    id="checkout-date"
+                    name="receiveDate"
+                    type="date"
+                    data-checkout-field="receiveDate"
+                    required
+                  />
+                  <p class="checkout-field__error" data-checkout-error="receiveDate" aria-live="polite"></p>
+                </div>
+
+                <div class="checkout-field">
+                  <label class="checkout-field__label" for="checkout-slot">Временной слот</label>
+                  <select class="checkout-field__control checkout-field__control--select" id="checkout-slot" name="receiveSlot" data-checkout-field="receiveSlot">
+                    <option value="">Выберите доступный интервал</option>
+                  </select>
+                  <p class="checkout-field__hint" data-checkout-slot-hint>Реальные интервалы появятся после подключения правил доставки.</p>
+                  <p class="checkout-field__error" data-checkout-error="receiveSlot" aria-live="polite"></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="checkout-section" aria-labelledby="checkout-comment-title">
+              <div class="checkout-section__head">
+                <span class="checkout-section__number" aria-hidden="true">04</span>
+                <div>
+                  <h2 class="checkout-section__title" id="checkout-comment-title">Комментарий</h2>
+                  <p class="checkout-section__description">Добавьте детали, которые важно учесть при сборке или передаче заказа.</p>
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label class="checkout-field__label" for="checkout-comment">Комментарий к заказу</label>
+                <textarea
+                  class="checkout-field__control checkout-field__control--textarea"
+                  id="checkout-comment"
+                  name="comment"
+                  rows="5"
+                  maxlength="500"
+                  placeholder="Например: позвонить перед приездом"
+                  data-checkout-comment
+                ></textarea>
+                <div class="checkout-field__meta">
+                  <span>Необязательно</span>
+                  <span data-checkout-comment-count>0 / 500</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="checkout-section" aria-labelledby="checkout-payment-title">
+              <div class="checkout-section__head">
+                <span class="checkout-section__number" aria-hidden="true">05</span>
+                <div>
+                  <h2 class="checkout-section__title" id="checkout-payment-title">Оплата</h2>
+                  <p class="checkout-section__description">Финальная доступность способов оплаты будет подтверждена сервером.</p>
+                </div>
+              </div>
+
+              <fieldset class="checkout-payment">
+                <legend class="visually-hidden">Способ оплаты</legend>
+
+                <label class="checkout-payment-card is-selected" data-checkout-payment-card>
+                  <input class="checkout-payment-card__input" type="radio" name="paymentMethod" value="online" checked />
+                  <span class="checkout-payment-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></svg>
+                  </span>
+                  <span class="checkout-payment-card__copy">
+                    <strong>Онлайн</strong>
+                    <small>Платёжный сценарий подключим на backend-этапе</small>
+                  </span>
+                  <span class="checkout-payment-card__mark" aria-hidden="true"></span>
+                </label>
+
+                <label class="checkout-payment-card" data-checkout-payment-card>
+                  <input class="checkout-payment-card__input" type="radio" name="paymentMethod" value="on-receipt" />
+                  <span class="checkout-payment-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 7h16v11H4zM7 4h10v3M8 12h8M8 15h5" /></svg>
+                  </span>
+                  <span class="checkout-payment-card__copy">
+                    <strong>При получении</strong>
+                    <small>Доступность будет зависеть от условий заказа</small>
+                  </span>
+                  <span class="checkout-payment-card__mark" aria-hidden="true"></span>
+                </label>
+              </fieldset>
+            </section>
+
+            <section class="checkout-section checkout-section--agreements" aria-labelledby="checkout-agreements-title">
+              <div class="checkout-section__head">
+                <span class="checkout-section__number" aria-hidden="true">06</span>
+                <div>
+                  <h2 class="checkout-section__title" id="checkout-agreements-title">Подтверждение</h2>
+                  <p class="checkout-section__description">Проверьте данные и подтвердите согласия перед отправкой.</p>
+                </div>
+              </div>
+
+              <div class="checkout-agreements">
+                <label class="checkout-checkbox">
+                  <input class="checkout-checkbox__input" type="checkbox" name="agreement" data-checkout-field="agreement" required />
+                  <span class="checkout-checkbox__box" aria-hidden="true">
+                    <svg viewBox="0 0 16 16"><path d="m3 8 3 3 7-7" /></svg>
+                  </span>
+                  <span class="checkout-checkbox__text">Я согласен с обработкой персональных данных и условиями оформления заказа.</span>
+                </label>
+                <p class="checkout-field__error" data-checkout-error="agreement" aria-live="polite"></p>
+              </div>
+            </section>
+
+            <div class="checkout-form-status" data-checkout-form-status hidden aria-live="polite"></div>
+          </form>
+
+          <aside class="checkout-summary" data-checkout-summary aria-label="Состав и стоимость заказа">
+            <div class="checkout-summary__head">
+              <div>
+                <span class="checkout-summary__eyebrow">Ваш заказ</span>
+                <h2 class="checkout-summary__title">Состав заказа</h2>
+              </div>
+              <a class="checkout-summary__edit" href="/cart.html">Изменить в корзине</a>
+            </div>
+
+            <div class="checkout-summary__items" data-checkout-items></div>
+
+            <div class="checkout-summary__divider" aria-hidden="true"></div>
+
+            <form class="checkout-promo" data-checkout-promo-form novalidate>
+              <label class="checkout-promo__label" for="checkout-promo">Промокод</label>
+              <div class="checkout-promo__field">
+                <input class="checkout-promo__input" id="checkout-promo" name="promoCode" type="text" autocomplete="off" maxlength="32" placeholder="Введите промокод" data-checkout-promo-input />
+                <button class="checkout-promo__button" type="submit">Проверить</button>
+              </div>
+              <p class="checkout-promo__message" data-checkout-promo-message aria-live="polite"></p>
+            </form>
+
+            <dl class="checkout-summary__rows">
+              <div class="checkout-summary__row">
+                <dt data-checkout-summary-count>Товары</dt>
+                <dd data-checkout-subtotal>0 ₽</dd>
+              </div>
+              <div class="checkout-summary__row checkout-summary__row--discount">
+                <dt>Скидка в товарах</dt>
+                <dd data-checkout-discount>0 ₽</dd>
+              </div>
+              <div class="checkout-summary__row">
+                <dt>Доставка</dt>
+                <dd data-checkout-delivery-cost>уточняется</dd>
+              </div>
+            </dl>
+
+            <div class="checkout-summary__total">
+              <div>
+                <span>Предварительно</span>
+                <small>без подтверждённой доставки</small>
+              </div>
+              <strong data-checkout-total>0 ₽</strong>
+            </div>
+
+            <button class="checkout-summary__submit" type="submit" form="checkout-form" data-checkout-submit>
+              <span data-checkout-submit-text>Оформить заказ</span>
+              <span class="checkout-summary__loader" data-checkout-loader hidden aria-hidden="true"></span>
+            </button>
+
+            <p class="checkout-summary__note">
+              Это предварительный расчёт интерфейса. Финальную сумму сформирует backend после проверки цен, скидок, остатков, промокода и условий доставки.
+            </p>
+
+            <div class="checkout-summary__trust">
+              <div class="checkout-summary__trust-item">
+                <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.7-3 7.6-8 9-5-1.4-8-4.3-8-9V6l8-3Z" /><path d="m8.5 12 2.2 2.2 4.8-5" /></svg></span>
+                <p><strong>Безопасное оформление</strong><small>Суммы и наличие будут проверяться сервером</small></p>
+              </div>
+              <div class="checkout-summary__trust-item">
+                <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM7 9h10M7 13h7" /></svg></span>
+                <p><strong>Проверка заказа</strong><small>Перед оплатой увидите подтверждённые условия</small></p>
+              </div>
+            </div>
+          </aside>
+
+          <section class="checkout-empty" data-checkout-empty hidden aria-labelledby="checkout-empty-title">
+            <span class="checkout-empty__icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64"><path d="M10 13h6l6 29h28l7-20H19" /><circle cx="27" cy="51" r="3" /><circle cx="47" cy="51" r="3" /></svg>
+            </span>
+            <h2 class="checkout-empty__title" id="checkout-empty-title">Оформлять пока нечего</h2>
+            <p class="checkout-empty__text">Корзина пуста. Добавьте продукты, а затем вернитесь к оформлению заказа.</p>
+            <a class="checkout-empty__button" href="/catalog.html">Перейти в каталог</a>
+          </section>
+        </div>
+      </section>
+
+      <div class="checkout-mobile-bar" data-checkout-mobile-bar hidden>
+        <div class="checkout-mobile-bar__total">
+          <span>Предварительно</span>
+          <strong data-checkout-mobile-total>0 ₽</strong>
+        </div>
+        <button class="checkout-mobile-bar__submit" type="button" data-checkout-mobile-submit>Оформить заказ</button>
+      </div>
+
+      <div class="checkout-state-modal" data-checkout-state-modal hidden>
+        <div class="checkout-state-modal__backdrop" data-checkout-modal-close></div>
+        <section class="checkout-state-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-state-title">
+          <button class="checkout-state-modal__close" type="button" aria-label="Закрыть" data-checkout-modal-close>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+          <span class="checkout-state-modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.7-3 7.6-8 9-5-1.4-8-4.3-8-9V6l8-3Z" /><path d="m8.5 12 2.2 2.2 4.8-5" /></svg>
+          </span>
+          <p class="checkout-state-modal__eyebrow">Frontend готов</p>
+          <h2 class="checkout-state-modal__title" id="checkout-state-title">Данные формы прошли проверку</h2>
+          <p class="checkout-state-modal__text">
+            Заказ не отправлен: backend checkout пока не подключён. Это демонстрация success-состояния интерфейса без создания фиктивного заказа.
+          </p>
+          <button class="checkout-state-modal__button" type="button" data-checkout-modal-close>Продолжить оформление</button>
+        </section>
+      </div>
+    </main>
+
+    <div data-component="footer"></div>
+
+    <script src="/site/js/main.js" defer></script>
+    <script src="/site/js/checkout.js" defer></script>
+  </body>
+</html>
