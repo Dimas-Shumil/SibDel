@@ -115,6 +115,17 @@ export function errorHandler(error, req, res, next) {
     errorCode: normalized.code,
   };
 
+  const isExpectedAnonymousAuthCheck =
+    req.method === "GET" &&
+    req.path === "/api/auth/me" &&
+    normalized.statusCode === 401 &&
+    normalized.code === "UNAUTHORIZED";
+
+  const isChromeDevToolsProbe =
+    req.method === "GET" &&
+    req.path === "/.well-known/appspecific/com.chrome.devtools.json" &&
+    normalized.statusCode === 404;
+
   if (normalized.statusCode >= 500) {
     logger.error(
       {
@@ -123,7 +134,7 @@ export function errorHandler(error, req, res, next) {
       },
       "Request failed",
     );
-  } else {
+  } else if (!isExpectedAnonymousAuthCheck && !isChromeDevToolsProbe) {
     logger.warn(context, "Request rejected");
   }
 
