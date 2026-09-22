@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="История заказов в личном кабинете Сибирских Деликатесов." />
+    <link rel="stylesheet" href="/site/css/account.min.css" />
+    <title>Мои заказы — Сибирские Деликатесы</title>
+  </head>
+  <body>
+    <div data-component="header"></div>
+    <main class="account-page" data-account-page="orders">
+      <div class="account-page__container">
+        <header class="account-mobile-head">
+          <div><span class="account-mobile-head__eyebrow">Личный кабинет</span><strong class="account-mobile-head__title">Заказы</strong></div>
+          <button class="account-mobile-head__menu" type="button" aria-expanded="false" aria-controls="account-sidebar" data-account-menu-toggle><span></span><span></span><span></span><span class="visually-hidden">Открыть меню кабинета</span></button>
+        </header>
+        <div class="account-layout">
+          <div id="account-sidebar" data-component="account-navigation"></div>
+          <section class="account-content" aria-labelledby="orders-title">
+            <header class="account-section-head">
+              <div><span class="account-section-head__eyebrow">История покупок</span><h1 class="account-section-head__title" id="orders-title">Мои заказы</h1><p class="account-section-head__text">Здесь появятся состав, статус и итоговая стоимость ваших заказов.</p></div>
+            </header>
+
+            <div class="account-loading" data-account-loading aria-live="polite">
+              <span class="account-loading__line account-loading__line--title"></span>
+              <span class="account-loading__line"></span><span class="account-loading__line"></span><span class="account-loading__line"></span>
+            </div>
+
+            <div class="account-orders-list" data-account-orders-list hidden></div>
+
+            <section class="account-state" data-account-empty hidden>
+              <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8V6a6 6 0 0 1 12 0v2" /><path d="M4 8h16l1 13H3L4 8Z" /></svg></span>
+              <h2>У вас пока нет заказов</h2>
+              <p>Выберите продукты в каталоге, а после оформления заказ появится в этом разделе.</p>
+              <a class="account-button account-button--primary" href="/catalog.html">Перейти в каталог</a>
+            </section>
+
+            <section class="account-state account-state--error" data-account-error hidden role="alert">
+              <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span>
+              <h2>Не удалось загрузить заказы</h2><p>Проверьте соединение и попробуйте ещё раз.</p>
+              <button class="account-button account-button--secondary" type="button" data-account-retry>Повторить</button>
+            </section>
+
+            <section class="account-service-note" data-account-unavailable hidden>
+              <strong>История заказов временно недоступна</strong><span>Интерфейс готов к подключению серверных данных.</span>
+            </section>
+          </section>
+        </div>
+      </div>
+      <div class="account-drawer-backdrop" data-account-menu-backdrop hidden></div>
+    </main>
+    <div data-component="footer"></div>
+    <script src="/site/js/main.js" defer></script><script src="/site/js/account.js" defer></script>
+  </body>
+</html>

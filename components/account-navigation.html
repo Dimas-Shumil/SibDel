@@ -1,0 +1,65 @@
+<aside class="account-sidebar" data-account-sidebar aria-label="Навигация личного кабинета">
+  <div class="account-sidebar__head">
+    <div>
+      <span class="account-sidebar__eyebrow">Личный кабинет</span>
+      <strong class="account-sidebar__title">Мой профиль</strong>
+    </div>
+
+    <button
+      class="account-sidebar__close"
+      type="button"
+      aria-label="Закрыть меню кабинета"
+      data-account-menu-close
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6 18 18M18 6 6 18" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="account-nav" aria-label="Разделы личного кабинета">
+    <a class="account-nav__link" href="/account/" data-account-nav="dashboard">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8" /><path d="M5 10v11h14V10M9 21v-7h6v7" /></svg>
+      <span>Главная</span>
+    </a>
+
+    <a class="account-nav__link" href="/account/orders" data-account-nav="orders">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8V6a6 6 0 0 1 12 0v2" /><path d="M4 8h16l1 13H3L4 8Z" /></svg>
+      <span>Заказы</span>
+    </a>
+
+    <a class="account-nav__link" href="/account/favorites" data-account-nav="favorites">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg>
+      <span>Избранное</span>
+      <span class="account-nav__count" data-account-favorites-count hidden>0</span>
+    </a>
+
+    <a class="account-nav__link" href="/account/addresses" data-account-nav="addresses">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5.2-8 11-8 11S4 15.2 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+      <span>Адреса</span>
+    </a>
+
+    <a class="account-nav__link" href="/account/settings" data-account-nav="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4.5 21c.6-5 3-7.5 7.5-7.5s6.9 2.5 7.5 7.5" /></svg>
+      <span>Настройки</span>
+    </a>
+
+    <a class="account-nav__link" href="/account/subscription" data-account-nav="subscription">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 9h18M7 14h4" /></svg>
+      <span>Подписка</span>
+    </a>
+  </nav>
+
+  <button class="account-sidebar__logout" type="button" data-account-logout>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M8 12h10" /></svg>
+    <span>Выйти</span>
+  </button>
+
+  <div class="account-sidebar__story" aria-hidden="true">
+    <div class="account-sidebar__story-copy">
+      <strong>Больше чем еда — это Сибирь</strong>
+      <span>Натуральные продукты с чистой историей</span>
+    </div>
+  </div>
+</aside>
+

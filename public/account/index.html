@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Личный кабинет покупателя Сибирских Деликатесов." />
+    <link rel="stylesheet" href="/site/css/account.min.css" />
+    <title>Личный кабинет — Сибирские Деликатесы</title>
+  </head>
+
+  <body>
+    <div data-component="header"></div>
+
+    <main class="account-page" data-account-page="dashboard">
+      <div class="account-page__container">
+        <header class="account-mobile-head">
+          <div>
+            <span class="account-mobile-head__eyebrow">Личный кабинет</span>
+            <strong class="account-mobile-head__title">Главная</strong>
+          </div>
+          <button class="account-mobile-head__menu" type="button" aria-expanded="false" aria-controls="account-sidebar" data-account-menu-toggle>
+            <span></span><span></span><span></span>
+            <span class="visually-hidden">Открыть меню кабинета</span>
+          </button>
+        </header>
+
+        <div class="account-layout">
+          <div id="account-sidebar" data-component="account-navigation"></div>
+
+          <div class="account-content">
+            <section class="account-welcome" aria-labelledby="account-welcome-title">
+              <div class="account-welcome__overlay"></div>
+              <div class="account-welcome__content">
+                <span class="account-welcome__eyebrow">Ваше пространство</span>
+                <h1 class="account-welcome__title" id="account-welcome-title">
+                  Добро пожаловать, <span data-account-first-name>покупатель</span>
+                </h1>
+                <p class="account-welcome__text">Управляйте заказами, избранными товарами и личными данными в одном месте.</p>
+              </div>
+            </section>
+
+            <section class="account-profile-card" aria-labelledby="account-profile-title">
+              <div class="account-profile-card__identity">
+                <span class="account-avatar" data-account-initials aria-hidden="true">СД</span>
+                <div>
+                  <span class="account-profile-card__eyebrow">Профиль покупателя</span>
+                  <h2 class="account-profile-card__name" id="account-profile-title" data-account-full-name>Загрузка данных…</h2>
+                </div>
+              </div>
+              <div class="account-profile-card__contacts">
+                <span data-account-email>—</span>
+                <span data-account-phone>Телефон не указан</span>
+              </div>
+              <a class="account-button account-button--primary" href="/account/settings">Редактировать профиль</a>
+            </section>
+
+            <section class="account-quick-grid" aria-label="Быстрые действия">
+              <a class="account-quick-card" href="/account/orders">
+                <span class="account-quick-card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8V6a6 6 0 0 1 12 0v2" /><path d="M4 8h16l1 13H3L4 8Z" /></svg></span>
+                <span class="account-quick-card__copy"><strong>Заказы</strong><small>История покупок</small></span>
+                <span class="account-quick-card__value" data-account-orders-count>0</span>
+              </a>
+              <a class="account-quick-card" href="/account/favorites">
+                <span class="account-quick-card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></span>
+                <span class="account-quick-card__copy"><strong>Избранное</strong><small>Сохранённые товары</small></span>
+                <span class="account-quick-card__value" data-account-favorites-count>0</span>
+              </a>
+              <a class="account-quick-card" href="/account/addresses">
+                <span class="account-quick-card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5.2-8 11-8 11S4 15.2 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></svg></span>
+                <span class="account-quick-card__copy"><strong>Адреса</strong><small>Для быстрой доставки</small></span>
+                <span class="account-quick-card__value" data-account-addresses-count>0</span>
+              </a>
+            </section>
+
+            <div class="account-dashboard-grid">
+              <section class="account-panel" aria-labelledby="recent-orders-title">
+                <div class="account-panel__head">
+                  <div><span class="account-panel__eyebrow">История покупок</span><h2 class="account-panel__title" id="recent-orders-title">Последние заказы</h2></div>
+                  <a class="account-text-link" href="/account/orders">Все заказы</a>
+                </div>
+                <div class="account-state account-state--compact" data-account-orders-empty>
+                  <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8V6a6 6 0 0 1 12 0v2" /><path d="M4 8h16l1 13H3L4 8Z" /></svg></span>
+                  <h3>У вас пока нет заказов</h3>
+                  <p>Познакомьтесь с коллекцией натуральных сибирских продуктов.</p>
+                  <a class="account-button account-button--secondary" href="/catalog.html">Перейти в каталог</a>
+                </div>
+                <div class="account-orders-list" data-account-recent-orders hidden></div>
+              </section>
+
+              <section class="account-panel" aria-labelledby="favorite-preview-title">
+                <div class="account-panel__head">
+                  <div><span class="account-panel__eyebrow">Сохранено для вас</span><h2 class="account-panel__title" id="favorite-preview-title">Избранное</h2></div>
+                  <a class="account-text-link" href="/account/favorites">Все товары</a>
+                </div>
+                <div class="account-favorites-preview" data-account-favorites-preview></div>
+                <div class="account-state account-state--compact" data-account-favorites-empty hidden>
+                  <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></span>
+                  <h3>Избранное пока пусто</h3>
+                  <p>Сохраняйте понравившиеся продукты, чтобы быстро вернуться к ним.</p>
+                  <a class="account-button account-button--secondary" href="/catalog.html">Выбрать продукты</a>
+                </div>
+              </section>
+            </div>
+
+            <section class="account-inline-status" data-account-global-error hidden role="alert">
+              <strong>Не удалось загрузить кабинет</strong>
+              <span data-account-global-error-text>Попробуйте обновить страницу.</span>
+              <button type="button" data-account-retry>Повторить</button>
+            </section>
+          </div>
+        </div>
+      </div>
+      <div class="account-drawer-backdrop" data-account-menu-backdrop hidden></div>
+    </main>
+
+    <div data-component="footer"></div>
+    <script src="/site/js/main.js" defer></script>
+    <script src="/site/js/account.js" defer></script>
+  </body>
+</html>

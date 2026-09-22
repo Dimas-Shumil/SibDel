@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="Вход и управление аккаунтом Сибирских Деликатесов."
+    />
+
+    <link rel="stylesheet" href="/site/css/auth.min.css" />
+
+    <title>Личный кабинет — Сибирские Деликатесы</title>
+  </head>
+
+  <body class="auth-page">
+    <main class="auth-shell" data-auth-shell>
+      <a class="auth-shell__back" href="/">На главную</a>
+
+      <div
+        class="auth-shell__ambient auth-shell__ambient--left"
+        aria-hidden="true"
+      >
+        <span class="auth-shell__ambient-line"></span>
+        <strong>Настоящие<br />вкусы Сибири</strong>
+        <span>Природа вдохновляет на лучшее</span>
+      </div>
+
+      <div
+        class="auth-shell__ambient auth-shell__ambient--right"
+        aria-hidden="true"
+      >
+        <span>Натуральные продукты</span>
+        <span>Традиции</span>
+        <span>Забота о будущем</span>
+      </div>
+
+      <section class="auth-card" aria-labelledby="auth-title" data-auth-card>
+        <a
+          class="auth-card__brand"
+          href="/"
+          aria-label="Сибирские Деликатесы — на главную"
+        >
+          <svg
+            class="auth-card__brand-mark"
+            viewBox="0 0 56 72"
+            aria-hidden="true"
+          >
+            <path
+              d="M28 2 17 20h7L12 35h10L7 53h16v15h10V53h16L34 35h10L32 20h7L28 2Z"
+              fill="currentColor"
+            />
+          </svg>
+
+          <span class="auth-card__brand-text">
+            <span>Сибирские</span>
+            <span>Деликатесы</span>
+          </span>
+        </a>
+
+        <div class="auth-card__viewport" data-auth-viewport>
+          <section class="auth-view is-active" data-auth-view="login">
+            <header class="auth-view__header">
+              <p class="auth-view__eyebrow">Личный кабинет</p>
+              <h1 class="auth-view__title" id="auth-title">С возвращением</h1>
+              <p class="auth-view__lead">
+                Войдите, чтобы управлять заказами, избранным и адресами
+                доставки.
+              </p>
+            </header>
+
+            <form class="auth-form" novalidate data-auth-form="login">
+              <div class="auth-field">
+                <label class="auth-field__label" for="auth-login-email"
+                  >Email</label
+                >
+                <div class="auth-field__control">
+                  <svg
+                    class="auth-field__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="3.5"
+                      y="5"
+                      width="17"
+                      height="14"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="m5 7 7 5 7-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  <input
+                    class="auth-field__input"
+                    id="auth-login-email"
+                    name="email"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    maxlength="191"
+                    placeholder="name@example.ru"
+                    required
+                    data-auth-input
+                  />
+                </div>
+                <span
+                  class="auth-field__error"
+                  data-field-error="email"
+                  aria-live="polite"
+                ></span>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="auth-login-password"
+                  >Пароль</label
+                >
+                <div class="auth-field__control">
+                  <svg
+                    class="auth-field__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="5"
+                      y="10"
+                      width="14"
+                      height="10"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M8 10V7.5a4 4 0 0 1 8 0V10"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <input
+                    class="auth-field__input auth-field__input--password"
+                    id="auth-login-password"
+                    name="password"
+                    type="password"
+                    autocomplete="current-password"
+                    maxlength="256"
+                    placeholder="Введите пароль"
+                    required
+                    data-auth-input
+                  />
+                  <button
+                    class="auth-field__toggle"
+                    type="button"
+                    aria-label="Показать пароль"
+                    aria-pressed="false"
+                    data-password-toggle
+                    data-password-target="auth-login-password"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M2.8 12s3.4-5.4 9.2-5.4S21.2 12 21.2 12 17.8 17.4 12 17.4 2.8 12 2.8 12Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="2.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <span
+                  class="auth-field__error"
+                  data-field-error="password"
+                  aria-live="polite"
+                ></span>
+              </div>
+
+              <div class="auth-form__meta auth-form__meta--end">
+                <button
+                  class="auth-link"
+                  type="button"
+                  data-auth-switch="forgot"
+                >
+                  Забыли пароль?
+                </button>
+              </div>
+
+              <div
+                class="auth-form__status"
+                role="status"
+                aria-live="polite"
+                data-form-status
+              ></div>
+
+              <button class="auth-submit" type="submit" data-auth-submit>
+                <span data-submit-label>Войти</span>
+                <span class="auth-submit__loader" aria-hidden="true"></span>
+              </button>
+
+              <p class="auth-form__switch">
+                Нет аккаунта?
+                <button
+                  class="auth-link auth-link--strong"
+                  type="button"
+                  data-auth-switch="register"
+                >
+                  Зарегистрироваться
+                </button>
+              </p>
+            </form>
+          </section>
+
+          <section class="auth-view" data-auth-view="register" hidden>
+            <header class="auth-view__header">
+              <p class="auth-view__eyebrow">Новый аккаунт</p>
+              <h2 class="auth-view__title">Создать аккаунт</h2>
+              <p class="auth-view__lead">
+                Заказы, адреса и любимые продукты будут собраны в одном месте.
+              </p>
+            </header>
+
+            <form
+              class="auth-form auth-form--compact"
+              novalidate
+              data-auth-form="register"
+            >
+              <div class="auth-form__grid">
+                <div class="auth-field">
+                  <label class="auth-field__label" for="auth-register-name"
+                    >Имя</label
+                  >
+                  <div class="auth-field__control">
+                    <input
+                      class="auth-field__input auth-field__input--plain"
+                      id="auth-register-name"
+                      name="firstName"
+                      type="text"
+                      autocomplete="given-name"
+                      maxlength="80"
+                      placeholder="Ваше имя"
+                      required
+                    />
+                  </div>
+                  <span
+                    class="auth-field__error"
+                    data-field-error="firstName"
+                    aria-live="polite"
+                  ></span>
+                </div>
+
+                <div class="auth-field">
+                  <label class="auth-field__label" for="auth-register-phone"
+                    >Телефон</label
+                  >
+                  <div class="auth-field__control">
+                    <input
+                      class="auth-field__input auth-field__input--plain"
+                      id="auth-register-phone"
+                      name="phone"
+                      type="tel"
+                      inputmode="tel"
+                      autocomplete="tel"
+                      maxlength="18"
+                      placeholder="+7 (999) 999-99-99"
+                      required
+                      data-phone-input
+                    />
+                  </div>
+                  <span
+                    class="auth-field__error"
+                    data-field-error="phone"
+                    aria-live="polite"
+                  ></span>
+                </div>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="auth-register-email"
+                  >Email</label
+                >
+                <div class="auth-field__control">
+                  <input
+                    class="auth-field__input auth-field__input--plain"
+                    id="auth-register-email"
+                    name="email"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    maxlength="191"
+                    placeholder="name@example.ru"
+                    required
+                  />
+                </div>
+                <span
+                  class="auth-field__error"
+                  data-field-error="email"
+                  aria-live="polite"
+                ></span>
+              </div>
+
+              <div class="auth-form__grid">
+                <div class="auth-field">
+                  <label class="auth-field__label" for="auth-register-password"
+                    >Пароль</label
+                  >
+                  <div class="auth-field__control">
+                    <input
+                      class="auth-field__input auth-field__input--plain auth-field__input--password"
+                      id="auth-register-password"
+                      name="password"
+                      type="password"
+                      autocomplete="new-password"
+                      minlength="8"
+                      maxlength="256"
+                      placeholder="От 8 символов"
+                      required
+                    />
+                    <button
+                      class="auth-field__toggle"
+                      type="button"
+                      aria-label="Показать пароль"
+                      aria-pressed="false"
+                      data-password-toggle
+                      data-password-target="auth-register-password"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M2.8 12s3.4-5.4 9.2-5.4S21.2 12 21.2 12 17.8 17.4 12 17.4 2.8 12 2.8 12Z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <span
+                    class="auth-field__error"
+                    data-field-error="password"
+                    aria-live="polite"
+                  ></span>
+                </div>
+
+                <div class="auth-field">
+                  <label
+                    class="auth-field__label"
+                    for="auth-register-password-confirm"
+                    >Повторите пароль</label
+                  >
+                  <div class="auth-field__control">
+                    <input
+                      class="auth-field__input auth-field__input--plain auth-field__input--password"
+                      id="auth-register-password-confirm"
+                      name="passwordConfirm"
+                      type="password"
+                      autocomplete="new-password"
+                      minlength="8"
+                      maxlength="256"
+                      placeholder="Повторите пароль"
+                      required
+                    />
+                    <button
+                      class="auth-field__toggle"
+                      type="button"
+                      aria-label="Показать пароль"
+                      aria-pressed="false"
+                      data-password-toggle
+                      data-password-target="auth-register-password-confirm"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M2.8 12s3.4-5.4 9.2-5.4S21.2 12 21.2 12 17.8 17.4 12 17.4 2.8 12 2.8 12Z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <span
+                    class="auth-field__error"
+                    data-field-error="passwordConfirm"
+                    aria-live="polite"
+                  ></span>
+                </div>
+              </div>
+
+              <label class="auth-consent">
+                <input
+                  class="auth-consent__input"
+                  type="checkbox"
+                  name="agreement"
+                  required
+                />
+                <span class="auth-consent__box" aria-hidden="true"></span>
+                <span class="auth-consent__text">
+                  Я согласен с условиями обработки персональных данных.
+                </span>
+              </label>
+              <span
+                class="auth-field__error auth-field__error--consent"
+                data-field-error="agreement"
+                aria-live="polite"
+              ></span>
+
+              <div
+                class="auth-form__status"
+                role="status"
+                aria-live="polite"
+                data-form-status
+              ></div>
+
+              <button class="auth-submit" type="submit" data-auth-submit>
+                <span data-submit-label>Создать аккаунт</span>
+                <span class="auth-submit__loader" aria-hidden="true"></span>
+              </button>
+
+              <p class="auth-form__switch">
+                Уже есть аккаунт?
+                <button
+                  class="auth-link auth-link--strong"
+                  type="button"
+                  data-auth-switch="login"
+                >
+                  Войти
+                </button>
+              </p>
+            </form>
+          </section>
+
+          <section class="auth-view" data-auth-view="forgot" hidden>
+            <header class="auth-view__header">
+              <p class="auth-view__eyebrow">Доступ к аккаунту</p>
+              <h2 class="auth-view__title">Восстановление пароля</h2>
+              <p class="auth-view__lead">
+                Укажите email — ссылка для создания нового пароля придёт на
+                почту.
+              </p>
+            </header>
+
+            <form class="auth-form" novalidate data-auth-form="forgot">
+              <div class="auth-field">
+                <label class="auth-field__label" for="auth-forgot-email"
+                  >Email</label
+                >
+                <div class="auth-field__control">
+                  <svg
+                    class="auth-field__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="3.5"
+                      y="5"
+                      width="17"
+                      height="14"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="m5 7 7 5 7-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  <input
+                    class="auth-field__input"
+                    id="auth-forgot-email"
+                    name="email"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    maxlength="191"
+                    placeholder="name@example.ru"
+                    required
+                  />
+                </div>
+                <span
+                  class="auth-field__error"
+                  data-field-error="email"
+                  aria-live="polite"
+                ></span>
+              </div>
+
+              <div
+                class="auth-form__status"
+                role="status"
+                aria-live="polite"
+                data-form-status
+              ></div>
+
+              <button class="auth-submit" type="submit" data-auth-submit>
+                <span data-submit-label>Отправить ссылку</span>
+                <span class="auth-submit__loader" aria-hidden="true"></span>
+              </button>
+
+              <p class="auth-form__switch">
+                Вспомнили пароль?
+                <button
+                  class="auth-link auth-link--strong"
+                  type="button"
+                  data-auth-switch="login"
+                >
+                  Войти
+                </button>
+              </p>
+            </form>
+          </section>
+
+          <section class="auth-view" data-auth-view="reset" hidden>
+            <header class="auth-view__header">
+              <p class="auth-view__eyebrow">Безопасность аккаунта</p>
+              <h2 class="auth-view__title">Новый пароль</h2>
+              <p class="auth-view__lead">
+                Придумайте новый пароль длиной не менее 8 символов.
+              </p>
+            </header>
+
+            <form class="auth-form" novalidate data-auth-form="reset">
+              <div class="auth-field">
+                <label class="auth-field__label" for="auth-reset-password"
+                  >Новый пароль</label
+                >
+                <div class="auth-field__control">
+                  <svg
+                    class="auth-field__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="5"
+                      y="10"
+                      width="14"
+                      height="10"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M8 10V7.5a4 4 0 0 1 8 0V10"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <input
+                    class="auth-field__input auth-field__input--password"
+                    id="auth-reset-password"
+                    name="password"
+                    type="password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="256"
+                    placeholder="От 8 символов"
+                    required
+                  />
+                  <button
+                    class="auth-field__toggle"
+                    type="button"
+                    aria-label="Показать пароль"
+                    aria-pressed="false"
+                    data-password-toggle
+                    data-password-target="auth-reset-password"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M2.8 12s3.4-5.4 9.2-5.4S21.2 12 21.2 12 17.8 17.4 12 17.4 2.8 12 2.8 12Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="2.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <span
+                  class="auth-field__error"
+                  data-field-error="password"
+                  aria-live="polite"
+                ></span>
+              </div>
+
+              <div class="auth-field">
+                <label
+                  class="auth-field__label"
+                  for="auth-reset-password-confirm"
+                  >Повторите пароль</label
+                >
+                <div class="auth-field__control">
+                  <svg
+                    class="auth-field__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="5"
+                      y="10"
+                      width="14"
+                      height="10"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M8 10V7.5a4 4 0 0 1 8 0V10"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <input
+                    class="auth-field__input auth-field__input--password"
+                    id="auth-reset-password-confirm"
+                    name="passwordConfirm"
+                    type="password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="256"
+                    placeholder="Повторите пароль"
+                    required
+                  />
+                  <button
+                    class="auth-field__toggle"
+                    type="button"
+                    aria-label="Показать пароль"
+                    aria-pressed="false"
+                    data-password-toggle
+                    data-password-target="auth-reset-password-confirm"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M2.8 12s3.4-5.4 9.2-5.4S21.2 12 21.2 12 17.8 17.4 12 17.4 2.8 12 2.8 12Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="2.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <span
+                  class="auth-field__error"
+                  data-field-error="passwordConfirm"
+                  aria-live="polite"
+                ></span>
+              </div>
+
+              <div
+                class="auth-form__status"
+                role="status"
+                aria-live="polite"
+                data-form-status
+              ></div>
+
+              <button class="auth-submit" type="submit" data-auth-submit>
+                <span data-submit-label>Сохранить пароль</span>
+                <span class="auth-submit__loader" aria-hidden="true"></span>
+              </button>
+
+              <p class="auth-form__switch">
+                Вернуться к
+                <button
+                  class="auth-link auth-link--strong"
+                  type="button"
+                  data-auth-switch="login"
+                >
+                  входу
+                </button>
+              </p>
+            </form>
+          </section>
+        </div>
+
+        <div class="auth-card__preview-note" data-auth-preview-note hidden>
+          <span class="auth-card__preview-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="m5 12 4 4 10-10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <div>
+            <strong data-preview-title>Frontend готов</strong>
+            <p data-preview-text></p>
+          </div>
+          <button
+            class="auth-link auth-link--strong"
+            type="button"
+            data-preview-back
+          >
+            Продолжить
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="/site/js/auth.js" defer></script>
+  </body>
+</html>

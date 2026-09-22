@@ -114,6 +114,8 @@ function initMobileHeader() {
   const menu = header?.querySelector('[data-header-mobile-menu]');
   const openActions = header?.querySelector('.header__mobile-open-actions');
   const accountLink = header?.querySelector('[data-mobile-account-link]');
+  const desktopAccountLink = header?.querySelector('[data-desktop-account-link]');
+  const desktopAccountText = header?.querySelector('[data-desktop-account-text]');
 
   if (!header || !toggle || !menu) {
     return;
@@ -186,6 +188,18 @@ function initMobileHeader() {
       accountLink.textContent = isAuthenticated
         ? 'Личный кабинет'
         : 'Войти в личный кабинет';
+    }
+
+    if (desktopAccountLink) {
+      desktopAccountLink.href = isAuthenticated ? '/account/' : '/login.html';
+      desktopAccountLink.setAttribute(
+        'aria-label',
+        isAuthenticated ? 'Открыть личный кабинет' : 'Войти в личный кабинет',
+      );
+    }
+
+    if (desktopAccountText) {
+      desktopAccountText.textContent = isAuthenticated ? 'Кабинет' : 'Войти';
     }
   };
 

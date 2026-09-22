@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Подробная информация о заказе в Сибирских Деликатесах." />
+    <link rel="stylesheet" href="/site/css/account.min.css" />
+    <title>Заказ — Сибирские Деликатесы</title>
+  </head>
+  <body>
+    <div data-component="header"></div>
+    <main class="account-page" data-account-page="order">
+      <div class="account-page__container">
+        <header class="account-mobile-head"><div><span class="account-mobile-head__eyebrow">Личный кабинет</span><strong class="account-mobile-head__title">Заказ</strong></div><button class="account-mobile-head__menu" type="button" aria-expanded="false" aria-controls="account-sidebar" data-account-menu-toggle><span></span><span></span><span></span><span class="visually-hidden">Открыть меню кабинета</span></button></header>
+        <div class="account-layout">
+          <div id="account-sidebar" data-component="account-navigation"></div>
+          <section class="account-content" aria-labelledby="order-title">
+            <header class="account-section-head account-section-head--with-action">
+              <div><a class="account-section-head__back" href="/account/orders">Вернуться к заказам</a><span class="account-section-head__eyebrow">Подробности заказа</span><h1 class="account-section-head__title" id="order-title" data-order-title>Заказ</h1></div>
+              <button class="account-button account-button--primary" type="button" data-repeat-order hidden>Повторить заказ</button>
+            </header>
+
+            <div class="account-loading" data-account-loading aria-live="polite"><span class="account-loading__line account-loading__line--title"></span><span class="account-loading__line"></span><span class="account-loading__line"></span><span class="account-loading__line"></span></div>
+            <div class="account-order-detail" data-account-order-detail hidden>
+              <section class="account-order-detail__main"><div class="account-panel__head"><div><span class="account-panel__eyebrow">Состав</span><h2 class="account-panel__title">Товары</h2></div><span class="account-status" data-order-status></span></div><div class="account-order-products" data-order-products></div><div class="account-order-total"><span>Итого</span><strong data-order-total>0 ₽</strong></div></section>
+              <aside class="account-order-detail__aside"><div class="account-order-info"><h2>Получение и оплата</h2><dl><div><dt>Способ получения</dt><dd data-order-delivery>—</dd></div><div><dt>Адрес</dt><dd data-order-address>—</dd></div><div><dt>Оплата</dt><dd data-order-payment>—</dd></div><div><dt>Дата заказа</dt><dd data-order-date>—</dd></div></dl></div></aside>
+            </div>
+
+            <section class="account-state" data-account-empty hidden>
+              <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg></span>
+              <h2>Заказ не выбран</h2><p>Откройте нужный заказ из истории покупок.</p><a class="account-button account-button--secondary" href="/account/orders">Перейти к заказам</a>
+            </section>
+            <section class="account-state account-state--error" data-account-error hidden role="alert"><span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span><h2>Не удалось открыть заказ</h2><p>Проверьте соединение и попробуйте ещё раз.</p><button class="account-button account-button--secondary" type="button" data-account-retry>Повторить</button></section>
+            <section class="account-service-note" data-account-unavailable hidden><strong>Данные заказа временно недоступны</strong><span>Повтор заказа станет доступен после подключения серверной истории.</span></section>
+            <p class="account-form-status" data-repeat-order-status role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </div>
+      <div class="account-drawer-backdrop" data-account-menu-backdrop hidden></div>
+    </main>
+    <div data-component="footer"></div><script src="/site/js/main.js" defer></script><script src="/site/js/account.js" defer></script>
+  </body>
+</html>
