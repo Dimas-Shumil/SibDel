@@ -35,31 +35,49 @@
 
 
 .account-content {
+  min-width: 0;
   opacity: 1;
   transform: translateY(0);
   transition:
-    opacity .35s ease,
-    transform .35s ease;
+    opacity 0.22s ease,
+    transform 0.22s ease;
 
-  &.is-leaving {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-
-  &.is-visible {
-    animation: account-content-show .45s ease forwards;
+  &.is-switching {
+    opacity: 0.18;
+    transform: translateY(4px);
+    pointer-events: none;
   }
 }
 
-@keyframes account-content-show {
+.account-view {
+  min-width: 0;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &.is-active {
+    animation: account-view-show 0.34s ease both;
+  }
+}
+
+@keyframes account-view-show {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(7px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-content,
+  .account-view.is-active {
+    transition: none;
+    animation: none;
   }
 }
 
@@ -1917,31 +1935,5 @@ body.account-menu-open {
   }
   .account-button {
     width: 100%;
-  }
-}
-
-
-.account-content {
-  transition: opacity .28s ease, transform .28s ease;
-
-  &.is-changing {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  &.is-visible {
-    animation: accountContentIn .35s ease forwards;
-  }
-}
-
-@keyframes accountContentIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }

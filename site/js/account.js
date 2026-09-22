@@ -1,11 +1,59 @@
 const ACCOUNT_NAVIGATION_URL = '/components/account-navigation.html';
 
+const ACCOUNT_ROUTES = {
+  '/account': {
+    view: 'dashboard',
+    title: 'Личный кабинет — Сибирские Деликатесы',
+    mobileTitle: 'Главная',
+  },
+  '/account/orders': {
+    view: 'orders',
+    title: 'Мои заказы — Сибирские Деликатесы',
+    mobileTitle: 'Заказы',
+  },
+  '/account/order': {
+    view: 'order',
+    title: 'Заказ — Сибирские Деликатесы',
+    mobileTitle: 'Заказ',
+  },
+  '/account/favorites': {
+    view: 'favorites',
+    title: 'Избранное — Сибирские Деликатесы',
+    mobileTitle: 'Избранное',
+  },
+  '/account/addresses': {
+    view: 'addresses',
+    title: 'Адреса доставки — Сибирские Деликатесы',
+    mobileTitle: 'Адреса',
+  },
+  '/account/settings': {
+    view: 'settings',
+    title: 'Настройки — Сибирские Деликатесы',
+    mobileTitle: 'Настройки',
+  },
+  '/account/subscription': {
+    view: 'subscription',
+    title: 'Подписка — Сибирские Деликатесы',
+    mobileTitle: 'Подписка',
+  },
+};
+
 const accountStore = {
   user: null,
   orders: [],
   addresses: [],
   subscription: null,
   lastRemovedFavorites: [],
+  loaded: {
+    orders: false,
+    addresses: false,
+    subscription: false,
+  },
+  backendAvailable: {
+    orders: false,
+    addresses: false,
+    subscription: false,
+  },
 };
 
 function escapeAccountHtml(value) {
@@ -106,8 +154,32 @@ function getAccountPage() {
   return document.querySelector('[data-account-page]');
 }
 
-function setElementText(selector, value, fallback = '—') {
-  document.querySelectorAll(selector).forEach((element) => {
+function normalizeAccountPath(pathname = window.location.pathname) {
+  const clean = String(pathname || '/account').replace(/\/+$/, '') || '/account';
+
+  if (clean === '/account/index.html') {
+    return '/account';
+  }
+
+  return clean;
+}
+
+function getAccountRoute(pathname = window.location.pathname) {
+  return ACCOUNT_ROUTES[normalizeAccountPath(pathname)] || null;
+}
+
+function getAccountView(type) {
+  const view = type || getAccountRoute()?.view || 'dashboard';
+  return document.querySelector(`[data-account-view="${view}"]`);
+}
+
+function getActiveAccountView() {
+  return document.querySelector('[data-account-view].is-active:not([hidden])') ||
+    document.querySelector('[data-account-view]:not([hidden])');
+}
+
+function setElementText(selector, value, fallback = '—', root = document) {
+  root.querySelectorAll(selector).forEach((element) => {
     element.textContent = value || fallback;
   });
 }
@@ -150,131 +222,8 @@ function renderAccountUser(user) {
 }
 
 
-function initAccountTransitions() {
-  const content = document.querySelector('.account-content');
-
-  if (!content) {
-    return;
-  }
-
-  requestAnimationFrame(() => {
-    content.classList.add('is-visible');
-  });
-
-  document.querySelectorAll('[data-account-nav]').forEach((link) => {
-    link.addEventListener('click', (event) => {
-      const href = link.getAttribute('href');
-
-      if (!href || href.startsWith('#') || link.target === '_blank') {
-        return;
-      }
-
-      if (href === window.location.pathname) {
-        event.preventDefault();
-        return;
-      }
-
-      event.preventDefault();
-
-      content.classList.remove('is-visible');
-      content.classList.add('is-leaving');
-
-      window.setTimeout(() => {
-        window.location.href = href;
-      }, 220);
-    });
-  });
-}
-
-
-
-function getAccountContent() {
-  return document.querySelector('.account-content');
-}
-
-function getAccountRouteType(url) {
-  const path = new URL(url, window.location.origin).pathname;
-
-  if (path.endsWith('/orders.html') || path.endsWith('/orders')) return 'orders';
-  if (path.endsWith('/favorites.html') || path.endsWith('/favorites')) return 'favorites';
-  if (path.endsWith('/addresses.html') || path.endsWith('/addresses')) return 'addresses';
-  if (path.endsWith('/settings.html') || path.endsWith('/settings')) return 'settings';
-  if (path.endsWith('/subscription.html') || path.endsWith('/subscription')) return 'subscription';
-  if (path.endsWith('/order.html') || path.endsWith('/order')) return 'order';
-
-  return 'dashboard';
-}
-
-async function loadAccountContent(url, push = true) {
-  const content = getAccountContent();
-
-  if (!content) {
-    window.location.href = url;
-    return;
-  }
-
-  const response = await fetch(url, {
-    headers: { Accept: 'text/html' },
-    credentials: 'same-origin',
-  });
-
-  if (!response.ok) {
-    window.location.href = url;
-    return;
-  }
-
-  const html = await response.text();
-  const parsed = new DOMParser().parseFromString(html, 'text/html');
-  const nextContent = parsed.querySelector('.account-content');
-
-  if (!nextContent) {
-    window.location.href = url;
-    return;
-  }
-
-  content.classList.add('is-changing');
-
-  window.setTimeout(async () => {
-    content.innerHTML = nextContent.innerHTML;
-    content.closest('[data-account-page]')?.setAttribute('data-account-page', getAccountRouteType(url));
-
-    if (push) {
-      window.history.pushState({ account: true }, '', url);
-    }
-
-    initAccountNavigation();
-    initAddressModal();
-    initSettingsForms();
-
-    await initAccountPageData();
-
-    content.classList.remove('is-changing');
-    content.classList.add('is-visible');
-  }, 180);
-}
-
-function initAccountRouter() {
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('[data-account-nav]');
-
-    if (!link) return;
-
-    const href = link.getAttribute('href');
-
-    if (!href || href.startsWith('#') || event.ctrlKey || event.metaKey) return;
-
-    event.preventDefault();
-    loadAccountContent(href);
-  });
-
-  window.addEventListener('popstate', () => {
-    loadAccountContent(window.location.pathname, false);
-  });
-}
-
-function initAccountNavigation() {
-  const page = getAccountPage();
-  const current = page?.dataset.accountPage === 'order' ? 'orders' : page?.dataset.accountPage;
+function initAccountNavigation(currentType = getAccountRoute()?.view || 'dashboard') {
+  const current = currentType === 'order' ? 'orders' : currentType;
 
   document.querySelectorAll('[data-account-nav]').forEach((link) => {
     const active = link.dataset.accountNav === current;
@@ -284,6 +233,121 @@ function initAccountNavigation() {
       link.setAttribute('aria-current', 'page');
     } else {
       link.removeAttribute('aria-current');
+    }
+  });
+}
+
+function updateAccountChrome(type) {
+  const page = getAccountPage();
+  const route = Object.values(ACCOUNT_ROUTES).find((item) => item.view === type) || ACCOUNT_ROUTES['/account'];
+
+  if (page) {
+    page.dataset.accountPage = type;
+  }
+
+  document.title = route.title;
+  setElementText('[data-account-mobile-title]', route.mobileTitle, 'Главная');
+  initAccountNavigation(type);
+}
+
+function setInitialAccountView(type) {
+  document.querySelectorAll('[data-account-view]').forEach((view) => {
+    const active = view.dataset.accountView === type;
+    view.hidden = !active;
+    view.classList.toggle('is-active', active);
+  });
+
+  updateAccountChrome(type);
+}
+
+async function switchAccountView(type) {
+  const content = document.querySelector('[data-account-content]');
+  const next = getAccountView(type);
+  const current = getActiveAccountView();
+
+  if (!content || !next) {
+    return;
+  }
+
+  if (current === next) {
+    updateAccountChrome(type);
+    await initAccountPageData(type);
+    return;
+  }
+
+  content.classList.add('is-switching');
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reducedMotion) {
+    await new Promise((resolve) => window.setTimeout(resolve, 110));
+  }
+
+  if (current) {
+    current.hidden = true;
+    current.classList.remove('is-active');
+  }
+
+  next.hidden = false;
+  next.classList.add('is-active');
+  updateAccountChrome(type);
+  await initAccountPageData(type);
+
+  window.requestAnimationFrame(() => {
+    content.classList.remove('is-switching');
+  });
+}
+
+function initAccountRouter() {
+  const initialRoute = getAccountRoute() || ACCOUNT_ROUTES['/account'];
+  setInitialAccountView(initialRoute.view);
+
+  document.addEventListener('click', (event) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    const link = event.target.closest('a[href]');
+
+    if (!link || link.target === '_blank' || link.hasAttribute('download')) {
+      return;
+    }
+
+    const url = new URL(link.href, window.location.origin);
+
+    if (url.origin !== window.location.origin) {
+      return;
+    }
+
+    const route = getAccountRoute(url.pathname);
+
+    if (!route) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const nextUrl = `${normalizeAccountPath(url.pathname) === '/account' ? '/account/' : normalizeAccountPath(url.pathname)}${url.search}${url.hash}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+    if (nextUrl !== currentUrl) {
+      window.history.pushState({ accountView: route.view }, '', nextUrl);
+    }
+
+    void switchAccountView(route.view);
+  });
+
+  window.addEventListener('popstate', () => {
+    const route = getAccountRoute();
+
+    if (route) {
+      void switchAccountView(route.view);
     }
   });
 }
@@ -386,9 +450,12 @@ function createOrderCard(order) {
 }
 
 function renderOrders(orders, { recent = false } = {}) {
-  const list = document.querySelector(recent ? '[data-account-recent-orders]' : '[data-account-orders-list]');
-  const empty = document.querySelector(recent ? '[data-account-orders-empty]' : '[data-account-empty]');
-  const loading = recent ? null : document.querySelector('[data-account-loading]');
+  const root = getAccountView(recent ? 'dashboard' : 'orders');
+  if (!root) return;
+
+  const list = root.querySelector(recent ? '[data-account-recent-orders]' : '[data-account-orders-list]');
+  const empty = root.querySelector(recent ? '[data-account-orders-empty]' : '[data-account-empty]');
+  const loading = recent ? null : root.querySelector('[data-account-loading]');
   const normalized = Array.isArray(orders) ? orders : [];
 
   if (loading) loading.hidden = true;
@@ -402,9 +469,12 @@ function renderOrders(orders, { recent = false } = {}) {
 }
 
 function renderOrder(order) {
-  const loading = document.querySelector('[data-account-loading]');
-  const detail = document.querySelector('[data-account-order-detail]');
-  const empty = document.querySelector('[data-account-empty]');
+  const root = getAccountView('order');
+  if (!root) return;
+
+  const loading = root.querySelector('[data-account-loading]');
+  const detail = root.querySelector('[data-account-order-detail]');
+  const empty = root.querySelector('[data-account-empty]');
 
   if (loading) loading.hidden = true;
   if (!detail || !empty) return;
@@ -417,19 +487,21 @@ function renderOrder(order) {
 
   empty.hidden = true;
   detail.hidden = false;
-  setElementText('[data-order-title]', `Заказ №${order.number || order.id || '—'}`);
-  setElementText('[data-order-status]', orderStatusLabels[order.status] || order.status || 'Статус уточняется');
-  setElementText('[data-order-total]', formatAccountMoney(order.total));
-  setElementText('[data-order-delivery]', order.deliveryMethod === 'PICKUP' ? 'Самовывоз' : 'Доставка');
-  setElementText('[data-order-address]', order.deliveryAddressSnapshot, 'Адрес не указан');
-  setElementText('[data-order-payment]', order.paymentMethod || order.paymentStatus, 'Способ оплаты не указан');
-  setElementText('[data-order-date]', formatAccountDate(order.createdAt));
+  setElementText('[data-order-title]', `Заказ №${order.number || order.id || '—'}`, 'Заказ', root);
+  setElementText('[data-order-status]', orderStatusLabels[order.status] || order.status || 'Статус уточняется', '—', root);
+  setElementText('[data-order-total]', formatAccountMoney(order.total), '0 ₽', root);
+  setElementText('[data-order-delivery]', order.deliveryMethod === 'PICKUP' ? 'Самовывоз' : 'Доставка', '—', root);
+  setElementText('[data-order-address]', order.deliveryAddressSnapshot, 'Адрес не указан', root);
+  setElementText('[data-order-payment]', order.paymentMethod || order.paymentStatus, 'Способ оплаты не указан', root);
+  setElementText('[data-order-date]', formatAccountDate(order.createdAt), '—', root);
 
-  const products = document.querySelector('[data-order-products]');
+  const products = root.querySelector('[data-order-products]');
   const items = Array.isArray(order.items) ? order.items : [];
-  products.innerHTML = items.map((item) => `<article class="account-order-product"><div><strong>${escapeAccountHtml(item.productName || 'Товар')}</strong><span>${escapeAccountHtml(item.quantity || 0)} × ${formatAccountMoney(item.unitPrice)}</span></div><strong>${formatAccountMoney(item.total)}</strong></article>`).join('');
+  if (products) {
+    products.innerHTML = items.map((item) => `<article class="account-order-product"><div><strong>${escapeAccountHtml(item.productName || 'Товар')}</strong><span>${escapeAccountHtml(item.quantity || 0)} × ${formatAccountMoney(item.unitPrice)}</span></div><strong>${formatAccountMoney(item.total)}</strong></article>`).join('');
+  }
 
-  const repeat = document.querySelector('[data-repeat-order]');
+  const repeat = root.querySelector('[data-repeat-order]');
   if (repeat) repeat.hidden = false;
 }
 
@@ -455,22 +527,26 @@ function renderFavorites() {
   if (!commerce) return;
 
   const favorites = commerce.getFavorites();
-  const grid = document.querySelector('[data-account-favorites-grid]');
-  const preview = document.querySelector('[data-account-favorites-preview]');
-  const pageEmpty = document.querySelector('[data-account-page="favorites"] [data-account-empty]');
-  const dashboardEmpty = document.querySelector('[data-account-favorites-empty]');
-  const loading = document.querySelector('[data-account-page="favorites"] [data-account-loading]');
-  const clear = document.querySelector('[data-account-favorites-clear]');
+  const favoritesRoot = getAccountView('favorites');
+  const dashboardRoot = getAccountView('dashboard');
+  const grid = favoritesRoot?.querySelector('[data-account-favorites-grid]');
+  const preview = dashboardRoot?.querySelector('[data-account-favorites-preview]');
+  const pageEmpty = favoritesRoot?.querySelector('[data-account-empty]');
+  const dashboardEmpty = dashboardRoot?.querySelector('[data-account-favorites-empty]');
+  const loading = favoritesRoot?.querySelector('[data-account-loading]');
+  const clear = favoritesRoot?.querySelector('[data-account-favorites-clear]');
 
   if (loading) loading.hidden = true;
   if (grid) {
     grid.innerHTML = favorites.map((item) => createFavoriteCard(item)).join('');
     grid.hidden = favorites.length === 0;
   }
-  if (preview) preview.innerHTML = favorites.slice(0, 3).map((item) => createFavoriteCard(item, true)).join('');
+  if (preview) {
+    preview.innerHTML = favorites.slice(0, 3).map((item) => createFavoriteCard(item, true)).join('');
+    preview.hidden = favorites.length === 0;
+  }
   if (pageEmpty) pageEmpty.hidden = favorites.length > 0;
   if (dashboardEmpty) dashboardEmpty.hidden = favorites.length > 0;
-  if (preview) preview.hidden = favorites.length === 0;
   if (clear) clear.hidden = favorites.length === 0;
 
   setElementText('[data-account-favorites-count]', String(favorites.length), '0');
@@ -486,7 +562,7 @@ function showAccountToast(message, canUndo = false) {
   const toast = document.querySelector('[data-account-toast]');
   if (!toast) return;
 
-  setElementText('[data-account-toast-text]', message);
+  setElementText('[data-account-toast-text]', message, '', toast);
   const undo = toast.querySelector('[data-account-toast-undo]');
   if (undo) undo.hidden = !canUndo;
   toast.hidden = false;
@@ -546,9 +622,12 @@ function createAddressCard(address) {
 }
 
 function renderAddresses(addresses) {
-  const list = document.querySelector('[data-account-addresses-list]');
-  const empty = document.querySelector('[data-account-empty]');
-  const loading = document.querySelector('[data-account-loading]');
+  const root = getAccountView('addresses');
+  if (!root) return;
+
+  const list = root.querySelector('[data-account-addresses-list]');
+  const empty = root.querySelector('[data-account-empty]');
+  const loading = root.querySelector('[data-account-loading]');
   const normalized = Array.isArray(addresses) ? addresses : [];
 
   if (loading) loading.hidden = true;
@@ -587,9 +666,12 @@ function initAddressModal() {
 }
 
 function renderSubscription(subscription) {
-  const card = document.querySelector('[data-account-subscription]');
-  const empty = document.querySelector('[data-account-empty]');
-  const loading = document.querySelector('[data-account-loading]');
+  const root = getAccountView('subscription');
+  if (!root) return;
+
+  const card = root.querySelector('[data-account-subscription]');
+  const empty = root.querySelector('[data-account-empty]');
+  const loading = root.querySelector('[data-account-loading]');
   if (loading) loading.hidden = true;
   if (!card || !empty) return;
 
@@ -601,11 +683,11 @@ function renderSubscription(subscription) {
 
   card.hidden = false;
   empty.hidden = true;
-  setElementText('[data-subscription-name]', subscription.plan?.name || subscription.name, 'Подписка');
-  setElementText('[data-subscription-description]', subscription.plan?.description || subscription.description, '');
-  setElementText('[data-subscription-status]', subscription.status, '—');
-  setElementText('[data-subscription-expires]', formatAccountDate(subscription.expiresAt), '—');
-  setElementText('[data-subscription-renew]', subscription.autoRenew ? 'Включено' : 'Выключено', '—');
+  setElementText('[data-subscription-name]', subscription.plan?.name || subscription.name, 'Подписка', root);
+  setElementText('[data-subscription-description]', subscription.plan?.description || subscription.description, '', root);
+  setElementText('[data-subscription-status]', subscription.status, '—', root);
+  setElementText('[data-subscription-expires]', formatAccountDate(subscription.expiresAt), '—', root);
+  setElementText('[data-subscription-renew]', subscription.autoRenew ? 'Включено' : 'Выключено', '—', root);
 }
 
 function initSettingsForms() {
@@ -658,79 +740,141 @@ function initLogout() {
   });
 }
 
-function showPageError(message) {
-  const page = getAccountPage();
-  const localError = page?.querySelector('[data-account-error]');
-  const globalError = page?.querySelector('[data-account-global-error]');
+function showPageError(message, type = getAccountRoute()?.view || 'dashboard') {
+  const root = getAccountView(type) || getActiveAccountView();
+  if (!root) return;
+
+  const localError = root.querySelector('[data-account-error]');
+  const globalError = root.querySelector('[data-account-global-error]');
   const target = localError || globalError;
   if (!target) return;
 
-  const loading = page.querySelector('[data-account-loading]');
+  const loading = root.querySelector('[data-account-loading]');
   if (loading) loading.hidden = true;
   target.hidden = false;
-  setElementText('[data-account-global-error-text]', message, 'Попробуйте обновить страницу.');
+  setElementText('[data-account-global-error-text]', message, 'Попробуйте обновить страницу.', root);
 }
 
 function revealSettings() {
-  const loading = document.querySelector('[data-account-loading]');
-  const settings = document.querySelector('[data-account-settings]');
+  const root = getAccountView('settings');
+  if (!root) return;
+
+  const loading = root.querySelector('[data-account-loading]');
+  const settings = root.querySelector('[data-account-settings]');
   if (loading) loading.hidden = true;
   if (settings) settings.hidden = false;
 }
 
-async function initAccountPageData() {
-  const type = getAccountPage()?.dataset.accountPage;
+function showUnavailableState(type, backendAvailable) {
+  const state = getAccountView(type)?.querySelector('[data-account-unavailable]');
+  if (state) state.hidden = backendAvailable;
+}
 
-  const showUnavailableState = (backendAvailable) => {
-    const state = document.querySelector('[data-account-unavailable]');
-    if (state) state.hidden = backendAvailable;
-  };
+async function ensureOrdersLoaded() {
+  if (accountStore.loaded.orders) return;
 
+  const { data, backendAvailable } = await loadOrders();
+  accountStore.orders = data;
+  accountStore.backendAvailable.orders = backendAvailable;
+  accountStore.loaded.orders = true;
+}
+
+async function ensureAddressesLoaded() {
+  if (accountStore.loaded.addresses) return;
+
+  const { data, backendAvailable } = await loadAddresses();
+  accountStore.addresses = data;
+  accountStore.backendAvailable.addresses = backendAvailable;
+  accountStore.loaded.addresses = true;
+}
+
+async function ensureSubscriptionLoaded() {
+  if (accountStore.loaded.subscription) return;
+
+  const { data, backendAvailable } = await loadSubscription();
+  accountStore.subscription = data;
+  accountStore.backendAvailable.subscription = backendAvailable;
+  accountStore.loaded.subscription = true;
+}
+
+async function initAccountPageData(type = getAccountRoute()?.view || 'dashboard') {
   if (type === 'dashboard') {
-    const { data } = await loadOrders();
-    accountStore.orders = data;
-    renderOrders(data, { recent: true });
+    await ensureOrdersLoaded();
+    renderOrders(accountStore.orders, { recent: true });
     renderFavorites();
+    return;
   }
 
   if (type === 'orders') {
-    const { data, backendAvailable } = await loadOrders();
-    accountStore.orders = data;
-    renderOrders(data);
-    showUnavailableState(backendAvailable);
+    await ensureOrdersLoaded();
+    renderOrders(accountStore.orders);
+    showUnavailableState('orders', accountStore.backendAvailable.orders);
+    return;
   }
 
   if (type === 'order') {
     renderOrder(null);
-    showUnavailableState(false);
+    showUnavailableState('order', false);
+    return;
   }
 
   if (type === 'favorites') {
     renderFavorites();
-    showUnavailableState(false);
+    showUnavailableState('favorites', false);
+    return;
   }
 
   if (type === 'addresses') {
-    const { data, backendAvailable } = await loadAddresses();
-    accountStore.addresses = data;
-    renderAddresses(data);
-    showUnavailableState(backendAvailable);
+    await ensureAddressesLoaded();
+    renderAddresses(accountStore.addresses);
+    showUnavailableState('addresses', accountStore.backendAvailable.addresses);
+    return;
   }
 
   if (type === 'settings') {
     revealSettings();
+    return;
   }
 
   if (type === 'subscription') {
-    const { data, backendAvailable } = await loadSubscription();
-    accountStore.subscription = data;
-    renderSubscription(data);
-    showUnavailableState(backendAvailable);
+    await ensureSubscriptionLoaded();
+    renderSubscription(accountStore.subscription);
+    showUnavailableState('subscription', accountStore.backendAvailable.subscription);
   }
+}
+
+function initAccountRetry() {
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-account-retry]');
+    if (!button) return;
+
+    const view = button.closest('[data-account-view]')?.dataset.accountView;
+
+    if (!view || view === 'dashboard') {
+      window.location.reload();
+      return;
+    }
+
+    if (view === 'orders') accountStore.loaded.orders = false;
+    if (view === 'addresses') accountStore.loaded.addresses = false;
+    if (view === 'subscription') accountStore.loaded.subscription = false;
+
+    const error = button.closest('[data-account-error]');
+    if (error) error.hidden = true;
+
+    try {
+      await initAccountPageData(view);
+    } catch (loadError) {
+      showPageError(loadError instanceof Error ? loadError.message : 'Не удалось загрузить раздел.', view);
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!getAccountPage()) return;
+
+  const initialRoute = getAccountRoute() || ACCOUNT_ROUTES['/account'];
+  setInitialAccountView(initialRoute.view);
 
   try {
     const [user] = await Promise.all([getAccountUser(), loadAccountNavigation()]);
@@ -738,16 +882,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     accountStore.user = user;
     renderAccountUser(user);
-    initAccountNavigation();
-    initAccountTransitions();
+    initAccountRouter();
     initAccountDrawer();
     initFavoritesActions();
     initAddressModal();
     initSettingsForms();
     initLogout();
-    document.querySelectorAll('[data-account-retry]').forEach((button) => button.addEventListener('click', () => window.location.reload()));
-    await initAccountPageData();
+    initAccountRetry();
+    await initAccountPageData(initialRoute.view);
   } catch (error) {
-    showPageError(error instanceof Error ? error.message : 'Не удалось загрузить кабинет.');
+    showPageError(error instanceof Error ? error.message : 'Не удалось загрузить кабинет.', initialRoute.view);
   }
 });

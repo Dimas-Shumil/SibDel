@@ -180,30 +180,46 @@ function initMobileHeader() {
     desktopMedia.addEventListener('change', handleViewportChange);
   }
 
-  const applyAuthState = (isAuthenticated) => {
+  const applyAuthState = (user = null) => {
+    const isAuthenticated = Boolean(user);
+    const isAdmin = user?.role === 'OWNER' || user?.role === 'STAFF';
+
     header.classList.toggle('header--authenticated', isAuthenticated);
+    header.classList.toggle('header--admin', isAdmin);
+
+    const targetHref = !isAuthenticated
+      ? '/login.html'
+      : isAdmin
+        ? '/admin-pages/dashboard.html'
+        : '/account/';
+
+    const targetText = !isAuthenticated
+      ? 'Войти'
+      : isAdmin
+        ? 'Админка'
+        : 'Кабинет';
 
     if (accountLink) {
-      accountLink.href = isAuthenticated ? '/account/' : '/login.html';
+      accountLink.href = targetHref;
       accountLink.textContent = isAuthenticated
-        ? 'Личный кабинет'
+        ? targetText
         : 'Войти в личный кабинет';
     }
 
     if (desktopAccountLink) {
-      desktopAccountLink.href = isAuthenticated ? '/account/' : '/login.html';
+      desktopAccountLink.href = targetHref;
       desktopAccountLink.setAttribute(
         'aria-label',
-        isAuthenticated ? 'Открыть личный кабинет' : 'Войти в личный кабинет',
+        isAuthenticated ? targetText : 'Войти в личный кабинет',
       );
     }
 
     if (desktopAccountText) {
-      desktopAccountText.textContent = isAuthenticated ? 'Кабинет' : 'Войти';
+      desktopAccountText.textContent = targetText;
     }
   };
 
-  applyAuthState(false);
+  applyAuthState(null);
 
   fetch('/api/auth/me', {
     method: 'GET',
@@ -220,7 +236,7 @@ function initMobileHeader() {
       return response.json();
     })
     .then((data) => {
-      applyAuthState(Boolean(data?.ok && data?.user));
+      applyAuthState(data?.ok ? data.user : null);
     })
     .catch(() => {
       applyAuthState(false);

@@ -1749,26 +1749,42 @@ main {
 }
 
 .account-content {
+  min-width: 0;
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
-.account-content.is-leaving {
-  opacity: 0;
-  transform: translateY(12px);
-}
-.account-content.is-visible {
-  animation: account-content-show 0.45s ease forwards;
+.account-content.is-switching {
+  opacity: 0.18;
+  transform: translateY(4px);
+  pointer-events: none;
 }
 
-@keyframes account-content-show {
+.account-view {
+  min-width: 0;
+}
+.account-view[hidden] {
+  display: none;
+}
+.account-view.is-active {
+  animation: account-view-show 0.34s ease both;
+}
+
+@keyframes account-view-show {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(7px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-content,
+  .account-view.is-active {
+    transition: none;
+    animation: none;
   }
 }
 .account-mobile-head {
@@ -3565,26 +3581,5 @@ body.account-menu-open {
   }
   .account-button {
     width: 100%;
-  }
-}
-.account-content {
-  transition: opacity 0.28s ease, transform 0.28s ease;
-}
-.account-content.is-changing {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.account-content.is-visible {
-  animation: accountContentIn 0.35s ease forwards;
-}
-
-@keyframes accountContentIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }

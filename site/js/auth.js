@@ -215,10 +215,19 @@ async function submitLogin(form) {
       return;
     }
 
-    setFormStatus(form, 'Вход выполнен. Открываем личный кабинет…', 'success');
+    const user = payload?.user;
+
+    setFormStatus(
+      form,
+      user?.role === 'OWNER' || user?.role === 'STAFF'
+        ? 'Вход выполнен. Открываем панель управления…'
+        : 'Вход выполнен. Открываем личный кабинет…',
+      'success',
+    );
 
     window.setTimeout(() => {
-      window.location.assign('/account/');
+      const isAdmin = user?.role === 'OWNER' || user?.role === 'STAFF';
+      window.location.assign(isAdmin ? '/admin-pages/dashboard.html' : '/account/');
     }, 450);
   } catch {
     setFormStatus(

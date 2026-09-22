@@ -1,120 +1,1045 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Личный кабинет покупателя Сибирских Деликатесов." />
-    <link rel="stylesheet" href="/site/css/account.min.css" />
-    <title>Личный кабинет — Сибирские Деликатесы</title>
-  </head>
-
-  <body>
-    <div data-component="header"></div>
-
-    <main class="account-page" data-account-page="dashboard">
-      <div class="account-page__container">
-        <header class="account-mobile-head">
-          <div>
-            <span class="account-mobile-head__eyebrow">Личный кабинет</span>
-            <strong class="account-mobile-head__title">Главная</strong>
-          </div>
-          <button class="account-mobile-head__menu" type="button" aria-expanded="false" aria-controls="account-sidebar" data-account-menu-toggle>
-            <span></span><span></span><span></span>
-            <span class="visually-hidden">Открыть меню кабинета</span>
-          </button>
-        </header>
-
-        <div class="account-layout">
-          <div id="account-sidebar" data-component="account-navigation"></div>
-
-          <div class="account-content">
-            <section class="account-welcome" aria-labelledby="account-welcome-title">
-              <div class="account-welcome__overlay"></div>
-              <div class="account-welcome__content">
-                <span class="account-welcome__eyebrow">Ваше пространство</span>
-                <h1 class="account-welcome__title" id="account-welcome-title">
-                  Добро пожаловать, <span data-account-first-name>покупатель</span>
-                </h1>
-                <p class="account-welcome__text">Управляйте заказами, избранными товарами и личными данными в одном месте.</p>
-              </div>
-            </section>
-
-            <section class="account-profile-card" aria-labelledby="account-profile-title">
-              <div class="account-profile-card__identity">
-                <span class="account-avatar" data-account-initials aria-hidden="true">СД</span>
-                <div>
-                  <span class="account-profile-card__eyebrow">Профиль покупателя</span>
-                  <h2 class="account-profile-card__name" id="account-profile-title" data-account-full-name>Загрузка данных…</h2>
-                </div>
-              </div>
-              <div class="account-profile-card__contacts">
-                <span data-account-email>—</span>
-                <span data-account-phone>Телефон не указан</span>
-              </div>
-              <a class="account-button account-button--primary" href="/account/settings">Редактировать профиль</a>
-            </section>
-
-            <section class="account-quick-grid" aria-label="Быстрые действия">
-              <a class="account-quick-card" href="/account/orders">
-                <span class="account-quick-card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8V6a6 6 0 0 1 12 0v2" /><path d="M4 8h16l1 13H3L4 8Z" /></svg></span>
-                <span class="account-quick-card__copy"><strong>Заказы</strong><small>История покупок</small></span>
-                <span class="account-quick-card__value" data-account-orders-count>0</span>
-              </a>
-              <a class="account-quick-card" href="/account/favorites">
-                <span class="account-quick-card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></span>
-                <span class="account-quick-card__copy"><strong>Избранное</strong><small>Сохранённые товары</small></span>
-                <span class="account-quick-card__value" data-account-favorites-count>0</span>
-              </a>
-              <a class="account-quick-card" href="/account/addresses">
-                <span class="account-quick-card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5.2-8 11-8 11S4 15.2 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></svg></span>
-                <span class="account-quick-card__copy"><strong>Адреса</strong><small>Для быстрой доставки</small></span>
-                <span class="account-quick-card__value" data-account-addresses-count>0</span>
-              </a>
-            </section>
-
-            <div class="account-dashboard-grid">
-              <section class="account-panel" aria-labelledby="recent-orders-title">
-                <div class="account-panel__head">
-                  <div><span class="account-panel__eyebrow">История покупок</span><h2 class="account-panel__title" id="recent-orders-title">Последние заказы</h2></div>
-                  <a class="account-text-link" href="/account/orders">Все заказы</a>
-                </div>
-                <div class="account-state account-state--compact" data-account-orders-empty>
-                  <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8V6a6 6 0 0 1 12 0v2" /><path d="M4 8h16l1 13H3L4 8Z" /></svg></span>
-                  <h3>У вас пока нет заказов</h3>
-                  <p>Познакомьтесь с коллекцией натуральных сибирских продуктов.</p>
-                  <a class="account-button account-button--secondary" href="/catalog.html">Перейти в каталог</a>
-                </div>
-                <div class="account-orders-list" data-account-recent-orders hidden></div>
-              </section>
-
-              <section class="account-panel" aria-labelledby="favorite-preview-title">
-                <div class="account-panel__head">
-                  <div><span class="account-panel__eyebrow">Сохранено для вас</span><h2 class="account-panel__title" id="favorite-preview-title">Избранное</h2></div>
-                  <a class="account-text-link" href="/account/favorites">Все товары</a>
-                </div>
-                <div class="account-favorites-preview" data-account-favorites-preview></div>
-                <div class="account-state account-state--compact" data-account-favorites-empty hidden>
-                  <span class="account-state__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z" /></svg></span>
-                  <h3>Избранное пока пусто</h3>
-                  <p>Сохраняйте понравившиеся продукты, чтобы быстро вернуться к ним.</p>
-                  <a class="account-button account-button--secondary" href="/catalog.html">Выбрать продукты</a>
-                </div>
-              </section>
-            </div>
-
-            <section class="account-inline-status" data-account-global-error hidden role="alert">
-              <strong>Не удалось загрузить кабинет</strong>
-              <span data-account-global-error-text>Попробуйте обновить страницу.</span>
-              <button type="button" data-account-retry>Повторить</button>
-            </section>
-          </div>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="Личный кабинет покупателя Сибирских Деликатесов: заказы, избранное, адреса, подписка и настройки." name="description"/>
+  <link href="/site/css/account.min.css" rel="stylesheet"/>
+  <title>
+   Личный кабинет — Сибирские Деликатесы
+  </title>
+ </head>
+ <body>
+  <div data-component="header">
+  </div>
+  <main class="account-page" data-account-page="dashboard" data-account-shell="">
+   <div class="account-page__container">
+    <header class="account-mobile-head">
+     <div>
+      <span class="account-mobile-head__eyebrow">
+       Личный кабинет
+      </span>
+      <strong class="account-mobile-head__title" data-account-mobile-title="">
+       Главная
+      </strong>
+     </div>
+     <button aria-controls="account-sidebar" aria-expanded="false" class="account-mobile-head__menu" data-account-menu-toggle="" type="button">
+      <span>
+      </span>
+      <span>
+      </span>
+      <span>
+      </span>
+      <span class="visually-hidden">
+       Открыть меню кабинета
+      </span>
+     </button>
+    </header>
+    <div class="account-layout">
+     <div data-component="account-navigation" id="account-sidebar">
+     </div>
+     <div class="account-content" data-account-content="">
+      <div class="account-view" data-account-view="dashboard">
+       <section aria-labelledby="account-welcome-title" class="account-welcome">
+        <div class="account-welcome__overlay">
         </div>
+        <div class="account-welcome__content">
+         <span class="account-welcome__eyebrow">
+          Ваше пространство
+         </span>
+         <h1 class="account-welcome__title" id="account-welcome-title">
+          Добро пожаловать,
+          <span data-account-first-name="">
+           покупатель
+          </span>
+         </h1>
+         <p class="account-welcome__text">
+          Управляйте заказами, избранными товарами и личными данными в одном месте.
+         </p>
+        </div>
+       </section>
+       <section aria-labelledby="account-profile-title" class="account-profile-card">
+        <div class="account-profile-card__identity">
+         <span aria-hidden="true" class="account-avatar" data-account-initials="">
+          СД
+         </span>
+         <div>
+          <span class="account-profile-card__eyebrow">
+           Профиль покупателя
+          </span>
+          <h2 class="account-profile-card__name" data-account-full-name="" id="account-profile-title">
+           Загрузка данных…
+          </h2>
+         </div>
+        </div>
+        <div class="account-profile-card__contacts">
+         <span data-account-email="">
+          —
+         </span>
+         <span data-account-phone="">
+          Телефон не указан
+         </span>
+        </div>
+        <a class="account-button account-button--primary" href="/account/settings">
+         Редактировать профиль
+        </a>
+       </section>
+       <section aria-label="Быстрые действия" class="account-quick-grid">
+        <a class="account-quick-card" href="/account/orders">
+         <span class="account-quick-card__icon">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+           <path d="M6 8V6a6 6 0 0 1 12 0v2">
+           </path>
+           <path d="M4 8h16l1 13H3L4 8Z">
+           </path>
+          </svg>
+         </span>
+         <span class="account-quick-card__copy">
+          <strong>
+           Заказы
+          </strong>
+          <small>
+           История покупок
+          </small>
+         </span>
+         <span class="account-quick-card__value" data-account-orders-count="">
+          0
+         </span>
+        </a>
+        <a class="account-quick-card" href="/account/favorites">
+         <span class="account-quick-card__icon">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+           <path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z">
+           </path>
+          </svg>
+         </span>
+         <span class="account-quick-card__copy">
+          <strong>
+           Избранное
+          </strong>
+          <small>
+           Сохранённые товары
+          </small>
+         </span>
+         <span class="account-quick-card__value" data-account-favorites-count="">
+          0
+         </span>
+        </a>
+        <a class="account-quick-card" href="/account/addresses">
+         <span class="account-quick-card__icon">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+           <path d="M20 10c0 5.2-8 11-8 11S4 15.2 4 10a8 8 0 1 1 16 0Z">
+           </path>
+           <circle cx="12" cy="10" r="2.5">
+           </circle>
+          </svg>
+         </span>
+         <span class="account-quick-card__copy">
+          <strong>
+           Адреса
+          </strong>
+          <small>
+           Для быстрой доставки
+          </small>
+         </span>
+         <span class="account-quick-card__value" data-account-addresses-count="">
+          0
+         </span>
+        </a>
+       </section>
+       <div class="account-dashboard-grid">
+        <section aria-labelledby="recent-orders-title" class="account-panel">
+         <div class="account-panel__head">
+          <div>
+           <span class="account-panel__eyebrow">
+            История покупок
+           </span>
+           <h2 class="account-panel__title" id="recent-orders-title">
+            Последние заказы
+           </h2>
+          </div>
+          <a class="account-text-link" href="/account/orders">
+           Все заказы
+          </a>
+         </div>
+         <div class="account-state account-state--compact" data-account-orders-empty="">
+          <span class="account-state__icon">
+           <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M6 8V6a6 6 0 0 1 12 0v2">
+            </path>
+            <path d="M4 8h16l1 13H3L4 8Z">
+            </path>
+           </svg>
+          </span>
+          <h3>
+           У вас пока нет заказов
+          </h3>
+          <p>
+           Познакомьтесь с коллекцией натуральных сибирских продуктов.
+          </p>
+          <a class="account-button account-button--secondary" href="/catalog.html">
+           Перейти в каталог
+          </a>
+         </div>
+         <div class="account-orders-list" data-account-recent-orders="" hidden="">
+         </div>
+        </section>
+        <section aria-labelledby="favorite-preview-title" class="account-panel">
+         <div class="account-panel__head">
+          <div>
+           <span class="account-panel__eyebrow">
+            Сохранено для вас
+           </span>
+           <h2 class="account-panel__title" id="favorite-preview-title">
+            Избранное
+           </h2>
+          </div>
+          <a class="account-text-link" href="/account/favorites">
+           Все товары
+          </a>
+         </div>
+         <div class="account-favorites-preview" data-account-favorites-preview="">
+         </div>
+         <div class="account-state account-state--compact" data-account-favorites-empty="" hidden="">
+          <span class="account-state__icon">
+           <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z">
+            </path>
+           </svg>
+          </span>
+          <h3>
+           Избранное пока пусто
+          </h3>
+          <p>
+           Сохраняйте понравившиеся продукты, чтобы быстро вернуться к ним.
+          </p>
+          <a class="account-button account-button--secondary" href="/catalog.html">
+           Выбрать продукты
+          </a>
+         </div>
+        </section>
+       </div>
+       <section class="account-inline-status" data-account-global-error="" hidden="" role="alert">
+        <strong>
+         Не удалось загрузить кабинет
+        </strong>
+        <span data-account-global-error-text="">
+         Попробуйте обновить страницу.
+        </span>
+        <button data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
       </div>
-      <div class="account-drawer-backdrop" data-account-menu-backdrop hidden></div>
-    </main>
-
-    <div data-component="footer"></div>
-    <script src="/site/js/main.js" defer></script>
-    <script src="/site/js/account.js" defer></script>
-  </body>
+      <div aria-labelledby="orders-title" class="account-view" data-account-view="orders" hidden="">
+       <header class="account-section-head">
+        <div>
+         <span class="account-section-head__eyebrow">
+          История покупок
+         </span>
+         <h1 class="account-section-head__title" id="orders-title">
+          Мои заказы
+         </h1>
+         <p class="account-section-head__text">
+          Здесь появятся состав, статус и итоговая стоимость ваших заказов.
+         </p>
+        </div>
+       </header>
+       <div aria-live="polite" class="account-loading" data-account-loading="">
+        <span class="account-loading__line account-loading__line--title">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+       </div>
+       <div class="account-orders-list" data-account-orders-list="" hidden="">
+       </div>
+       <section class="account-state" data-account-empty="" hidden="">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M6 8V6a6 6 0 0 1 12 0v2">
+          </path>
+          <path d="M4 8h16l1 13H3L4 8Z">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         У вас пока нет заказов
+        </h2>
+        <p>
+         Выберите продукты в каталоге, а после оформления заказ появится в этом разделе.
+        </p>
+        <a class="account-button account-button--primary" href="/catalog.html">
+         Перейти в каталог
+        </a>
+       </section>
+       <section class="account-state account-state--error" data-account-error="" hidden="" role="alert">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9">
+          </circle>
+          <path d="M12 7v6M12 17h.01">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Не удалось загрузить заказы
+        </h2>
+        <p>
+         Проверьте соединение и попробуйте ещё раз.
+        </p>
+        <button class="account-button account-button--secondary" data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
+       <section class="account-service-note" data-account-unavailable="" hidden="">
+        <strong>
+         История заказов временно недоступна
+        </strong>
+        <span>
+         Интерфейс готов к подключению серверных данных.
+        </span>
+       </section>
+      </div>
+      <div aria-labelledby="order-title" class="account-view" data-account-view="order" hidden="">
+       <header class="account-section-head account-section-head--with-action">
+        <div>
+         <a class="account-section-head__back" href="/account/orders">
+          Вернуться к заказам
+         </a>
+         <span class="account-section-head__eyebrow">
+          Подробности заказа
+         </span>
+         <h1 class="account-section-head__title" data-order-title="" id="order-title">
+          Заказ
+         </h1>
+        </div>
+        <button class="account-button account-button--primary" data-repeat-order="" hidden="" type="button">
+         Повторить заказ
+        </button>
+       </header>
+       <div aria-live="polite" class="account-loading" data-account-loading="">
+        <span class="account-loading__line account-loading__line--title">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+       </div>
+       <div class="account-order-detail" data-account-order-detail="" hidden="">
+        <section class="account-order-detail__main">
+         <div class="account-panel__head">
+          <div>
+           <span class="account-panel__eyebrow">
+            Состав
+           </span>
+           <h2 class="account-panel__title">
+            Товары
+           </h2>
+          </div>
+          <span class="account-status" data-order-status="">
+          </span>
+         </div>
+         <div class="account-order-products" data-order-products="">
+         </div>
+         <div class="account-order-total">
+          <span>
+           Итого
+          </span>
+          <strong data-order-total="">
+           0 ₽
+          </strong>
+         </div>
+        </section>
+        <aside class="account-order-detail__aside">
+         <div class="account-order-info">
+          <h2>
+           Получение и оплата
+          </h2>
+          <dl>
+           <div>
+            <dt>
+             Способ получения
+            </dt>
+            <dd data-order-delivery="">
+             —
+            </dd>
+           </div>
+           <div>
+            <dt>
+             Адрес
+            </dt>
+            <dd data-order-address="">
+             —
+            </dd>
+           </div>
+           <div>
+            <dt>
+             Оплата
+            </dt>
+            <dd data-order-payment="">
+             —
+            </dd>
+           </div>
+           <div>
+            <dt>
+             Дата заказа
+            </dt>
+            <dd data-order-date="">
+             —
+            </dd>
+           </div>
+          </dl>
+         </div>
+        </aside>
+       </div>
+       <section class="account-state" data-account-empty="" hidden="">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Заказ не выбран
+        </h2>
+        <p>
+         Откройте нужный заказ из истории покупок.
+        </p>
+        <a class="account-button account-button--secondary" href="/account/orders">
+         Перейти к заказам
+        </a>
+       </section>
+       <section class="account-state account-state--error" data-account-error="" hidden="" role="alert">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9">
+          </circle>
+          <path d="M12 7v6M12 17h.01">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Не удалось открыть заказ
+        </h2>
+        <p>
+         Проверьте соединение и попробуйте ещё раз.
+        </p>
+        <button class="account-button account-button--secondary" data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
+       <section class="account-service-note" data-account-unavailable="" hidden="">
+        <strong>
+         Данные заказа временно недоступны
+        </strong>
+        <span>
+         Повтор заказа станет доступен после подключения серверной истории.
+        </span>
+       </section>
+       <p aria-live="polite" class="account-form-status" data-repeat-order-status="" role="status">
+       </p>
+      </div>
+      <div aria-labelledby="favorites-title" class="account-view" data-account-view="favorites" hidden="">
+       <header class="account-section-head account-section-head--with-action">
+        <div>
+         <span class="account-section-head__eyebrow">
+          Сохранённые продукты
+         </span>
+         <h1 class="account-section-head__title" id="favorites-title">
+          Избранное
+         </h1>
+         <p class="account-section-head__text">
+          <span data-account-favorites-label="">
+           0 товаров
+          </span>
+          в вашем списке.
+         </p>
+        </div>
+        <button class="account-button account-button--secondary" data-account-favorites-clear="" hidden="" type="button">
+         Очистить избранное
+        </button>
+       </header>
+       <div aria-live="polite" class="account-loading" data-account-loading="">
+        <span class="account-loading__line account-loading__line--title">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+       </div>
+       <div class="account-favorites-grid" data-account-favorites-grid="" hidden="">
+       </div>
+       <section class="account-state" data-account-empty="" hidden="">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M12 20.5 4.7 13.4C1.8 10.5 2 6 5.5 4.6 8 3.6 10.1 5 12 7.1 13.9 5 16 3.6 18.5 4.6 22 6 22.2 10.5 19.3 13.4L12 20.5Z">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         В избранном пока ничего нет
+        </h2>
+        <p>
+         Нажимайте на сердце у понравившихся продуктов, чтобы сохранить их здесь.
+        </p>
+        <a class="account-button account-button--primary" href="/catalog.html">
+         Выбрать продукты
+        </a>
+       </section>
+       <section class="account-state account-state--error" data-account-error="" hidden="" role="alert">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9">
+          </circle>
+          <path d="M12 7v6M12 17h.01">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Не удалось загрузить избранное
+        </h2>
+        <p>
+         Обновите страницу и попробуйте ещё раз.
+        </p>
+        <button class="account-button account-button--secondary" data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
+       <section class="account-service-note" data-account-unavailable="" hidden="">
+        <strong>
+         Синхронизация с аккаунтом пока недоступна
+        </strong>
+        <span>
+         Сейчас список надёжно сохраняется в этом браузере.
+        </span>
+       </section>
+      </div>
+      <div aria-labelledby="addresses-title" class="account-view" data-account-view="addresses" hidden="">
+       <header class="account-section-head account-section-head--with-action">
+        <div>
+         <span class="account-section-head__eyebrow">
+          Доставка без лишних шагов
+         </span>
+         <h1 class="account-section-head__title" id="addresses-title">
+          Мои адреса
+         </h1>
+         <p class="account-section-head__text">
+          Сохранённые адреса можно будет выбирать при оформлении заказа.
+         </p>
+        </div>
+        <button class="account-button account-button--primary" data-address-open="" type="button">
+         Добавить адрес
+        </button>
+       </header>
+       <div aria-live="polite" class="account-loading" data-account-loading="">
+        <span class="account-loading__line account-loading__line--title">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+       </div>
+       <div class="account-addresses-grid" data-account-addresses-list="" hidden="">
+       </div>
+       <section class="account-state" data-account-empty="" hidden="">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M20 10c0 5.2-8 11-8 11S4 15.2 4 10a8 8 0 1 1 16 0Z">
+          </path>
+          <circle cx="12" cy="10" r="2.5">
+          </circle>
+         </svg>
+        </span>
+        <h2>
+         Добавьте адрес доставки
+        </h2>
+        <p>
+         Чтобы оформлять заказы быстрее и не вводить данные каждый раз.
+        </p>
+        <button class="account-button account-button--secondary" data-address-open="" type="button">
+         Добавить адрес
+        </button>
+       </section>
+       <section class="account-state account-state--error" data-account-error="" hidden="" role="alert">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9">
+          </circle>
+          <path d="M12 7v6M12 17h.01">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Не удалось загрузить адреса
+        </h2>
+        <p>
+         Проверьте соединение и попробуйте ещё раз.
+        </p>
+        <button class="account-button account-button--secondary" data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
+       <section class="account-service-note" data-account-unavailable="" hidden="">
+        <strong>
+         Сохранение адресов пока недоступно
+        </strong>
+        <span>
+         Форма подготовлена к подключению модели Address.
+        </span>
+       </section>
+      </div>
+      <div aria-labelledby="settings-title" class="account-view" data-account-view="settings" hidden="">
+       <header class="account-section-head">
+        <div>
+         <span class="account-section-head__eyebrow">
+          Профиль и защита
+         </span>
+         <h1 class="account-section-head__title" id="settings-title">
+          Настройки
+         </h1>
+         <p class="account-section-head__text">
+          Личные данные, пароль и активные сеансы собраны в одном разделе.
+         </p>
+        </div>
+       </header>
+       <div aria-live="polite" class="account-loading" data-account-loading="">
+        <span class="account-loading__line account-loading__line--title">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+       </div>
+       <div class="account-settings" data-account-settings="" hidden="">
+        <section aria-labelledby="personal-title" class="account-panel account-settings__panel">
+         <div class="account-panel__head">
+          <div>
+           <span class="account-panel__eyebrow">
+            Личные данные
+           </span>
+           <h2 class="account-panel__title" id="personal-title">
+            Профиль
+           </h2>
+          </div>
+          <span aria-hidden="true" class="account-avatar account-avatar--small" data-account-initials="">
+           СД
+          </span>
+         </div>
+         <form class="account-form" data-profile-form="" novalidate="">
+          <div class="account-form__grid">
+           <label class="account-field">
+            <span>
+             Имя
+            </span>
+            <input autocomplete="given-name" maxlength="100" name="firstName" type="text"/>
+           </label>
+           <label class="account-field">
+            <span>
+             Фамилия
+            </span>
+            <input autocomplete="family-name" maxlength="100" name="lastName" type="text"/>
+           </label>
+           <label class="account-field">
+            <span>
+             Email
+            </span>
+            <input autocomplete="email" maxlength="191" name="email" type="email"/>
+           </label>
+           <label class="account-field">
+            <span>
+             Телефон
+            </span>
+            <input autocomplete="tel" maxlength="32" name="phone" type="tel"/>
+           </label>
+          </div>
+          <p aria-live="polite" class="account-form-status" data-profile-status="" role="status">
+          </p>
+          <button class="account-button account-button--primary" type="submit">
+           Сохранить изменения
+          </button>
+         </form>
+        </section>
+        <section aria-labelledby="security-title" class="account-panel account-settings__panel">
+         <div class="account-panel__head">
+          <div>
+           <span class="account-panel__eyebrow">
+            Безопасность
+           </span>
+           <h2 class="account-panel__title" id="security-title">
+            Изменение пароля
+           </h2>
+          </div>
+          <span class="account-panel__shield">
+           <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M12 3 20 6v6c0 4.7-3 7.6-8 9-5-1.4-8-4.3-8-9V6l8-3Z">
+            </path>
+            <path d="m8.5 12 2.2 2.2 4.8-5">
+            </path>
+           </svg>
+          </span>
+         </div>
+         <form class="account-form" data-password-form="" novalidate="">
+          <div class="account-form__grid account-form__grid--single">
+           <label class="account-field">
+            <span>
+             Текущий пароль
+            </span>
+            <input autocomplete="current-password" maxlength="256" minlength="8" name="currentPassword" type="password"/>
+           </label>
+           <label class="account-field">
+            <span>
+             Новый пароль
+            </span>
+            <input autocomplete="new-password" maxlength="256" minlength="8" name="newPassword" type="password"/>
+           </label>
+           <label class="account-field">
+            <span>
+             Повторите новый пароль
+            </span>
+            <input autocomplete="new-password" maxlength="256" minlength="8" name="passwordConfirm" type="password"/>
+           </label>
+          </div>
+          <p class="account-field-hint">
+           Минимум 8 символов. Не используйте пароль от других сервисов.
+          </p>
+          <p aria-live="polite" class="account-form-status" data-password-status="" role="status">
+          </p>
+          <button class="account-button account-button--secondary" type="submit">
+           Изменить пароль
+          </button>
+         </form>
+        </section>
+        <section aria-labelledby="sessions-title" class="account-panel account-settings__panel">
+         <div class="account-panel__head">
+          <div>
+           <span class="account-panel__eyebrow">
+            Контроль доступа
+           </span>
+           <h2 class="account-panel__title" id="sessions-title">
+            Активные сессии
+           </h2>
+          </div>
+         </div>
+         <div class="account-session-card">
+          <span class="account-session-card__icon">
+           <svg aria-hidden="true" viewBox="0 0 24 24">
+            <rect height="14" rx="2" width="18" x="3" y="4">
+            </rect>
+            <path d="M8 21h8M12 18v3">
+            </path>
+           </svg>
+          </span>
+          <div>
+           <strong>
+            Текущий браузер
+           </strong>
+           <span>
+            Эта сессия активна сейчас
+           </span>
+          </div>
+          <span class="account-session-card__badge">
+           Текущая
+          </span>
+         </div>
+         <div class="account-service-note account-service-note--inline" data-account-unavailable="">
+          <strong>
+           Список других сессий пока недоступен
+          </strong>
+          <span>
+           Для управления всеми устройствами требуется серверный API.
+          </span>
+         </div>
+        </section>
+        <section aria-labelledby="logout-title" class="account-panel account-settings__panel account-settings__panel--logout">
+         <div>
+          <h2 class="account-panel__title" id="logout-title">
+           Завершить текущую сессию
+          </h2>
+          <p>
+           Для следующего входа потребуется email и пароль.
+          </p>
+         </div>
+         <button class="account-button account-button--danger" data-account-logout="" type="button">
+          Выйти из аккаунта
+         </button>
+        </section>
+       </div>
+       <section class="account-state account-state--error" data-account-error="" hidden="" role="alert">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9">
+          </circle>
+          <path d="M12 7v6M12 17h.01">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Не удалось загрузить настройки
+        </h2>
+        <p>
+         Проверьте соединение и попробуйте ещё раз.
+        </p>
+        <button class="account-button account-button--secondary" data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
+      </div>
+      <div aria-labelledby="subscription-title" class="account-view" data-account-view="subscription" hidden="">
+       <header class="account-section-head">
+        <div>
+         <span class="account-section-head__eyebrow">
+          Больше вкуса и выгоды
+         </span>
+         <h1 class="account-section-head__title" id="subscription-title">
+          Моя подписка
+         </h1>
+         <p class="account-section-head__text">
+          Управляйте сроком действия и автопродлением подписки.
+         </p>
+        </div>
+       </header>
+       <div aria-live="polite" class="account-loading" data-account-loading="">
+        <span class="account-loading__line account-loading__line--title">
+        </span>
+        <span class="account-loading__line">
+        </span>
+        <span class="account-loading__line">
+        </span>
+       </div>
+       <div class="account-subscription-card" data-account-subscription="" hidden="">
+        <div class="account-subscription-card__copy">
+         <span class="account-panel__eyebrow">
+          Активный план
+         </span>
+         <h2 data-subscription-name="">
+          Подписка
+         </h2>
+         <p data-subscription-description="">
+         </p>
+        </div>
+        <dl class="account-subscription-card__details">
+         <div>
+          <dt>
+           Статус
+          </dt>
+          <dd data-subscription-status="">
+           —
+          </dd>
+         </div>
+         <div>
+          <dt>
+           Действует до
+          </dt>
+          <dd data-subscription-expires="">
+           —
+          </dd>
+         </div>
+         <div>
+          <dt>
+           Автопродление
+          </dt>
+          <dd data-subscription-renew="">
+           —
+          </dd>
+         </div>
+        </dl>
+       </div>
+       <section class="account-state account-state--subscription" data-account-empty="" hidden="">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <rect height="14" rx="2" width="18" x="3" y="5">
+          </rect>
+          <path d="M3 9h18M7 14h4">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         У вас пока нет активной подписки
+        </h2>
+        <p>
+         Когда подписка будет оформлена, здесь появятся её условия, срок действия и управление автопродлением.
+        </p>
+       </section>
+       <div class="account-benefits">
+        <article>
+         <span>
+          01
+         </span>
+         <h3>
+          Особые предложения
+         </h3>
+         <p>
+          Персональные условия и подборки для постоянных покупателей.
+         </p>
+        </article>
+        <article>
+         <span>
+          02
+         </span>
+         <h3>
+          Любимые продукты
+         </h3>
+         <p>
+          Удобный доступ к товарам, которые вы выбираете чаще всего.
+         </p>
+        </article>
+        <article>
+         <span>
+          03
+         </span>
+         <h3>
+          Спокойное управление
+         </h3>
+         <p>
+          Все условия и сроки подписки всегда перед глазами.
+         </p>
+        </article>
+       </div>
+       <section class="account-state account-state--error" data-account-error="" hidden="" role="alert">
+        <span class="account-state__icon">
+         <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9">
+          </circle>
+          <path d="M12 7v6M12 17h.01">
+          </path>
+         </svg>
+        </span>
+        <h2>
+         Не удалось загрузить подписку
+        </h2>
+        <p>
+         Проверьте соединение и попробуйте ещё раз.
+        </p>
+        <button class="account-button account-button--secondary" data-account-retry="" type="button">
+         Повторить
+        </button>
+       </section>
+       <section class="account-service-note" data-account-unavailable="" hidden="">
+        <strong>
+         Управление подпиской пока недоступно
+        </strong>
+        <span>
+         Интерфейс подготовлен для SubscriptionPlan и UserSubscription.
+        </span>
+       </section>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="account-modal" data-address-modal="" hidden="">
+    <div class="account-modal__backdrop" data-address-close="">
+    </div>
+    <section aria-labelledby="address-modal-title" aria-modal="true" class="account-modal__dialog" role="dialog">
+     <button aria-label="Закрыть" class="account-modal__close" data-address-close="" type="button">
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+       <path d="M6 6 18 18M18 6 6 18">
+       </path>
+      </svg>
+     </button>
+     <span class="account-panel__eyebrow">
+      Адрес доставки
+     </span>
+     <h2 class="account-modal__title" id="address-modal-title">
+      Добавить адрес
+     </h2>
+     <form class="account-form" data-address-form="" novalidate="">
+      <div class="account-form__grid">
+       <label class="account-field account-field--wide">
+        <span>
+         Название адреса
+        </span>
+        <input maxlength="100" name="title" placeholder="Например, Дом" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Получатель
+        </span>
+        <input autocomplete="name" maxlength="150" name="recipientName" required="" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Телефон
+        </span>
+        <input autocomplete="tel" maxlength="32" name="phone" required="" type="tel"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Город
+        </span>
+        <input autocomplete="address-level2" maxlength="120" name="city" required="" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Улица
+        </span>
+        <input autocomplete="street-address" maxlength="180" name="street" required="" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Дом
+        </span>
+        <input maxlength="50" name="house" required="" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Квартира
+        </span>
+        <input maxlength="50" name="apartment" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Подъезд
+        </span>
+        <input maxlength="50" name="entrance" type="text"/>
+       </label>
+       <label class="account-field">
+        <span>
+         Этаж
+        </span>
+        <input maxlength="50" name="floor" type="text"/>
+       </label>
+       <label class="account-field account-field--wide">
+        <span>
+         Комментарий курьеру
+        </span>
+        <textarea maxlength="500" name="comment" rows="3"></textarea>
+       </label>
+      </div>
+      <label class="account-check">
+       <input name="isDefault" type="checkbox"/>
+       <span>
+        Использовать по умолчанию
+       </span>
+      </label>
+      <p aria-live="polite" class="account-form-status" data-address-status="" role="status">
+      </p>
+      <button class="account-button account-button--primary account-button--wide" type="submit">
+       Сохранить адрес
+      </button>
+     </form>
+    </section>
+   </div>
+   <div aria-atomic="true" aria-live="polite" class="account-toast" data-account-toast="" hidden="" role="status">
+    <span data-account-toast-text="">
+    </span>
+    <button data-account-toast-undo="" hidden="" type="button">
+     Вернуть
+    </button>
+   </div>
+   <div class="account-drawer-backdrop" data-account-menu-backdrop="" hidden="">
+   </div>
+  </main>
+  <div data-component="footer">
+  </div>
+  <script defer="" src="/site/js/main.js">
+  </script>
+  <script defer="" src="/site/js/account.js">
+  </script>
+ </body>
 </html>

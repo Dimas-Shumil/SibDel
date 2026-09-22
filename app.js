@@ -29,6 +29,7 @@ const sitePath = path.join(__dirname, "site");
 const componentsPath = path.join(__dirname, "components");
 const uploadsPath = path.join(__dirname, "uploads");
 const adminPagesPath = path.join(__dirname, "admin-pages");
+const accountIndexPath = path.join(publicPath, "account", "index.html");
 
 const app = express();
 
@@ -121,6 +122,22 @@ app.use(
     dotfiles: "deny",
     index: false,
   }),
+);
+
+app.get(
+  [
+    "/account",
+    "/account/",
+    "/account/orders",
+    "/account/order",
+    "/account/favorites",
+    "/account/addresses",
+    "/account/settings",
+    "/account/subscription",
+  ],
+  (_req, res) => {
+    return res.sendFile(accountIndexPath);
+  },
 );
 
 app.use(
