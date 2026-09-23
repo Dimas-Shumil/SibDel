@@ -182,22 +182,11 @@ function initMobileHeader() {
 
   const applyAuthState = (user = null) => {
     const isAuthenticated = Boolean(user);
-    const isAdmin = user?.role === 'OWNER' || user?.role === 'STAFF';
 
     header.classList.toggle('header--authenticated', isAuthenticated);
-    header.classList.toggle('header--admin', isAdmin);
 
-    const targetHref = !isAuthenticated
-      ? '/login.html'
-      : isAdmin
-        ? '/admin-pages/dashboard.html'
-        : '/account/';
-
-    const targetText = !isAuthenticated
-      ? 'Войти'
-      : isAdmin
-        ? 'Админка'
-        : 'Кабинет';
+    const targetHref = isAuthenticated ? '/account/' : '/login.html';
+    const targetText = isAuthenticated ? 'Кабинет' : 'Войти';
 
     if (accountLink) {
       accountLink.href = targetHref;

@@ -112,8 +112,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sessions      UserSession[]
-  addresses     Address[]
+  sessions            UserSession[]
+  passwordResetTokens PasswordResetToken[]
+  addresses           Address[]
   carts         Cart[]
   favorites     Favorite[]
   orders        Order[]
@@ -143,6 +144,22 @@ model UserSession {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  tokenHash String @unique @db.VarChar(64)
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
   @@index([expiresAt])
 }
 

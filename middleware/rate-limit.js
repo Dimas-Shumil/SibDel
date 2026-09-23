@@ -48,7 +48,25 @@ export const authRateLimiter = createRateLimiter({
 });
 
 export const sensitiveRateLimiter = createRateLimiter({
-  limit: 30,
+  limit: 10,
   identifier: "sensitive",
-  message: "Слишком много запросов. Попробуйте немного позже.",
+  message: "Слишком много попыток выполнить защищённую операцию. Попробуйте позже.",
+});
+
+export const registrationRateLimiter = createRateLimiter({
+  limit: 5,
+  identifier: "registration",
+  message: "Слишком много попыток регистрации. Попробуйте немного позже.",
+});
+
+export const passwordResetRequestRateLimiter = createRateLimiter({
+  limit: 5,
+  identifier: "password-reset-request",
+  message: "Слишком много запросов на восстановление пароля. Попробуйте позже.",
+});
+
+export const passwordResetRateLimiter = createRateLimiter({
+  limit: 10,
+  identifier: "password-reset",
+  message: "Слишком много попыток смены пароля. Попробуйте немного позже.",
 });

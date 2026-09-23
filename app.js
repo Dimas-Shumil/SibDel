@@ -16,6 +16,7 @@ import { authMiddleware } from "./middleware/auth.js";
 import { adminAuth } from "./middleware/admin-auth.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import authRouter from "./routes/auth.routes.js";
+import accountRouter from "./routes/account.routes.js";
 import {
   notFoundHandler,
   errorHandler,
@@ -173,6 +174,11 @@ app.use(csrfProtection);
 app.use(
   "/api/auth",
   authRouter,
+);
+
+app.use(
+  "/api/account",
+  accountRouter,
 );
 
 app.get("/admin/login", (_req, res) => {

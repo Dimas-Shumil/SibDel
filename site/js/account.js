@@ -69,6 +69,37 @@ function parseAccountJson(response) {
   return response.json().catch(() => null);
 }
 
+async function requestAccountJson(url, { method = 'GET', body } = {}) {
+  const response = await fetch(url, {
+    method,
+    headers: {
+      Accept: 'application/json',
+      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+    },
+    credentials: 'same-origin',
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+
+  const payload = await parseAccountJson(response);
+
+  if (response.status === 401) {
+    window.location.replace('/login.html');
+    const error = new Error('Сессия завершена. Войдите в аккаунт снова.');
+    error.status = 401;
+    error.code = 'UNAUTHORIZED';
+    throw error;
+  }
+
+  if (!response.ok || !payload?.ok) {
+    const error = new Error(payload?.error?.message || 'Не удалось выполнить запрос.');
+    error.status = response.status;
+    error.code = payload?.error?.code || null;
+    throw error;
+  }
+
+  return payload;
+}
+
 async function getAccountUser() {
   const response = await fetch('/api/auth/me', {
     method: 'GET',
@@ -105,18 +136,36 @@ async function logoutAccount() {
   window.location.replace('/login.html');
 }
 
-// Эти источники данных намеренно не вызывают несуществующие API.
-// Их сигнатуры готовы для подключения серверных маршрутов кабинета.
 async function loadOrders() {
-  return { data: [], backendAvailable: false };
+  const payload = await requestAccountJson('/api/account/orders');
+  return { data: payload?.orders || [], backendAvailable: true };
+}
+
+async function loadOrder(orderKey) {
+  if (!orderKey) {
+    return { data: null, backendAvailable: true };
+  }
+
+  try {
+    const payload = await requestAccountJson(`/api/account/orders/${encodeURIComponent(orderKey)}`);
+    return { data: payload?.order || null, backendAvailable: true };
+  } catch (error) {
+    if (error?.status === 404) {
+      return { data: null, backendAvailable: true };
+    }
+
+    throw error;
+  }
 }
 
 async function loadAddresses() {
-  return { data: [], backendAvailable: false };
+  const payload = await requestAccountJson('/api/account/addresses');
+  return { data: payload?.addresses || [], backendAvailable: true };
 }
 
 async function loadSubscription() {
-  return { data: null, backendAvailable: false };
+  const payload = await requestAccountJson('/api/account/subscription');
+  return { data: payload?.subscription || null, backendAvailable: true };
 }
 
 async function loadAccountNavigation() {
@@ -434,6 +483,23 @@ const orderStatusLabels = {
   CANCELLED: 'Отменён',
 };
 
+const paymentStatusLabels = {
+  PENDING: 'Ожидает оплаты',
+  WAITING_FOR_CAPTURE: 'Ожидает подтверждения',
+  SUCCEEDED: 'Оплачен',
+  CANCELLED: 'Отменён',
+  REFUNDED: 'Возвращён',
+  PARTIALLY_REFUNDED: 'Частичный возврат',
+  FAILED: 'Ошибка оплаты',
+};
+
+const subscriptionStatusLabels = {
+  ACTIVE: 'Активна',
+  PAUSED: 'Приостановлена',
+  CANCELLED: 'Отменена',
+  EXPIRED: 'Истекла',
+};
+
 function createOrderCard(order) {
   const itemCount = Array.isArray(order.items) ? order.items.length : Number(order.itemCount) || 0;
   const number = escapeAccountHtml(order.number || order.id || '—');
@@ -491,8 +557,8 @@ function renderOrder(order) {
   setElementText('[data-order-status]', orderStatusLabels[order.status] || order.status || 'Статус уточняется', '—', root);
   setElementText('[data-order-total]', formatAccountMoney(order.total), '0 ₽', root);
   setElementText('[data-order-delivery]', order.deliveryMethod === 'PICKUP' ? 'Самовывоз' : 'Доставка', '—', root);
-  setElementText('[data-order-address]', order.deliveryAddressSnapshot, 'Адрес не указан', root);
-  setElementText('[data-order-payment]', order.paymentMethod || order.paymentStatus, 'Способ оплаты не указан', root);
+  setElementText('[data-order-address]', order.deliveryAddressSnapshot || order.pickupPoint?.address, 'Адрес не указан', root);
+  setElementText('[data-order-payment]', order.paymentMethod || paymentStatusLabels[order.paymentStatus] || order.paymentStatus, 'Способ оплаты не указан', root);
   setElementText('[data-order-date]', formatAccountDate(order.createdAt), '—', root);
 
   const products = root.querySelector('[data-order-products]');
@@ -502,7 +568,7 @@ function renderOrder(order) {
   }
 
   const repeat = root.querySelector('[data-repeat-order]');
-  if (repeat) repeat.hidden = false;
+  if (repeat) repeat.hidden = true;
 }
 
 function createFavoriteCard(item, compact = false) {
@@ -643,25 +709,133 @@ function initAddressModal() {
   const form = document.querySelector('[data-address-form]');
   if (!modal || !form) return;
 
-  const setOpen = (open) => {
+  const modalTitle = modal.querySelector('#address-modal-title');
+  const submitButton = form.querySelector('button[type="submit"]');
+  let editingAddressId = null;
+
+  const fillForm = (address = null) => {
+    form.reset();
+    editingAddressId = address?.id ? String(address.id) : null;
+
+    if (address) {
+      form.elements.title.value = address.title || '';
+      form.elements.recipientName.value = address.recipientName || '';
+      form.elements.phone.value = address.phone || '';
+      form.elements.city.value = address.city || '';
+      form.elements.street.value = address.street || '';
+      form.elements.house.value = address.house || '';
+      form.elements.apartment.value = address.apartment || '';
+      form.elements.entrance.value = address.entrance || '';
+      form.elements.floor.value = address.floor || '';
+      form.elements.comment.value = address.comment || '';
+      form.elements.isDefault.checked = Boolean(address.isDefault);
+    }
+
+    if (modalTitle) modalTitle.textContent = address ? 'Изменить адрес' : 'Добавить адрес';
+    if (submitButton) submitButton.textContent = address ? 'Сохранить изменения' : 'Сохранить адрес';
+
+    const status = form.querySelector('[data-address-status]');
+    if (status) status.textContent = '';
+  };
+
+  const setOpen = (open, address = null) => {
+    if (open) fillForm(address);
     modal.hidden = !open;
     document.body.classList.toggle('account-modal-open', open);
     if (open) window.requestAnimationFrame(() => form.elements.title?.focus());
   };
 
-  document.querySelectorAll('[data-address-open]').forEach((button) => button.addEventListener('click', () => setOpen(true)));
-  document.querySelectorAll('[data-address-close]').forEach((button) => button.addEventListener('click', () => setOpen(false)));
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !modal.hidden) setOpen(false); });
+  document.querySelectorAll('[data-address-open]').forEach((button) =>
+    button.addEventListener('click', () => setOpen(true)),
+  );
+  document.querySelectorAll('[data-address-close]').forEach((button) =>
+    button.addEventListener('click', () => setOpen(false)),
+  );
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) setOpen(false);
+  });
 
-  form.addEventListener('submit', (event) => {
+  document.addEventListener('click', async (event) => {
+    const card = event.target.closest('[data-address-id]');
+    if (!card) return;
+
+    const addressId = String(card.dataset.addressId || '');
+    const address = accountStore.addresses.find((item) => String(item.id) === addressId);
+    if (!address) return;
+
+    if (event.target.closest('[data-address-edit]')) {
+      setOpen(true, address);
+      return;
+    }
+
+    if (!event.target.closest('[data-address-delete]')) return;
+
+    const confirmed = window.confirm(`Удалить адрес «${address.title || 'Адрес'}»?`);
+    if (!confirmed) return;
+
+    try {
+      await requestAccountJson(`/api/account/addresses/${encodeURIComponent(addressId)}`, {
+        method: 'DELETE',
+      });
+      accountStore.loaded.addresses = false;
+      await ensureAddressesLoaded();
+      renderAddresses(accountStore.addresses);
+      showAccountToast('Адрес удалён');
+    } catch (error) {
+      showPageError(error instanceof Error ? error.message : 'Не удалось удалить адрес.', 'addresses');
+    }
+  });
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const status = form.querySelector('[data-address-status]');
+
     if (!form.checkValidity()) {
       form.reportValidity();
       if (status) status.textContent = 'Заполните обязательные поля.';
       return;
     }
-    if (status) status.textContent = 'Сохранение адреса станет доступно после подключения backend.';
+
+    const data = new FormData(form);
+    const payload = {
+      title: String(data.get('title') || '').trim() || null,
+      recipientName: String(data.get('recipientName') || '').trim(),
+      phone: String(data.get('phone') || '').trim(),
+      city: String(data.get('city') || '').trim(),
+      street: String(data.get('street') || '').trim(),
+      house: String(data.get('house') || '').trim(),
+      apartment: String(data.get('apartment') || '').trim() || null,
+      entrance: String(data.get('entrance') || '').trim() || null,
+      floor: String(data.get('floor') || '').trim() || null,
+      intercom: null,
+      comment: String(data.get('comment') || '').trim() || null,
+      isDefault: data.get('isDefault') === 'on',
+    };
+
+    if (submitButton) submitButton.disabled = true;
+    if (status) status.textContent = editingAddressId ? 'Сохраняем изменения…' : 'Сохраняем адрес…';
+
+    try {
+      await requestAccountJson(
+        editingAddressId
+          ? `/api/account/addresses/${encodeURIComponent(editingAddressId)}`
+          : '/api/account/addresses',
+        {
+          method: editingAddressId ? 'PATCH' : 'POST',
+          body: payload,
+        },
+      );
+
+      accountStore.loaded.addresses = false;
+      await ensureAddressesLoaded();
+      renderAddresses(accountStore.addresses);
+      setOpen(false);
+      showAccountToast(editingAddressId ? 'Адрес обновлён' : 'Адрес добавлен');
+    } catch (error) {
+      if (status) status.textContent = error instanceof Error ? error.message : 'Не удалось сохранить адрес.';
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 }
 
@@ -685,7 +859,7 @@ function renderSubscription(subscription) {
   empty.hidden = true;
   setElementText('[data-subscription-name]', subscription.plan?.name || subscription.name, 'Подписка', root);
   setElementText('[data-subscription-description]', subscription.plan?.description || subscription.description, '', root);
-  setElementText('[data-subscription-status]', subscription.status, '—', root);
+  setElementText('[data-subscription-status]', subscriptionStatusLabels[subscription.status] || subscription.status, '—', root);
   setElementText('[data-subscription-expires]', formatAccountDate(subscription.expiresAt), '—', root);
   setElementText('[data-subscription-renew]', subscription.autoRenew ? 'Включено' : 'Выключено', '—', root);
 }
@@ -694,20 +868,49 @@ function initSettingsForms() {
   const profileForm = document.querySelector('[data-profile-form]');
   const passwordForm = document.querySelector('[data-password-form]');
 
-  profileForm?.addEventListener('submit', (event) => {
+  profileForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const status = profileForm.querySelector('[data-profile-status]');
+    const submitButton = profileForm.querySelector('button[type="submit"]');
+
     if (!profileForm.checkValidity()) {
       profileForm.reportValidity();
       return;
     }
-    status.textContent = 'Изменение профиля станет доступно после подключения backend.';
+
+    const data = new FormData(profileForm);
+    const payload = {
+      firstName: String(data.get('firstName') || '').trim() || null,
+      lastName: String(data.get('lastName') || '').trim() || null,
+      email: String(data.get('email') || '').trim(),
+      phone: String(data.get('phone') || '').trim() || null,
+    };
+
+    if (submitButton) submitButton.disabled = true;
+    if (status) status.textContent = 'Сохраняем изменения…';
+
+    try {
+      const response = await requestAccountJson('/api/account/profile', {
+        method: 'PATCH',
+        body: payload,
+      });
+
+      accountStore.user = response.user;
+      renderAccountUser(response.user);
+      if (status) status.textContent = 'Изменения сохранены.';
+    } catch (error) {
+      if (status) status.textContent = error instanceof Error ? error.message : 'Не удалось сохранить профиль.';
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 
-  passwordForm?.addEventListener('submit', (event) => {
+  passwordForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const data = new FormData(passwordForm);
     const status = passwordForm.querySelector('[data-password-status]');
+    const submitButton = passwordForm.querySelector('button[type="submit"]');
+    const currentPassword = String(data.get('currentPassword') || '');
     const nextPassword = String(data.get('newPassword') || '');
     const confirmation = String(data.get('passwordConfirm') || '');
 
@@ -715,11 +918,31 @@ function initSettingsForms() {
       passwordForm.reportValidity();
       return;
     }
+
     if (nextPassword !== confirmation) {
-      status.textContent = 'Новые пароли не совпадают.';
+      if (status) status.textContent = 'Новые пароли не совпадают.';
       return;
     }
-    status.textContent = 'Смена пароля станет доступна после подключения backend.';
+
+    if (submitButton) submitButton.disabled = true;
+    if (status) status.textContent = 'Изменяем пароль…';
+
+    try {
+      await requestAccountJson('/api/account/password', {
+        method: 'PATCH',
+        body: {
+          currentPassword,
+          newPassword: nextPassword,
+        },
+      });
+
+      passwordForm.reset();
+      if (status) status.textContent = 'Пароль изменён. Остальные активные сессии завершены.';
+    } catch (error) {
+      if (status) status.textContent = error instanceof Error ? error.message : 'Не удалось изменить пароль.';
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 }
 
@@ -799,8 +1022,9 @@ async function ensureSubscriptionLoaded() {
 
 async function initAccountPageData(type = getAccountRoute()?.view || 'dashboard') {
   if (type === 'dashboard') {
-    await ensureOrdersLoaded();
+    await Promise.all([ensureOrdersLoaded(), ensureAddressesLoaded()]);
     renderOrders(accountStore.orders, { recent: true });
+    renderAddresses(accountStore.addresses);
     renderFavorites();
     return;
   }
@@ -813,8 +1037,10 @@ async function initAccountPageData(type = getAccountRoute()?.view || 'dashboard'
   }
 
   if (type === 'order') {
-    renderOrder(null);
-    showUnavailableState('order', false);
+    const orderKey = new URLSearchParams(window.location.search).get('id');
+    const { data, backendAvailable } = await loadOrder(orderKey);
+    renderOrder(data);
+    showUnavailableState('order', backendAvailable);
     return;
   }
 

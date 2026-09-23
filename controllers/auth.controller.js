@@ -3,23 +3,34 @@ import {
   getClearSessionCookieOptions,
   getSessionCookieOptions,
 } from "../config/auth.js";
-
+import { logger } from "../lib/logger.js";
 import {
   authenticateUserByEmail,
+  createCustomerAccount,
+  createPasswordResetRequest,
   createSession,
+  invalidatePasswordResetRequest,
+  resetPasswordWithToken,
   revokeSessionToken,
 } from "../services/auth.service.js";
+import { sendPasswordResetEmail } from "../services/mail.service.js";
+
+const MIN_FORGOT_RESPONSE_MS = 250;
+
+function createAuthError(message, statusCode, code) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  error.code = code;
+  error.expose = true;
+  return error;
+}
 
 function createInvalidCredentialsError() {
-  const error = new Error(
+  return createAuthError(
     "Неверный email или пароль.",
+    401,
+    "INVALID_CREDENTIALS",
   );
-
-  error.statusCode = 401;
-  error.code = "INVALID_CREDENTIALS";
-  error.expose = true;
-
-  return error;
 }
 
 function getRequestIp(req) {
@@ -39,6 +50,52 @@ function getUserAgent(req) {
   return typeof userAgent === "string"
     ? userAgent
     : null;
+}
+
+async function waitForMinimumDuration(startedAt, minimumMs) {
+  const elapsed = Date.now() - startedAt;
+  const remaining = minimumMs - elapsed;
+
+  if (remaining <= 0) {
+    return;
+  }
+
+  await new Promise((resolve) => {
+    setTimeout(resolve, remaining);
+  });
+}
+
+function dispatchPasswordResetEmail(resetRequest) {
+  if (!resetRequest) {
+    return;
+  }
+
+  void sendPasswordResetEmail({
+    to: resetRequest.email,
+    token: resetRequest.token,
+  }).catch(async (error) => {
+    logger.warn(
+      {
+        err: error,
+        passwordResetRequestId: resetRequest.id,
+      },
+      "Password reset email delivery failed",
+    );
+
+    try {
+      await invalidatePasswordResetRequest(
+        resetRequest.id,
+      );
+    } catch (cleanupError) {
+      logger.error(
+        {
+          err: cleanupError,
+          passwordResetRequestId: resetRequest.id,
+        },
+        "Failed to invalidate undelivered password reset token",
+      );
+    }
+  });
 }
 
 export async function login(
@@ -90,13 +147,159 @@ export async function login(
 
     return res.status(200).json({
       ok: true,
-
       user,
-
       session: {
         expiresAt:
           session.expiresAt,
       },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function register(
+  req,
+  res,
+  next,
+) {
+  try {
+    if (req.user) {
+      return next(
+        createAuthError(
+          "Вы уже вошли в аккаунт.",
+          409,
+          "ALREADY_AUTHENTICATED",
+        ),
+      );
+    }
+
+    const {
+      email,
+      phone,
+      firstName,
+      password,
+    } = req.validated.body;
+
+    let user;
+
+    try {
+      user = await createCustomerAccount({
+        email,
+        phone,
+        firstName,
+        password,
+      });
+    } catch (error) {
+      if (error?.code === "P2002") {
+        return next(
+          createAuthError(
+            "Аккаунт с такими контактными данными уже существует.",
+            409,
+            "REGISTRATION_CONFLICT",
+          ),
+        );
+      }
+
+      throw error;
+    }
+
+    const session = await createSession({
+      userId: user.id,
+      ipAddress: getRequestIp(req),
+      userAgent: getUserAgent(req),
+    });
+
+    res.cookie(
+      authConfig.sessionCookieName,
+      session.token,
+      getSessionCookieOptions(),
+    );
+
+    return res.status(201).json({
+      ok: true,
+      user,
+      session: {
+        expiresAt: session.expiresAt,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function forgotPassword(
+  req,
+  res,
+  next,
+) {
+  const startedAt = Date.now();
+
+  try {
+    const resetRequest =
+      await createPasswordResetRequest({
+        email: req.validated.body.email,
+      });
+
+    dispatchPasswordResetEmail(resetRequest);
+
+    await waitForMinimumDuration(
+      startedAt,
+      MIN_FORGOT_RESPONSE_MS,
+    );
+
+    return res.status(200).json({
+      ok: true,
+      message:
+        "Если аккаунт с таким email существует, ссылка для восстановления отправлена на почту.",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function resetPassword(
+  req,
+  res,
+  next,
+) {
+  try {
+    const result =
+      await resetPasswordWithToken({
+        token: req.validated.body.token,
+        newPassword:
+          req.validated.body.password,
+      });
+
+    if (!result.ok) {
+      if (result.reason === "PASSWORD_NOT_CHANGED") {
+        return next(
+          createAuthError(
+            "Новый пароль должен отличаться от текущего.",
+            400,
+            "PASSWORD_NOT_CHANGED",
+          ),
+        );
+      }
+
+      return next(
+        createAuthError(
+          "Ссылка для восстановления недействительна или срок её действия истёк.",
+          400,
+          "INVALID_RESET_TOKEN",
+        ),
+      );
+    }
+
+    if (req.user?.id === result.userId) {
+      res.clearCookie(
+        authConfig.sessionCookieName,
+        getClearSessionCookieOptions(),
+      );
+    }
+
+    return res.status(200).json({
+      ok: true,
     });
   } catch (error) {
     return next(error);

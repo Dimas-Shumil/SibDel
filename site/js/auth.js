@@ -1,10 +1,41 @@
 const AUTH_VIEWS = new Set(['login', 'register', 'forgot', 'reset']);
+let passwordResetToken = '';
+
+function captureResetTokenFromUrl() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+
+  if (!hash) {
+    return;
+  }
+
+  const token = new URLSearchParams(hash).get('token') || '';
+
+  if (!token) {
+    return;
+  }
+
+  passwordResetToken = token;
+
+  const url = new URL(window.location.href);
+  url.hash = '';
+  window.history.replaceState(
+    { authView: getAuthViewFromUrl() },
+    '',
+    `${url.pathname}${url.search}`,
+  );
+}
 
 function getAuthViewFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const requested = params.get('view');
 
   return AUTH_VIEWS.has(requested) ? requested : 'login';
+}
+
+function getResetTokenFromUrl() {
+  return passwordResetToken;
 }
 
 function updateAuthUrl(view, { replace = false } = {}) {
@@ -16,8 +47,21 @@ function updateAuthUrl(view, { replace = false } = {}) {
     url.searchParams.set('view', view);
   }
 
+  if (view !== 'reset') {
+    url.hash = '';
+  }
+
   const method = replace ? 'replaceState' : 'pushState';
   window.history[method]({ authView: view }, '', `${url.pathname}${url.search}${url.hash}`);
+}
+
+function clearResetTokenFromUrl() {
+  passwordResetToken = '';
+
+  const url = new URL(window.location.href);
+  url.hash = '';
+  url.searchParams.delete('view');
+  window.history.replaceState({ authView: 'login' }, '', `${url.pathname}${url.search}`);
 }
 
 function clearFormErrors(form) {
@@ -182,6 +226,52 @@ async function parseJsonSafely(response) {
   }
 }
 
+function applyApiValidationErrors(form, payload) {
+  const details = payload?.error?.details;
+
+  if (!Array.isArray(details)) {
+    return false;
+  }
+
+  let applied = false;
+
+  details.forEach((issue) => {
+    const path = String(issue?.path || '');
+    const fieldName = path.split('.').pop();
+
+    if (!fieldName || !form.elements.namedItem(fieldName)) {
+      return;
+    }
+
+    setFieldError(
+      form,
+      fieldName,
+      issue?.message || 'Проверьте значение.',
+    );
+    applied = true;
+  });
+
+  return applied;
+}
+
+function showApiError(form, response, payload, fallbackMessage) {
+  const validationApplied = applyApiValidationErrors(form, payload);
+
+  if (validationApplied) {
+    setFormStatus(form, 'Проверьте выделенные поля.', 'error');
+    form.querySelector('.auth-field.is-invalid input')?.focus();
+    return;
+  }
+
+  const message =
+    payload?.error?.message ||
+    (response.status === 429
+      ? 'Слишком много запросов. Попробуйте немного позже.'
+      : fallbackMessage);
+
+  setFormStatus(form, message, 'error');
+}
+
 async function submitLogin(form) {
   const data = new FormData(form);
 
@@ -205,74 +295,202 @@ async function submitLogin(form) {
     const payload = await parseJsonSafely(response);
 
     if (!response.ok) {
-      const message =
-        payload?.error?.message ||
-        (response.status === 429
-          ? 'Слишком много попыток входа. Попробуйте немного позже.'
-          : 'Не удалось выполнить вход. Попробуйте ещё раз.');
-
-      setFormStatus(form, message, 'error');
-      return;
+      showApiError(
+        form,
+        response,
+        payload,
+        'Не удалось выполнить вход. Попробуйте ещё раз.',
+      );
+      return false;
     }
-
-    const user = payload?.user;
 
     setFormStatus(
       form,
-      user?.role === 'OWNER' || user?.role === 'STAFF'
-        ? 'Вход выполнен. Открываем панель управления…'
-        : 'Вход выполнен. Открываем личный кабинет…',
+      'Вход выполнен. Открываем личный кабинет…',
       'success',
     );
 
     window.setTimeout(() => {
-      const isAdmin = user?.role === 'OWNER' || user?.role === 'STAFF';
-      window.location.assign(isAdmin ? '/admin-pages/dashboard.html' : '/account/');
+      window.location.assign('/account/');
     }, 450);
+
+    return true;
   } catch {
     setFormStatus(
       form,
       'Не удалось связаться с сервером. Проверьте соединение и повторите попытку.',
       'error',
     );
+    return false;
   } finally {
     setFormLoading(form, false);
   }
 }
 
-function showFrontendPreview(shell, view) {
-  const viewport = shell.querySelector('[data-auth-viewport]');
-  const note = shell.querySelector('[data-auth-preview-note]');
-  const title = shell.querySelector('[data-preview-title]');
-  const text = shell.querySelector('[data-preview-text]');
-  const content = {
-    register: {
-      title: 'Регистрация готова визуально',
-      text: 'Форма прошла frontend-проверку. Серверная регистрация пока не подключена, поэтому аккаунт не создавался.',
-    },
-    forgot: {
-      title: 'Восстановление готово визуально',
-      text: 'Email проверен. Письмо не отправлялось: backend восстановления пароля пока не реализован.',
-    },
-    reset: {
-      title: 'Новый пароль готов визуально',
-      text: 'Пароли прошли frontend-проверку. Изменение пароля на сервере пока не выполнялось.',
-    },
-  }[view];
+async function submitRegister(form) {
+  const data = new FormData(form);
 
-  if (!viewport || !note || !content) {
-    return;
+  setFormLoading(form, true);
+  setFormStatus(form, 'Создаём защищённый аккаунт…');
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        firstName: String(data.get('firstName') || '').trim(),
+        phone: String(data.get('phone') || '').trim(),
+        email: String(data.get('email') || '').trim().toLowerCase(),
+        password: String(data.get('password') || ''),
+        passwordConfirm: String(data.get('passwordConfirm') || ''),
+        agreement: data.get('agreement') === 'on',
+      }),
+    });
+
+    const payload = await parseJsonSafely(response);
+
+    if (!response.ok) {
+      showApiError(
+        form,
+        response,
+        payload,
+        'Не удалось создать аккаунт. Проверьте данные и попробуйте ещё раз.',
+      );
+      return false;
+    }
+
+    setFormStatus(
+      form,
+      'Аккаунт создан. Открываем личный кабинет…',
+      'success',
+    );
+
+    window.setTimeout(() => {
+      window.location.assign('/account/');
+    }, 500);
+
+    return true;
+  } catch {
+    setFormStatus(
+      form,
+      'Не удалось связаться с сервером. Проверьте соединение и повторите попытку.',
+      'error',
+    );
+    return false;
+  } finally {
+    setFormLoading(form, false);
+  }
+}
+
+async function submitForgotPassword(form) {
+  const data = new FormData(form);
+
+  setFormLoading(form, true);
+  setFormStatus(form, 'Проверяем запрос…');
+
+  try {
+    const response = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: String(data.get('email') || '').trim().toLowerCase(),
+      }),
+    });
+
+    const payload = await parseJsonSafely(response);
+
+    if (!response.ok) {
+      showApiError(
+        form,
+        response,
+        payload,
+        'Не удалось обработать запрос. Попробуйте ещё раз.',
+      );
+      return false;
+    }
+
+    setFormStatus(
+      form,
+      payload?.message ||
+        'Если аккаунт с таким email существует, ссылка для восстановления отправлена на почту.',
+      'success',
+    );
+
+    return true;
+  } catch {
+    setFormStatus(
+      form,
+      'Не удалось связаться с сервером. Проверьте соединение и повторите попытку.',
+      'error',
+    );
+    return false;
+  } finally {
+    setFormLoading(form, false);
+  }
+}
+
+async function submitResetPassword(form) {
+  const token = getResetTokenFromUrl();
+
+  if (!token) {
+    setFormStatus(
+      form,
+      'Ссылка восстановления недействительна. Запросите новую ссылку.',
+      'error',
+    );
+    return false;
   }
 
-  viewport.hidden = true;
-  note.hidden = false;
+  const data = new FormData(form);
 
-  if (title) {
-    title.textContent = content.title;
-  }
+  setFormLoading(form, true);
+  setFormStatus(form, 'Сохраняем новый пароль…');
 
-  if (text) {
-    text.textContent = content.text;
+  try {
+    const response = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token,
+        password: String(data.get('password') || ''),
+        passwordConfirm: String(data.get('passwordConfirm') || ''),
+      }),
+    });
+
+    const payload = await parseJsonSafely(response);
+
+    if (!response.ok) {
+      showApiError(
+        form,
+        response,
+        payload,
+        'Не удалось изменить пароль. Запросите новую ссылку и попробуйте снова.',
+      );
+      return false;
+    }
+
+    return true;
+  } catch {
+    setFormStatus(
+      form,
+      'Не удалось связаться с сервером. Проверьте соединение и повторите попытку.',
+      'error',
+    );
+    return false;
+  } finally {
+    setFormLoading(form, false);
   }
 }
 
@@ -348,6 +566,8 @@ function initPasswordToggles() {
 }
 
 function initAuth() {
+  captureResetTokenFromUrl();
+
   const shell = document.querySelector('[data-auth-shell]');
 
   if (!shell) {
@@ -355,20 +575,9 @@ function initAuth() {
   }
 
   const card = shell.querySelector('[data-auth-card]');
-  const viewport = shell.querySelector('[data-auth-viewport]');
-  const previewNote = shell.querySelector('[data-auth-preview-note]');
-  let activeView = null;
 
   const renderView = (view, { updateUrl = true, replace = false } = {}) => {
     const nextView = AUTH_VIEWS.has(view) ? view : 'login';
-
-    if (previewNote) {
-      previewNote.hidden = true;
-    }
-
-    if (viewport) {
-      viewport.hidden = false;
-    }
 
     shell.querySelectorAll('[data-auth-view]').forEach((section) => {
       const isActive = section.dataset.authView === nextView;
@@ -383,14 +592,24 @@ function initAuth() {
       }
     });
 
-    activeView = nextView;
-
     if (card) {
       card.dataset.authActiveView = nextView;
     }
 
     if (updateUrl) {
       updateAuthUrl(nextView, { replace });
+    }
+
+    const activeForm = shell.querySelector(
+      `[data-auth-view="${nextView}"] form`,
+    );
+
+    if (nextView === 'reset' && activeForm && !getResetTokenFromUrl()) {
+      setFormStatus(
+        activeForm,
+        'Ссылка восстановления недействительна. Запросите новую ссылку.',
+        'error',
+      );
     }
 
     const focusTarget = shell.querySelector(
@@ -405,12 +624,6 @@ function initAuth() {
 
     if (switcher instanceof HTMLButtonElement) {
       renderView(switcher.dataset.authSwitch);
-    }
-
-    const previewBack = event.target.closest('[data-preview-back]');
-
-    if (previewBack instanceof HTMLButtonElement) {
-      renderView(activeView || 'login', { updateUrl: false });
     }
   });
 
@@ -430,7 +643,36 @@ function initAuth() {
         return;
       }
 
-      showFrontendPreview(shell, type);
+      if (type === 'register') {
+        await submitRegister(form);
+        return;
+      }
+
+      if (type === 'forgot') {
+        await submitForgotPassword(form);
+        return;
+      }
+
+      if (type === 'reset') {
+        const changed = await submitResetPassword(form);
+
+        if (!changed) {
+          return;
+        }
+
+        clearResetTokenFromUrl();
+        renderView('login', { updateUrl: false });
+
+        const loginForm = shell.querySelector('[data-auth-form="login"]');
+
+        if (loginForm) {
+          setFormStatus(
+            loginForm,
+            'Пароль изменён. Войдите с новым паролем.',
+            'success',
+          );
+        }
+      }
     });
 
     form.addEventListener('input', (event) => {
