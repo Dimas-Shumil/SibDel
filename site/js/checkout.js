@@ -244,13 +244,10 @@ function initCheckoutPage() {
     }
 
     if (pickupSelect) {
-      pickupSelect.required = !isDelivery;
-      pickupSelect.disabled = isDelivery || !checkoutState?.capabilities?.pickup;
-      if (isDelivery) clearFieldError('pickupPointId');
-    }
-
-    if (slotHint) {
-      slotHint.textContent = 'Интервалы отображаются только из реальных активных слотов backend.';
+      const selectionRequired = checkoutState?.capabilities?.pickupPointSelectionRequired === true;
+      pickupSelect.required = !isDelivery && selectionRequired;
+      pickupSelect.disabled = isDelivery || !selectionRequired;
+      if (isDelivery || !selectionRequired) clearFieldError('pickupPointId');
     }
 
     syncChoiceCards();
@@ -258,26 +255,25 @@ function initCheckoutPage() {
 
   const renderPickupPoints = () => {
     const points = checkoutState?.pickupPoints || [];
+    const selectionRequired = points.length > 0;
 
     if (pickupSelect) {
-      pickupSelect.innerHTML = [
-        '<option value="">Выберите точку самовывоза</option>',
-        ...points.map((point) => `<option value="${point.id}">${escapeCheckoutHtml(point.name)} — ${escapeCheckoutHtml(point.address)}</option>`),
-      ].join('');
+      pickupSelect.innerHTML = selectionRequired
+        ? [
+            '<option value="">Выберите точку самовывоза</option>',
+            ...points.map((point) => `<option value="${point.id}">${escapeCheckoutHtml(point.name)} — ${escapeCheckoutHtml(point.address)}</option>`),
+          ].join('')
+        : '<option value="">Точку подтвердим после оформления</option>';
     }
 
     if (pickupRadio) {
-      pickupRadio.disabled = points.length === 0;
-      if (pickupRadio.checked && pickupRadio.disabled) {
-        const deliveryRadio = form.querySelector('input[name="receiveMethod"][value="delivery"]');
-        if (deliveryRadio) deliveryRadio.checked = true;
-      }
+      pickupRadio.disabled = false;
     }
 
     if (pickupHint) {
-      pickupHint.textContent = points.length
-        ? 'Выберите доступную точку выдачи.'
-        : 'Активных точек самовывоза пока нет — этот способ временно недоступен.';
+      pickupHint.textContent = selectionRequired
+        ? 'Выберите удобную точку самовывоза.'
+        : 'Самовывоз доступен. Адрес и время выдачи подтвердит менеджер после оформления.';
     }
   };
 
@@ -287,8 +283,21 @@ function initCheckoutPage() {
     if (!slotSelect) return;
 
     const previous = slotSelect.value;
+
+    if (slots.length === 0) {
+      slotSelect.innerHTML = '<option value="">Время согласуем после оформления</option>';
+      slotSelect.value = '';
+      slotSelect.disabled = true;
+
+      if (slotHint) {
+        slotHint.textContent = 'Когда интервалы будут настроены, здесь появится выбор времени. Пока менеджер согласует его после оформления.';
+      }
+      return;
+    }
+
+    slotSelect.disabled = false;
     slotSelect.innerHTML = [
-      '<option value="">Без конкретного интервала</option>',
+      '<option value="">Любой доступный интервал</option>',
       ...slots.map((slot) => `<option value="${slot.id}">${escapeCheckoutHtml(`${slot.startTime}–${slot.endTime}`)}</option>`),
     ].join('');
 
@@ -297,9 +306,7 @@ function initCheckoutPage() {
     }
 
     if (slotHint) {
-      slotHint.textContent = slots.length
-        ? 'Показаны только активные интервалы на выбранную дату.'
-        : 'На выбранную дату активных интервалов нет — заказ можно оставить без конкретного слота.';
+      slotHint.textContent = 'Выберите удобный активный интервал или оставьте любое доступное время.';
     }
   };
 
@@ -402,7 +409,7 @@ function initCheckoutPage() {
     if (phoneDigits.length < 10 || phoneDigits.length > 15) errors.push(['phone', 'Проверьте номер телефона.']);
     if (!emailPattern.test(email)) errors.push(['email', 'Введите корректный email.']);
     if (receiveMethod === 'delivery' && address.length < 5) errors.push(['address', 'Укажите адрес доставки.']);
-    if (receiveMethod === 'pickup' && !pickupPointId) errors.push(['pickupPointId', 'Выберите точку самовывоза.']);
+    if (receiveMethod === 'pickup' && checkoutState?.capabilities?.pickupPointSelectionRequired === true && !pickupPointId) errors.push(['pickupPointId', 'Выберите точку самовывоза.']);
     if (!receiveDate) errors.push(['receiveDate', 'Выберите дату получения.']);
     else if (receiveDate < getLocalDateInputValue()) errors.push(['receiveDate', 'Дата получения не может быть в прошлом.']);
     if (!agreement) errors.push(['agreement', 'Подтвердите согласие перед оформлением.']);
@@ -459,6 +466,22 @@ function initCheckoutPage() {
 
     successLink?.focus();
   };
+
+  const closeSuccessModal = () => {
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    document.body.classList.remove('is-lock');
+  };
+
+  modal?.querySelectorAll('[data-checkout-modal-close]').forEach((button) => {
+    button.addEventListener('click', closeSuccessModal);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal && !modal.hidden) {
+      closeSuccessModal();
+    }
+  });
 
   if (dateInput) dateInput.min = getLocalDateInputValue();
 

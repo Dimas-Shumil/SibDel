@@ -80,6 +80,28 @@ function validateCheckoutCartItem(item) {
     };
   }
 
+  if (storedQuantity > limits.max + 0.0005) {
+    return {
+      code: "INSUFFICIENT_STOCK",
+      slug: product.slug,
+      productName: product.name,
+      message: `Для товара «${product.name}» доступно не более ${limits.max}.`,
+      requestedQuantity: storedQuantity,
+      availableQuantity: limits.max,
+    };
+  }
+
+  if (storedQuantity > 0 && storedQuantity < limits.min - 0.0005) {
+    return {
+      code: "BELOW_MINIMUM_QUANTITY",
+      slug: product.slug,
+      productName: product.name,
+      message: `Минимальное количество товара «${product.name}» — ${limits.min}.`,
+      requestedQuantity: storedQuantity,
+      minimumQuantity: limits.min,
+    };
+  }
+
   const normalized = normalizeCommerceQuantity(storedQuantity, product, {
     allowZero: true,
   });
@@ -354,7 +376,8 @@ export async function getCheckoutState({ owner, userId = null, receiveDate = nul
     deliverySlots,
     capabilities: {
       guestCheckout: true,
-      pickup: pickupPoints.length > 0,
+      pickup: true,
+      pickupPointSelectionRequired: pickupPoints.length > 0,
       promoCodes: false,
       onlinePayment: false,
       deliveryPriceCalculation: false,
@@ -397,36 +420,50 @@ async function resolveDeliverySelection(transaction, input) {
   }
 
   if (input.receiveMethod === "pickup") {
-    if (!input.pickupPointId) {
-      throw createCheckoutError(
-        "Выберите точку самовывоза.",
-        400,
-        "PICKUP_POINT_REQUIRED",
-      );
+    if (input.pickupPointId) {
+      const pickupPoint = await transaction.pickupPoint.findFirst({
+        where: {
+          id: input.pickupPointId,
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          address: true,
+        },
+      });
+
+      if (!pickupPoint) {
+        throw createCheckoutError(
+          "Выбранная точка самовывоза больше недоступна.",
+          409,
+          "PICKUP_POINT_UNAVAILABLE",
+        );
+      }
+
+      pickupPointId = pickupPoint.id;
+      deliveryAddressSnapshot = `${pickupPoint.name}, ${pickupPoint.address}`;
+    } else {
+      const hasConfiguredPickupPoint = await transaction.pickupPoint.findFirst({
+        where: {
+          isActive: true,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (hasConfiguredPickupPoint) {
+        throw createCheckoutError(
+          "Выберите точку самовывоза.",
+          400,
+          "PICKUP_POINT_REQUIRED",
+        );
+      }
+
+      deliveryAddressSnapshot = "Точка самовывоза будет подтверждена менеджером";
     }
 
-    const pickupPoint = await transaction.pickupPoint.findFirst({
-      where: {
-        id: input.pickupPointId,
-        isActive: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        address: true,
-      },
-    });
-
-    if (!pickupPoint) {
-      throw createCheckoutError(
-        "Выбранная точка самовывоза больше недоступна.",
-        409,
-        "PICKUP_POINT_UNAVAILABLE",
-      );
-    }
-
-    pickupPointId = pickupPoint.id;
-    deliveryAddressSnapshot = `${pickupPoint.name}, ${pickupPoint.address}`;
     deliveryPriceConfirmed = true;
   } else {
     deliveryAddressSnapshot = formatAddressSnapshot(input);

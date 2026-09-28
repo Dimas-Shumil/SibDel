@@ -10,6 +10,7 @@ import {
   getOrders,
   getProfile,
   getSubscription,
+  repeatOrder,
   updateAddress,
   updateProfile,
 } from "../controllers/account.controller.js";
@@ -158,6 +159,11 @@ router.get(
   "/orders/:orderKey",
   validate({ params: orderParamsSchema }),
   getOrder,
+);
+router.post(
+  "/orders/:orderKey/repeat",
+  validate({ params: orderParamsSchema }),
+  repeatOrder,
 );
 
 router.get("/subscription", getSubscription);

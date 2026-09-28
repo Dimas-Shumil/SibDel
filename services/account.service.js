@@ -3,6 +3,12 @@ import {
   hashPassword,
   verifyPassword,
 } from "./auth.service.js";
+import {
+  getCommerceProductSelect,
+  getProductCommerceLimits,
+  normalizeCommerceQuantity,
+} from "./commerce.service.js";
+import { getCart } from "./cart.service.js";
 
 const SAFE_USER_SELECT = Object.freeze({
   id: true,
@@ -446,6 +452,146 @@ export async function getAccountOrder(userId, orderKey) {
       },
     },
   });
+}
+
+export async function repeatAccountOrder(userId, orderKey) {
+  const order = await prisma.order.findFirst({
+    where: {
+      userId,
+      OR: createOrderLookup(orderKey),
+    },
+    select: {
+      id: true,
+      number: true,
+      items: {
+        orderBy: { id: "asc" },
+        select: {
+          id: true,
+          productName: true,
+          quantity: true,
+          product: {
+            select: getCommerceProductSelect(),
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw createAccountError(
+      "Заказ не найден.",
+      404,
+      "ORDER_NOT_FOUND",
+    );
+  }
+
+  const skipped = [];
+  const adjusted = [];
+
+  await prisma.$transaction(async (transaction) => {
+    const cart = await transaction.cart.upsert({
+      where: { userId },
+      create: { userId },
+      update: {},
+      select: { id: true },
+    });
+
+    for (const item of order.items) {
+      const product = item.product;
+
+      if (!product) {
+        skipped.push({
+          productName: item.productName,
+          reason: "Товар больше не существует в каталоге.",
+        });
+        continue;
+      }
+
+      const limits = getProductCommerceLimits(product);
+      if (!limits.available) {
+        skipped.push({
+          productName: product.name,
+          reason: "Товар сейчас недоступен для покупки.",
+        });
+        continue;
+      }
+
+      const requested = Number(item.quantity?.toString?.() ?? item.quantity) || limits.min;
+      const repeatedQuantity = normalizeCommerceQuantity(requested, product);
+
+      if (Math.abs(repeatedQuantity - requested) > 0.0005) {
+        adjusted.push({
+          productName: product.name,
+          requestedQuantity: requested,
+          addedQuantity: repeatedQuantity,
+          availableQuantity: limits.max,
+        });
+      }
+
+      if (repeatedQuantity <= 0) {
+        skipped.push({
+          productName: product.name,
+          reason: "Количество больше не соответствует условиям продажи.",
+        });
+        continue;
+      }
+
+      const existing = await transaction.cartItem.findUnique({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId: product.id,
+          },
+        },
+        select: { quantity: true },
+      });
+
+      const existingQuantity = Number(existing?.quantity?.toString?.() ?? existing?.quantity) || 0;
+      const desiredQuantity = existingQuantity + repeatedQuantity;
+      const finalQuantity = normalizeCommerceQuantity(desiredQuantity, product);
+
+      if (Math.abs(finalQuantity - desiredQuantity) > 0.0005) {
+        adjusted.push({
+          productName: product.name,
+          requestedQuantity: desiredQuantity,
+          addedQuantity: Math.max(0, finalQuantity - existingQuantity),
+          availableQuantity: limits.max,
+        });
+      }
+
+      if (finalQuantity <= existingQuantity) {
+        skipped.push({
+          productName: product.name,
+          reason: "Доступный остаток уже находится в корзине.",
+        });
+        continue;
+      }
+
+      await transaction.cartItem.upsert({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId: product.id,
+          },
+        },
+        create: {
+          cartId: cart.id,
+          productId: product.id,
+          quantity: finalQuantity,
+        },
+        update: {
+          quantity: finalQuantity,
+        },
+      });
+    }
+  });
+
+  return {
+    cart: await getCart({ type: "user", userId, sessionId: null }),
+    repeatedFrom: { id: order.id, number: order.number },
+    skipped,
+    adjusted,
+  };
 }
 
 export async function getAccountSubscription(userId) {

@@ -574,7 +574,11 @@ function renderOrder(order) {
   }
 
   const repeat = root.querySelector('[data-repeat-order]');
-  if (repeat) repeat.hidden = true;
+  if (repeat) {
+    repeat.hidden = items.length === 0;
+    repeat.dataset.orderKey = String(order.id || order.number || '');
+    repeat.disabled = items.length === 0;
+  }
 }
 
 function createFavoriteCard(item, compact = false) {
@@ -1076,6 +1080,47 @@ async function initAccountPageData(type = getAccountRoute()?.view || 'dashboard'
   }
 }
 
+function initRepeatOrder() {
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-repeat-order]');
+    if (!button || button.disabled) return;
+
+    const orderKey = String(button.dataset.orderKey || '').trim();
+    if (!orderKey) return;
+
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = 'Добавляем…';
+
+    try {
+      const payload = await requestAccountJson(`/api/account/orders/${encodeURIComponent(orderKey)}/repeat`, {
+        method: 'POST',
+      });
+
+      if (window.SibDelCommerce && payload.cart?.items) {
+        window.SibDelCommerce.replaceCart(payload.cart.items);
+      }
+
+      const skippedCount = Array.isArray(payload.skipped) ? payload.skipped.length : 0;
+      const adjustedCount = Array.isArray(payload.adjusted) ? payload.adjusted.length : 0;
+
+      if (skippedCount || adjustedCount) {
+        showAccountToast('Заказ добавлен в корзину с учётом текущего наличия.');
+      } else {
+        showAccountToast('Товары из заказа добавлены в корзину.');
+      }
+
+      window.setTimeout(() => {
+        window.location.href = '/cart.html';
+      }, 250);
+    } catch (error) {
+      showPageError(error instanceof Error ? error.message : 'Не удалось повторить заказ.', 'order');
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  });
+}
+
 function initAccountRetry() {
   document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-account-retry]');
@@ -1121,6 +1166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initAddressModal();
     initSettingsForms();
     initLogout();
+    initRepeatOrder();
     initAccountRetry();
     await initAccountPageData(initialRoute.view);
   } catch (error) {

@@ -62,6 +62,45 @@ async function fetchJson(url) {
 
 let catalogCategoriesCache = [];
 
+const CATALOG_CATEGORY_ALIASES = Object.freeze({
+  "molochnaya-produktsiya": "molochnye-produkty-i-yaytsa",
+  "zamorozhennye-produkty": "zamorozka",
+});
+
+function normalizeCatalogCategorySlug(slug) {
+  const normalized = String(slug || "").trim();
+  return CATALOG_CATEGORY_ALIASES[normalized] || normalized;
+}
+
+function syncTopCategoryLinks(categories = catalogCategoriesCache) {
+  const categorySlugs = new Set(categories.map((category) => category.slug));
+  const selected = normalizeCatalogCategorySlug(
+    new URLSearchParams(window.location.search).get("category") || "all",
+  );
+
+  document.querySelectorAll("a.catalog-category[href]").forEach((link) => {
+    const url = new URL(link.href, window.location.origin);
+    const rawSlug = url.searchParams.get("category") || "";
+    const slug = normalizeCatalogCategorySlug(rawSlug);
+    const supported = slug && categorySlugs.has(slug);
+
+    link.hidden = !supported;
+    link.classList.toggle("catalog-category--active", supported && slug === selected);
+
+    if (supported) {
+      url.searchParams.set("category", slug);
+      link.href = `${url.pathname}?${url.searchParams.toString()}`;
+      if (slug === selected) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
 function closeCatalogFilterDrawer() {
   const filter = document.querySelector("[data-filter]");
   const overlay = document.querySelector(".catalog-filter-overlay");
@@ -299,7 +338,7 @@ function renderCategoryOptions(categories) {
   }
 
   const params = new URLSearchParams(window.location.search);
-  const selected = params.get("category") || "all";
+  const selected = normalizeCatalogCategorySlug(params.get("category") || "all");
   const total = categories.reduce(
     (sum, category) => sum + Number(category.productCount || 0),
     0,
@@ -334,7 +373,7 @@ function renderCategoryOptions(categories) {
     })
     .join("");
 
-  container.addEventListener("change", (event) => {
+  container.onchange = (event) => {
     const input = event.target.closest(".catalog-filter__category-input");
 
     if (!input) {
@@ -347,7 +386,7 @@ function renderCategoryOptions(categories) {
         label.contains(input),
       );
     });
-  });
+  };
 }
 
 function renderCatalogCard(product) {
@@ -462,9 +501,19 @@ function buildCatalogApiParams(page = 1) {
   ];
 
   allowed.forEach((key) => {
-    if (source.has(key)) {
-      params.set(key, source.get(key));
+    if (!source.has(key)) {
+      return;
     }
+
+    const value = key === "category"
+      ? normalizeCatalogCategorySlug(source.get(key))
+      : source.get(key);
+
+    if (key === "category" && (!value || value === "all")) {
+      return;
+    }
+
+    params.set(key, value);
   });
 
   if (
@@ -531,7 +580,7 @@ function updateCatalogHeading(catalog, categories) {
   const title = document.querySelector(".catalog-products__title");
   const count = document.querySelector(".catalog-products__count");
   const params = new URLSearchParams(window.location.search);
-  const categorySlug = params.get("category");
+  const categorySlug = normalizeCatalogCategorySlug(params.get("category"));
   const query = params.get("q")?.trim();
   const category = categories.find((item) => item.slug === categorySlug);
 
@@ -657,13 +706,23 @@ function getFilterUrl(form) {
 }
 
 async function applyCatalogUrl(url, { replace = false } = {}) {
+  const nextUrl = new URL(url, window.location.origin);
+  const rawCategory = nextUrl.searchParams.get("category");
+  const normalizedCategory = normalizeCatalogCategorySlug(rawCategory);
+
+  if (rawCategory && normalizedCategory && normalizedCategory !== rawCategory) {
+    nextUrl.searchParams.set("category", normalizedCategory);
+  }
+
   if (replace) {
-    window.history.replaceState({}, "", url);
+    window.history.replaceState({}, "", nextUrl);
   } else {
-    window.history.pushState({}, "", url);
+    window.history.pushState({}, "", nextUrl);
   }
 
   syncControlsFromUrl();
+  renderCategoryOptions(catalogCategoriesCache);
+  syncTopCategoryLinks(catalogCategoriesCache);
 
   const payload = await loadCatalogPage(1);
   updateCatalogHeading(payload, catalogCategoriesCache);
@@ -949,7 +1008,13 @@ function initCatalogCategoryLinks() {
       return;
     }
 
+    const category = normalizeCatalogCategorySlug(url.searchParams.get("category"));
+    if (!category || !catalogCategoriesCache.some((item) => item.slug === category)) {
+      return;
+    }
+
     event.preventDefault();
+    url.searchParams.set("category", category);
     url.searchParams.delete("page");
 
     try {
@@ -1006,17 +1071,34 @@ function initCatalogShowMore() {
 
 async function hydrateCatalog() {
   try {
+    const categoriesPayload = await fetchJson("/api/categories");
+    catalogCategoriesCache = categoriesPayload.categories;
+
+    const url = new URL(window.location.href);
+    const rawCategory = url.searchParams.get("category");
+    const normalizedCategory = normalizeCatalogCategorySlug(rawCategory);
+
+    if (rawCategory) {
+      if (catalogCategoriesCache.some((item) => item.slug === normalizedCategory)) {
+        if (normalizedCategory !== rawCategory) {
+          url.searchParams.set("category", normalizedCategory);
+          window.history.replaceState({}, "", url);
+        }
+      } else {
+        url.searchParams.delete("category");
+        window.history.replaceState({}, "", url);
+      }
+    }
+
+    renderCategoryOptions(catalogCategoriesCache);
+    syncTopCategoryLinks(catalogCategoriesCache);
+    syncControlsFromUrl();
+
     const params = new URLSearchParams(window.location.search);
     const requestedPage = Number(params.get("page"));
     const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+    const catalogPayload = await loadCatalogPage(page);
 
-    const [categoriesPayload, catalogPayload] = await Promise.all([
-      fetchJson("/api/categories"),
-      loadCatalogPage(page),
-    ]);
-
-    catalogCategoriesCache = categoriesPayload.categories;
-    renderCategoryOptions(catalogCategoriesCache);
     updateCatalogHeading(catalogPayload, catalogCategoriesCache);
   } catch (error) {
     renderCatalogError(error.message);
@@ -1048,6 +1130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const payload = await loadCatalogPage(page);
       renderCategoryOptions(catalogCategoriesCache);
+      syncTopCategoryLinks(catalogCategoriesCache);
       updateCatalogHeading(payload, catalogCategoriesCache);
     } catch (error) {
       renderCatalogError(error.message);

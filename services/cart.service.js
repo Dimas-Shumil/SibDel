@@ -3,6 +3,7 @@ import {
   buildCommerceOwnerWhere,
   findPurchasableProductBySlug,
   getCommerceProductSelect,
+  getProductCommerceLimits,
   normalizeCommerceQuantity,
   serializeCommerceItem,
 } from "./commerce.service.js";
@@ -129,6 +130,17 @@ export async function addCartItem(owner, { slug, quantity }) {
     );
   }
 
+  const limits = getProductCommerceLimits(product);
+  const requestedIncrement = Number(quantity);
+
+  if (Number.isFinite(requestedIncrement) && requestedIncrement > limits.max + 0.0005) {
+    throw createCartError(
+      `Доступно не более ${limits.max} единиц товара.`,
+      409,
+      "QUANTITY_EXCEEDS_STOCK",
+    );
+  }
+
   const normalizedIncrement = normalizeCommerceQuantity(quantity, product);
 
   if (normalizedIncrement <= 0) {
@@ -153,9 +165,19 @@ export async function addCartItem(owner, { slug, quantity }) {
       },
     });
 
+    const currentQuantity = Number(existing?.quantity?.toString?.() ?? existing?.quantity) || 0;
+    const requestedNextQuantity = currentQuantity + normalizedIncrement;
+
+    if (requestedNextQuantity > limits.max + 0.0005) {
+      throw createCartError(
+        `Доступно не более ${limits.max} единиц товара.`,
+        409,
+        "QUANTITY_EXCEEDS_STOCK",
+      );
+    }
+
     const nextQuantity = normalizeCommerceQuantity(
-      (Number(existing?.quantity?.toString?.() ?? existing?.quantity) || 0) +
-        normalizedIncrement,
+      requestedNextQuantity,
       product,
     );
 
@@ -204,6 +226,17 @@ export async function setCartItemQuantity(owner, { slug, quantity }) {
 
   if (!cart) {
     return serializeCart(null);
+  }
+
+  const limits = getProductCommerceLimits(product);
+  const requestedQuantity = Number(quantity);
+
+  if (Number.isFinite(requestedQuantity) && requestedQuantity > limits.max + 0.0005) {
+    throw createCartError(
+      `Доступно не более ${limits.max} единиц товара.`,
+      409,
+      "QUANTITY_EXCEEDS_STOCK",
+    );
   }
 
   const normalizedQuantity = normalizeCommerceQuantity(quantity, product, {

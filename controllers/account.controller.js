@@ -13,6 +13,7 @@ import {
   getAccountSubscription,
   listAccountAddresses,
   listAccountOrders,
+  repeatAccountOrder,
   updateAccountAddress,
   updateAccountProfile,
 } from "../services/account.service.js";
@@ -192,6 +193,22 @@ export async function getOrder(req, res, next) {
     return res.status(200).json({
       ok: true,
       order,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function repeatOrder(req, res, next) {
+  try {
+    const result = await repeatAccountOrder(
+      req.user.id,
+      req.validated.params.orderKey,
+    );
+
+    return res.status(200).json({
+      ok: true,
+      ...result,
     });
   } catch (error) {
     return next(error);
