@@ -70,3 +70,9 @@ export const passwordResetRateLimiter = createRateLimiter({
   identifier: "password-reset",
   message: "Слишком много попыток смены пароля. Попробуйте немного позже.",
 });
+
+export const checkoutRateLimiter = createRateLimiter({
+  limit: 20,
+  identifier: "checkout",
+  message: "Слишком много попыток оформить заказ. Попробуйте немного позже.",
+});

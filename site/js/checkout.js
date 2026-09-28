@@ -33,24 +33,6 @@ function getCheckoutItemKey(item) {
   return String(item?.slug || item?.productId || item?.key || '').trim();
 }
 
-function getCheckoutTotals(items) {
-  return items.reduce(
-    (totals, item) => {
-      const quantity = Math.max(0, Number(item.quantity) || 0);
-      const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
-      const oldUnitPrice = Math.max(unitPrice, Number(item.oldUnitPrice) || unitPrice);
-
-      totals.lines += 1;
-      totals.quantity += quantity;
-      totals.total += unitPrice * quantity;
-      totals.oldTotal += oldUnitPrice * quantity;
-
-      return totals;
-    },
-    { lines: 0, quantity: 0, total: 0, oldTotal: 0 },
-  );
-}
-
 function createCheckoutItemMarkup(item) {
   const key = getCheckoutItemKey(item);
   const slug = encodeURIComponent(String(item.slug || key));
@@ -60,8 +42,12 @@ function createCheckoutItemMarkup(item) {
   const quantity = Math.max(0, Number(item.quantity) || 0);
   const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
   const oldUnitPrice = Math.max(unitPrice, Number(item.oldUnitPrice) || unitPrice);
-  const currentLinePrice = unitPrice * quantity;
-  const oldLinePrice = oldUnitPrice * quantity;
+  const currentLinePrice = Number.isFinite(Number(item.total))
+    ? Number(item.total)
+    : unitPrice * quantity;
+  const oldLinePrice = Number.isFinite(Number(item.lineSubtotal))
+    ? Number(item.lineSubtotal)
+    : oldUnitPrice * quantity;
   const availability = item.available === false ? 'Временно нет' : '';
   const meta = [
     measure,
@@ -95,6 +81,54 @@ function getLocalDateInputValue(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
+function createCheckoutIdempotencyKey() {
+  if (typeof crypto?.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+async function requestCheckoutApi(url, options = {}) {
+  const response = await fetch(url, {
+    method: options.method || 'GET',
+    credentials: 'same-origin',
+    headers: {
+      Accept: 'application/json',
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    },
+    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok || !payload?.ok) {
+    const error = new Error(payload?.error?.message || 'Не удалось оформить заказ.');
+    error.status = response.status;
+    error.code = payload?.error?.code || 'CHECKOUT_REQUEST_FAILED';
+    error.details = payload?.error?.details;
+    throw error;
+  }
+
+  return payload;
+}
+
+function buildAddressValue(address) {
+  if (!address) {
+    return '';
+  }
+
+  const street = [address.street, address.house].filter(Boolean).join(', ');
+  return [address.city, street, address.apartment ? `кв. ${address.apartment}` : '']
+    .filter(Boolean)
+    .join(', ');
+}
+
 function initCheckoutPage() {
   const page = document.querySelector('[data-checkout-page]');
   const commerce = window.SibDelCommerce;
@@ -115,31 +149,42 @@ function initCheckoutPage() {
   const summaryCount = page.querySelector('[data-checkout-summary-count]');
   const subtotalOutput = page.querySelector('[data-checkout-subtotal]');
   const discountOutput = page.querySelector('[data-checkout-discount]');
+  const deliveryOutput = page.querySelector('[data-checkout-delivery-cost]');
   const totalOutput = page.querySelector('[data-checkout-total]');
   const mobileTotalOutput = page.querySelector('[data-checkout-mobile-total]');
+  const totalNote = page.querySelector('[data-checkout-total-note]');
   const formStatus = page.querySelector('[data-checkout-form-status]');
   const deliveryPanel = page.querySelector('[data-checkout-delivery-panel]');
   const pickupPanel = page.querySelector('[data-checkout-pickup-panel]');
+  const pickupHint = page.querySelector('[data-checkout-pickup-hint]');
+  const pickupSelect = page.querySelector('[data-checkout-field="pickupPointId"]');
   const addressInput = page.querySelector('[data-checkout-field="address"]');
   const dateInput = page.querySelector('[data-checkout-field="receiveDate"]');
   const slotSelect = page.querySelector('[data-checkout-field="receiveSlot"]');
   const slotHint = page.querySelector('[data-checkout-slot-hint]');
   const commentInput = page.querySelector('[data-checkout-comment]');
   const commentCount = page.querySelector('[data-checkout-comment-count]');
+  const promoForm = page.querySelector('[data-checkout-promo-form]');
+  const promoInput = page.querySelector('[data-checkout-promo-input]');
+  const promoMessage = page.querySelector('[data-checkout-promo-message]');
   const modal = page.querySelector('[data-checkout-state-modal]');
-  let lastFocusedElement = null;
-  let submitTimer = null;
+  const successText = page.querySelector('[data-checkout-success-text]');
+  const successLink = page.querySelector('[data-checkout-success-link]');
+  const pickupRadio = form?.querySelector('input[name="receiveMethod"][value="pickup"]');
+  const onlinePayment = form?.querySelector('input[name="paymentMethod"][value="online"]');
+  const receiptPayment = form?.querySelector('input[name="paymentMethod"][value="on-receipt"]');
 
   if (!form || !itemsRoot) {
     return;
   }
 
+  let checkoutState = null;
+  let idempotencyKey = createCheckoutIdempotencyKey();
+  let userEditedContact = false;
+  let userEditedAddress = false;
 
   const setFormStatus = (message = '', type = 'error') => {
-    if (!formStatus) {
-      return;
-    }
-
+    if (!formStatus) return;
     formStatus.textContent = message;
     formStatus.hidden = !message;
     formStatus.classList.toggle('is-success', type === 'success');
@@ -148,25 +193,17 @@ function initCheckoutPage() {
   const clearFieldError = (fieldName) => {
     const input = form.querySelector(`[data-checkout-field="${fieldName}"]`);
     const error = form.querySelector(`[data-checkout-error="${fieldName}"]`);
-
     input?.classList.remove('is-error');
     input?.removeAttribute('aria-invalid');
-
-    if (error) {
-      error.textContent = '';
-    }
+    if (error) error.textContent = '';
   };
 
   const setFieldError = (fieldName, message) => {
     const input = form.querySelector(`[data-checkout-field="${fieldName}"]`);
     const error = form.querySelector(`[data-checkout-error="${fieldName}"]`);
-
     input?.classList.add('is-error');
     input?.setAttribute('aria-invalid', 'true');
-
-    if (error) {
-      error.textContent = message;
-    }
+    if (error) error.textContent = message;
   };
 
   const clearAllErrors = () => {
@@ -174,11 +211,9 @@ function initCheckoutPage() {
       field.classList.remove('is-error');
       field.removeAttribute('aria-invalid');
     });
-
     form.querySelectorAll('[data-checkout-error]').forEach((error) => {
       error.textContent = '';
     });
-
     setFormStatus('');
   };
 
@@ -186,11 +221,12 @@ function initCheckoutPage() {
     page.querySelectorAll('[data-checkout-choice-card]').forEach((card) => {
       const input = card.querySelector('input[type="radio"]');
       card.classList.toggle('is-selected', Boolean(input?.checked));
+      card.classList.toggle('is-disabled', Boolean(input?.disabled));
     });
-
     page.querySelectorAll('[data-checkout-payment-card]').forEach((card) => {
       const input = card.querySelector('input[type="radio"]');
       card.classList.toggle('is-selected', Boolean(input?.checked));
+      card.classList.toggle('is-disabled', Boolean(input?.disabled));
     });
   };
 
@@ -198,126 +234,183 @@ function initCheckoutPage() {
     const receiveMethod = form.elements.receiveMethod?.value || 'delivery';
     const isDelivery = receiveMethod === 'delivery';
 
-    if (deliveryPanel) {
-      deliveryPanel.hidden = !isDelivery;
-    }
-
-    if (pickupPanel) {
-      pickupPanel.hidden = isDelivery;
-    }
+    if (deliveryPanel) deliveryPanel.hidden = !isDelivery;
+    if (pickupPanel) pickupPanel.hidden = isDelivery;
 
     if (addressInput) {
       addressInput.required = isDelivery;
       addressInput.disabled = !isDelivery;
+      if (!isDelivery) clearFieldError('address');
+    }
 
-      if (!isDelivery) {
-        clearFieldError('address');
-      }
+    if (pickupSelect) {
+      pickupSelect.required = !isDelivery;
+      pickupSelect.disabled = isDelivery || !checkoutState?.capabilities?.pickup;
+      if (isDelivery) clearFieldError('pickupPointId');
     }
 
     if (slotHint) {
-      slotHint.textContent = isDelivery
-        ? 'Реальные интервалы появятся после подключения правил доставки.'
-        : 'Интервалы самовывоза появятся после подключения данных точек выдачи.';
-    }
-
-    if (slotSelect) {
-      slotSelect.disabled = false;
+      slotHint.textContent = 'Интервалы отображаются только из реальных активных слотов backend.';
     }
 
     syncChoiceCards();
   };
 
+  const renderPickupPoints = () => {
+    const points = checkoutState?.pickupPoints || [];
+
+    if (pickupSelect) {
+      pickupSelect.innerHTML = [
+        '<option value="">Выберите точку самовывоза</option>',
+        ...points.map((point) => `<option value="${point.id}">${escapeCheckoutHtml(point.name)} — ${escapeCheckoutHtml(point.address)}</option>`),
+      ].join('');
+    }
+
+    if (pickupRadio) {
+      pickupRadio.disabled = points.length === 0;
+      if (pickupRadio.checked && pickupRadio.disabled) {
+        const deliveryRadio = form.querySelector('input[name="receiveMethod"][value="delivery"]');
+        if (deliveryRadio) deliveryRadio.checked = true;
+      }
+    }
+
+    if (pickupHint) {
+      pickupHint.textContent = points.length
+        ? 'Выберите доступную точку выдачи.'
+        : 'Активных точек самовывоза пока нет — этот способ временно недоступен.';
+    }
+  };
+
+  const renderSlots = () => {
+    const slots = checkoutState?.deliverySlots || [];
+
+    if (!slotSelect) return;
+
+    const previous = slotSelect.value;
+    slotSelect.innerHTML = [
+      '<option value="">Без конкретного интервала</option>',
+      ...slots.map((slot) => `<option value="${slot.id}">${escapeCheckoutHtml(`${slot.startTime}–${slot.endTime}`)}</option>`),
+    ].join('');
+
+    if ([...slotSelect.options].some((option) => option.value === previous)) {
+      slotSelect.value = previous;
+    }
+
+    if (slotHint) {
+      slotHint.textContent = slots.length
+        ? 'Показаны только активные интервалы на выбранную дату.'
+        : 'На выбранную дату активных интервалов нет — заказ можно оставить без конкретного слота.';
+    }
+  };
+
+  const renderPaymentCapabilities = () => {
+    const onlineAvailable = checkoutState?.capabilities?.onlinePayment === true;
+
+    if (onlinePayment) {
+      onlinePayment.disabled = !onlineAvailable;
+      if (!onlineAvailable && onlinePayment.checked && receiptPayment) {
+        receiptPayment.checked = true;
+      }
+    }
+
+    syncChoiceCards();
+  };
+
+  const applyCustomerDefaults = () => {
+    const customer = checkoutState?.customer;
+    const address = checkoutState?.defaultAddress;
+
+    if (customer && !userEditedContact) {
+      if (!form.elements.name.value) form.elements.name.value = customer.name || '';
+      if (!form.elements.phone.value) form.elements.phone.value = customer.phone || '';
+      if (!form.elements.email.value) form.elements.email.value = customer.email || '';
+    }
+
+    if (address && !userEditedAddress && !form.elements.address.value) {
+      form.elements.address.value = buildAddressValue(address);
+      if (form.elements.entrance && !form.elements.entrance.value) form.elements.entrance.value = address.entrance || '';
+      if (form.elements.floor && !form.elements.floor.value) form.elements.floor.value = address.floor || '';
+    }
+  };
+
   const renderCheckout = () => {
-    const items = commerce.getCart();
-    const totals = getCheckoutTotals(items);
-    const discount = Math.max(0, totals.oldTotal - totals.total);
+    const cart = checkoutState?.cart;
+    const items = cart?.items || commerce.getCart();
+    const serverSummary = cart?.summary;
     const isEmpty = items.length === 0;
 
     itemsRoot.innerHTML = items.map(createCheckoutItemMarkup).join('');
 
-    if (summaryCount) {
-      summaryCount.textContent = `Товары, ${formatCheckoutQuantity(totals.quantity)}`;
-    }
+    const quantity = serverSummary?.quantity ?? items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+    const subtotal = serverSummary?.subtotal ?? 0;
+    const discount = serverSummary?.discount ?? 0;
+    const total = serverSummary?.total ?? commerce.getCartTotal();
 
-    if (subtotalOutput) {
-      subtotalOutput.textContent = formatCheckoutMoney(totals.oldTotal);
+    if (summaryCount) summaryCount.textContent = `Товары, ${formatCheckoutQuantity(quantity)}`;
+    if (subtotalOutput) subtotalOutput.textContent = formatCheckoutMoney(subtotal);
+    if (discountOutput) discountOutput.textContent = discount ? `−${formatCheckoutMoney(discount)}` : formatCheckoutMoney(0);
+    if (deliveryOutput) {
+      deliveryOutput.textContent = serverSummary?.deliveryPriceConfirmed
+        ? formatCheckoutMoney(serverSummary.deliveryPrice)
+        : 'уточняется';
     }
-
-    if (discountOutput) {
-      discountOutput.textContent = discount ? `−${formatCheckoutMoney(discount)}` : formatCheckoutMoney(0);
-    }
-
-    if (totalOutput) {
-      totalOutput.textContent = formatCheckoutMoney(totals.total);
-    }
-
-    if (mobileTotalOutput) {
-      mobileTotalOutput.textContent = formatCheckoutMoney(totals.total);
+    if (totalOutput) totalOutput.textContent = formatCheckoutMoney(total);
+    if (mobileTotalOutput) mobileTotalOutput.textContent = formatCheckoutMoney(total);
+    if (totalNote) {
+      totalNote.textContent = serverSummary?.isFinal
+        ? 'итоговая сумма подтверждена сервером'
+        : 'стоимость доставки ещё не подтверждена';
     }
 
     form.hidden = isEmpty;
+    if (summary) summary.hidden = isEmpty;
+    if (emptyState) emptyState.hidden = !isEmpty;
+    if (mobileBar) mobileBar.hidden = isEmpty;
+  };
 
-    if (summary) {
-      summary.hidden = isEmpty;
-    }
+  const refreshCheckoutState = async ({ date = dateInput?.value || '', preserveStatus = false } = {}) => {
+    const query = date ? `?date=${encodeURIComponent(date)}` : '';
+    const payload = await requestCheckoutApi(`/api/checkout${query}`);
+    checkoutState = payload.checkout;
+    renderPickupPoints();
+    renderSlots();
+    renderPaymentCapabilities();
+    applyCustomerDefaults();
+    syncReceiveMethod();
+    renderCheckout();
 
-    if (emptyState) {
-      emptyState.hidden = !isEmpty;
-    }
-
-    if (mobileBar) {
-      mobileBar.hidden = isEmpty;
+    if (!preserveStatus && checkoutState?.cart?.issues?.length) {
+      setFormStatus('Корзина изменилась. Вернитесь в корзину и проверьте количество товаров.');
     }
   };
 
   const validateForm = () => {
     clearAllErrors();
-
     const name = String(form.elements.name?.value || '').trim();
     const phone = String(form.elements.phone?.value || '').trim();
     const email = String(form.elements.email?.value || '').trim();
     const receiveMethod = form.elements.receiveMethod?.value || 'delivery';
     const address = String(form.elements.address?.value || '').trim();
+    const pickupPointId = String(form.elements.pickupPointId?.value || '').trim();
     const receiveDate = String(form.elements.receiveDate?.value || '').trim();
     const agreement = Boolean(form.elements.agreement?.checked);
     const phoneDigits = phone.replace(/\D/g, '');
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const errors = [];
 
-    if (name.length < 2) {
-      errors.push(['name', 'Укажите имя, чтобы мы знали, как к вам обращаться.']);
-    }
-
-    if (phoneDigits.length < 10 || phoneDigits.length > 15) {
-      errors.push(['phone', 'Проверьте номер телефона.']);
-    }
-
-    if (!emailPattern.test(email)) {
-      errors.push(['email', 'Введите корректный email.']);
-    }
-
-    if (receiveMethod === 'delivery' && address.length < 5) {
-      errors.push(['address', 'Укажите адрес доставки.']);
-    }
-
-    if (!receiveDate) {
-      errors.push(['receiveDate', 'Выберите дату получения.']);
-    } else if (receiveDate < getLocalDateInputValue()) {
-      errors.push(['receiveDate', 'Дата получения не может быть в прошлом.']);
-    }
-
-    if (!agreement) {
-      errors.push(['agreement', 'Подтвердите согласие перед оформлением.']);
-    }
+    if (name.length < 2) errors.push(['name', 'Укажите имя, чтобы мы знали, как к вам обращаться.']);
+    if (phoneDigits.length < 10 || phoneDigits.length > 15) errors.push(['phone', 'Проверьте номер телефона.']);
+    if (!emailPattern.test(email)) errors.push(['email', 'Введите корректный email.']);
+    if (receiveMethod === 'delivery' && address.length < 5) errors.push(['address', 'Укажите адрес доставки.']);
+    if (receiveMethod === 'pickup' && !pickupPointId) errors.push(['pickupPointId', 'Выберите точку самовывоза.']);
+    if (!receiveDate) errors.push(['receiveDate', 'Выберите дату получения.']);
+    else if (receiveDate < getLocalDateInputValue()) errors.push(['receiveDate', 'Дата получения не может быть в прошлом.']);
+    if (!agreement) errors.push(['agreement', 'Подтвердите согласие перед оформлением.']);
 
     errors.forEach(([field, message]) => setFieldError(field, message));
 
-    const cartItems = commerce.getCart();
-    const unavailableItem = cartItems.find((item) => item.available === false);
-
-    if (unavailableItem) {
-      setFormStatus(`Товар «${unavailableItem.title || 'из заказа'}» сейчас недоступен. Измените корзину перед оформлением.`);
+    if (checkoutState?.cart?.issues?.length) {
+      setFormStatus('Состав корзины изменился. Проверьте товары перед оформлением.');
       return false;
     }
 
@@ -337,64 +430,51 @@ function initCheckoutPage() {
       submitButton.disabled = isSubmitting;
       submitButton.setAttribute('aria-busy', String(isSubmitting));
     }
-
     if (mobileSubmit) {
       mobileSubmit.disabled = isSubmitting;
       mobileSubmit.setAttribute('aria-busy', String(isSubmitting));
     }
-
-    if (submitText) {
-      submitText.textContent = isSubmitting ? 'Проверяем данные' : 'Оформить заказ';
-    }
-
-    if (loader) {
-      loader.hidden = !isSubmitting;
-    }
+    if (submitText) submitText.textContent = isSubmitting ? 'Создаём заказ' : 'Оформить заказ';
+    if (loader) loader.hidden = !isSubmitting;
   };
 
-  const openSuccessModal = () => {
-    if (!modal) {
-      return;
-    }
-
-    lastFocusedElement = document.activeElement;
+  const openSuccessModal = (order) => {
+    if (!modal) return;
     modal.hidden = false;
     document.body.classList.add('is-lock');
-    modal.querySelector('[data-checkout-modal-close]')?.focus();
-  };
 
-  const closeSuccessModal = () => {
-    if (!modal) {
-      return;
+    if (successText) {
+      successText.textContent = `Заказ №${order.number} создан. ${order.deliveryPriceConfirmed ? 'Сумма подтверждена.' : 'Стоимость доставки будет подтверждена отдельно.'}`;
     }
 
-    modal.hidden = true;
-    document.body.classList.remove('is-lock');
-
-    if (lastFocusedElement instanceof HTMLElement) {
-      lastFocusedElement.focus();
+    if (successLink) {
+      if (order.canViewInAccount) {
+        successLink.href = `/account/order?id=${encodeURIComponent(order.id)}`;
+        successLink.textContent = 'Посмотреть заказ';
+      } else {
+        successLink.href = '/catalog.html';
+        successLink.textContent = 'Продолжить покупки';
+      }
     }
+
+    successLink?.focus();
   };
 
-  if (dateInput) {
-    dateInput.min = getLocalDateInputValue();
-  }
+  if (dateInput) dateInput.min = getLocalDateInputValue();
 
-  form.addEventListener('change', (event) => {
+  form.addEventListener('change', async (event) => {
     const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
 
-    if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) {
-      return;
+    if (target.name === 'receiveMethod') syncReceiveMethod();
+    if (target.name === 'paymentMethod') syncChoiceCards();
+    if (target.name === 'receiveDate') {
+      try {
+        await refreshCheckoutState({ date: target.value, preserveStatus: true });
+      } catch (error) {
+        setFormStatus(error.message);
+      }
     }
-
-    if (target.name === 'receiveMethod') {
-      syncReceiveMethod();
-    }
-
-    if (target.name === 'paymentMethod') {
-      syncChoiceCards();
-    }
-
     if (target.dataset.checkoutField) {
       clearFieldError(target.dataset.checkoutField);
       setFormStatus('');
@@ -403,100 +483,125 @@ function initCheckoutPage() {
 
   form.addEventListener('input', (event) => {
     const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
 
-    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
-      return;
-    }
+    if (['name', 'phone', 'email'].includes(target.name)) userEditedContact = true;
+    if (['address', 'entrance', 'floor'].includes(target.name)) userEditedAddress = true;
 
     if (target.dataset.checkoutField) {
       clearFieldError(target.dataset.checkoutField);
       setFormStatus('');
     }
-
     if (target === commentInput && commentCount) {
       commentCount.textContent = `${target.value.length} / ${target.maxLength}`;
     }
   });
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    window.clearTimeout(submitTimer);
 
-    if (!commerce.getCart().length) {
+    if (!checkoutState?.cart?.items?.length) {
       renderCheckout();
       return;
     }
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setSubmitting(true);
-    setFormStatus('Проверяем заполненные данные перед отправкой…', 'success');
+    setFormStatus('Сервер повторно проверяет цены, скидки, количество и наличие…', 'success');
 
-    submitTimer = window.setTimeout(() => {
+    try {
+      const payload = await requestCheckoutApi('/api/checkout', {
+        method: 'POST',
+        body: {
+          idempotencyKey,
+          name: String(form.elements.name.value || '').trim(),
+          phone: String(form.elements.phone.value || '').trim(),
+          email: String(form.elements.email.value || '').trim(),
+          receiveMethod: form.elements.receiveMethod.value,
+          address: String(form.elements.address?.value || '').trim(),
+          entrance: String(form.elements.entrance?.value || '').trim(),
+          floor: String(form.elements.floor?.value || '').trim(),
+          receiveDate: form.elements.receiveDate.value,
+          receiveSlotId: form.elements.receiveSlot?.value ? Number(form.elements.receiveSlot.value) : null,
+          pickupPointId: form.elements.pickupPointId?.value ? Number(form.elements.pickupPointId.value) : null,
+          paymentMethod: form.elements.paymentMethod.value,
+          comment: String(form.elements.comment?.value || '').trim(),
+          agreement: Boolean(form.elements.agreement.checked),
+        },
+      });
+
+      commerce.replaceCart([]);
+      checkoutState = {
+        ...(checkoutState || {}),
+        cart: {
+          items: [],
+          issues: [],
+          summary: {
+            lines: 0,
+            quantity: 0,
+            subtotal: 0,
+            discount: 0,
+            merchandiseTotal: 0,
+            deliveryPrice: null,
+            deliveryPriceConfirmed: false,
+            total: 0,
+            currency: 'RUB',
+            isFinal: false,
+          },
+        },
+      };
+      renderCheckout();
+      setFormStatus('Заказ успешно создан.', 'success');
+      openSuccessModal(payload.order);
+      idempotencyKey = createCheckoutIdempotencyKey();
+    } catch (error) {
+      if (error.code === 'CART_OUTDATED' || error.code === 'CHECKOUT_RETRY_REQUIRED') {
+        try {
+          await commerce.refresh?.('checkout-reload');
+          await refreshCheckoutState({ preserveStatus: true });
+        } catch {
+          // The original checkout error remains the useful message for the user.
+        }
+      }
+      setFormStatus(error.message || 'Не удалось создать заказ. Попробуйте ещё раз.');
+    } finally {
       setSubmitting(false);
-      setFormStatus('Данные формы валидны. Реальную отправку заказа подключим вместе с checkout API.', 'success');
-      openSuccessModal();
-    }, 650);
+    }
   });
 
-  mobileSubmit?.addEventListener('click', () => {
-    form.requestSubmit();
-  });
-
-  const promoForm = page.querySelector('[data-checkout-promo-form]');
-  const promoInput = page.querySelector('[data-checkout-promo-input]');
-  const promoMessage = page.querySelector('[data-checkout-promo-message]');
+  mobileSubmit?.addEventListener('click', () => form.requestSubmit());
 
   promoForm?.addEventListener('submit', (event) => {
     event.preventDefault();
     const promoCode = String(promoInput?.value || '').trim();
-
-    if (!promoCode) {
-      promoMessage?.classList.add('is-error');
-
-      if (promoMessage) {
-        promoMessage.textContent = 'Введите промокод.';
-      }
-
-      promoInput?.focus();
-      return;
-    }
-
-    promoMessage?.classList.remove('is-error');
-
+    promoMessage?.classList.toggle('is-error', Boolean(promoCode));
     if (promoMessage) {
-      promoMessage.textContent = 'Код сохранён для проверки. Скидку применит только сервер после подключения checkout API.';
+      promoMessage.textContent = promoCode
+        ? 'Промокоды пока не подключены к серверной модели акций и не влияют на сумму заказа.'
+        : 'Введите промокод.';
     }
   });
 
   promoInput?.addEventListener('input', () => {
     promoMessage?.classList.remove('is-error');
-
-    if (promoMessage) {
-      promoMessage.textContent = '';
-    }
+    if (promoMessage) promoMessage.textContent = '';
   });
 
-  modal?.addEventListener('click', (event) => {
-    if (event.target.closest('[data-checkout-modal-close]')) {
-      closeSuccessModal();
-    }
+  document.addEventListener('sibdel:commerce-state-changed', () => {
+    if (!checkoutState) return;
+    void refreshCheckoutState({ preserveStatus: true }).catch(() => {});
   });
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && modal && !modal.hidden) {
-      closeSuccessModal();
+  void (async () => {
+    try {
+      await commerce.ready();
+      await refreshCheckoutState();
+    } catch (error) {
+      setFormStatus(error.message || 'Не удалось загрузить данные оформления заказа.');
+      renderCheckout();
     }
-  });
-
-  document.addEventListener('sibdel:commerce-ui-updated', renderCheckout);
-  document.addEventListener('sibdel:commerce-state-changed', renderCheckout);
-
-  syncReceiveMethod();
-  syncChoiceCards();
-  renderCheckout();
+  })();
 }
 
 initCheckoutPage();

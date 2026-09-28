@@ -493,6 +493,12 @@ const paymentStatusLabels = {
   FAILED: 'Ошибка оплаты',
 };
 
+
+const paymentMethodLabels = {
+  ONLINE: 'Онлайн',
+  ON_RECEIPT: 'При получении',
+};
+
 const subscriptionStatusLabels = {
   ACTIVE: 'Активна',
   PAUSED: 'Приостановлена',
@@ -510,7 +516,7 @@ function createOrderCard(order) {
     <div class="account-order-card__main"><span class="account-order-card__number">Заказ №${number}</span><span class="account-order-card__date">${escapeAccountHtml(formatAccountDate(order.createdAt))}</span></div>
     <span class="account-status account-status--${escapeAccountHtml(String(order.status || '').toLowerCase())}">${status}</span>
     <span class="account-order-card__items">${itemCount} ${getWordForm(itemCount, ['товар', 'товара', 'товаров'])}</span>
-    <strong class="account-order-card__total">${formatAccountMoney(order.total)}</strong>
+    <strong class="account-order-card__total">${order.deliveryPriceConfirmed === false ? `${formatAccountMoney(order.total)} + доставка` : formatAccountMoney(order.total)}</strong>
     <a class="account-button account-button--soft" href="/account/order?id=${id}">Посмотреть заказ</a>
   </article>`;
 }
@@ -555,10 +561,10 @@ function renderOrder(order) {
   detail.hidden = false;
   setElementText('[data-order-title]', `Заказ №${order.number || order.id || '—'}`, 'Заказ', root);
   setElementText('[data-order-status]', orderStatusLabels[order.status] || order.status || 'Статус уточняется', '—', root);
-  setElementText('[data-order-total]', formatAccountMoney(order.total), '0 ₽', root);
+  setElementText('[data-order-total]', order.deliveryPriceConfirmed === false ? `${formatAccountMoney(order.total)} + доставка` : formatAccountMoney(order.total), '0 ₽', root);
   setElementText('[data-order-delivery]', order.deliveryMethod === 'PICKUP' ? 'Самовывоз' : 'Доставка', '—', root);
   setElementText('[data-order-address]', order.deliveryAddressSnapshot || order.pickupPoint?.address, 'Адрес не указан', root);
-  setElementText('[data-order-payment]', order.paymentMethod || paymentStatusLabels[order.paymentStatus] || order.paymentStatus, 'Способ оплаты не указан', root);
+  setElementText('[data-order-payment]', paymentMethodLabels[order.paymentMethod] || paymentStatusLabels[order.paymentStatus] || order.paymentStatus, 'Способ оплаты не указан', root);
   setElementText('[data-order-date]', formatAccountDate(order.createdAt), '—', root);
 
   const products = root.querySelector('[data-order-products]');
@@ -673,8 +679,9 @@ function initFavoritesActions() {
   document.querySelector('[data-account-toast-undo]')?.addEventListener('click', () => {
     const commerce = window.SibDelCommerce;
     if (!commerce || accountStore.lastRemovedFavorites.length === 0) return;
-    const current = commerce.getFavorites();
-    commerce.replaceFavorites([...current, ...accountStore.lastRemovedFavorites]);
+    accountStore.lastRemovedFavorites.forEach((item) => {
+      commerce.setFavorite(item, true);
+    });
     accountStore.lastRemovedFavorites = [];
     showAccountToast('Товары возвращены');
   });
@@ -1046,7 +1053,7 @@ async function initAccountPageData(type = getAccountRoute()?.view || 'dashboard'
 
   if (type === 'favorites') {
     renderFavorites();
-    showUnavailableState('favorites', false);
+    showUnavailableState('favorites', true);
     return;
   }
 

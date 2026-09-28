@@ -11,7 +11,7 @@ const envSchema = z
       .enum(["development", "test", "production"])
       .default("development"),
 
-    PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+    PORT: z.coerce.number().int().min(1).max(65535).default(3001),
 
     HOST: z.string().trim().min(1).default("127.0.0.1"),
 
@@ -32,7 +32,7 @@ const envSchema = z
       .string()
       .trim()
       .url("APP_URL must be a valid URL")
-      .default("http://localhost:3000"),
+      .default("http://localhost:3001"),
 
     SESSION_COOKIE_NAME: z
       .string()

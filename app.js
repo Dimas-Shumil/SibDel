@@ -17,6 +17,13 @@ import { adminAuth } from "./middleware/admin-auth.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import authRouter from "./routes/auth.routes.js";
 import accountRouter from "./routes/account.routes.js";
+import catalogRouter from "./routes/catalog.routes.js";
+import categoriesRouter from "./routes/categories.routes.js";
+import productsRouter from "./routes/products.routes.js";
+import cartRouter from "./routes/cart.routes.js";
+import favoritesRouter from "./routes/favorites.routes.js";
+import commerceRouter from "./routes/commerce.routes.js";
+import checkoutRouter from "./routes/checkout.routes.js";
 import {
   notFoundHandler,
   errorHandler,
@@ -180,6 +187,14 @@ app.use(
   "/api/account",
   accountRouter,
 );
+
+app.use("/api/catalog", catalogRouter);
+app.use("/api/categories", categoriesRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/commerce", commerceRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/favorites", favoritesRouter);
+app.use("/api/checkout", checkoutRouter);
 
 app.get("/admin/login", (_req, res) => {
   return res.sendFile(

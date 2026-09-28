@@ -410,10 +410,10 @@ function initReviewsSlider() {
 }
 
 
-const SIBDEL_PREVIEW_CART_KEY = 'sibdelPreviewCartV2';
-const SIBDEL_PREVIEW_FAVORITES_KEY = 'sibdelPreviewFavoritesV2';
+const SIBDEL_LEGACY_CART_KEY = 'sibdelPreviewCartV2';
+const SIBDEL_LEGACY_FAVORITES_KEY = 'sibdelPreviewFavoritesV2';
 
-function getPreviewStorageValue(key) {
+function getLegacyCommerceStorageValue(key) {
   try {
     const raw = window.localStorage.getItem(key);
 
@@ -428,20 +428,21 @@ function getPreviewStorageValue(key) {
   }
 }
 
-function setPreviewStorageValue(key, value) {
+function clearLegacyCommerceStorage() {
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.removeItem(SIBDEL_LEGACY_CART_KEY);
+    window.localStorage.removeItem(SIBDEL_LEGACY_FAVORITES_KEY);
   } catch {
-    // Preview state must never break the storefront if storage is unavailable.
+    // Legacy preview storage is best-effort cleanup only.
   }
 }
 
-function normalizePreviewNumber(value, fallback = 0) {
+function normalizeCommerceNumber(value, fallback = 0) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
 
-function normalizePreviewItem(item = {}) {
+function normalizeCommerceItem(item = {}) {
   const slug = String(item.slug || '').trim();
   const productId = String(item.productId || '').trim();
   const key = slug || productId;
@@ -450,12 +451,12 @@ function normalizePreviewItem(item = {}) {
     return null;
   }
 
-  const min = Math.max(0.001, normalizePreviewNumber(item.min, 1));
-  const step = Math.max(0.001, normalizePreviewNumber(item.step, 1));
-  const max = Math.max(min, normalizePreviewNumber(item.max, 999));
+  const min = Math.max(0.001, normalizeCommerceNumber(item.min, 1));
+  const step = Math.max(0.001, normalizeCommerceNumber(item.step, 1));
+  const max = Math.max(min, normalizeCommerceNumber(item.max, 999));
   const quantity = Math.min(
     max,
-    Math.max(min, normalizePreviewNumber(item.quantity, min)),
+    Math.max(min, normalizeCommerceNumber(item.quantity, min)),
   );
 
   return {
@@ -468,11 +469,11 @@ function normalizePreviewItem(item = {}) {
     badge: String(item.badge || '').trim().slice(0, 40),
     available: item.available !== false,
     rating: String(item.rating || '').trim().slice(0, 20),
-    reviewCount: String(item.reviewCount || '').trim().slice(0, 20),
-    unitPrice: Math.max(0, normalizePreviewNumber(item.unitPrice, 0)),
+    reviewCount: String(item.reviewCount || '').trim().slice(0, 40),
+    unitPrice: Math.max(0, normalizeCommerceNumber(item.unitPrice, 0)),
     oldUnitPrice: Math.max(
       0,
-      normalizePreviewNumber(item.oldUnitPrice, item.unitPrice || 0),
+      normalizeCommerceNumber(item.oldUnitPrice, item.unitPrice || 0),
     ),
     quantity,
     min,
@@ -481,21 +482,54 @@ function normalizePreviewItem(item = {}) {
   };
 }
 
-function createSibDelCommercePreview() {
-  let cart = getPreviewStorageValue(SIBDEL_PREVIEW_CART_KEY);
-  let favorites = getPreviewStorageValue(SIBDEL_PREVIEW_FAVORITES_KEY);
+async function requestCommerceApi(url, options = {}) {
+  const requestOptions = {
+    method: options.method || 'GET',
+    credentials: 'same-origin',
+    headers: {
+      Accept: 'application/json',
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    },
+  };
+
+  if (options.body) {
+    requestOptions.body = JSON.stringify(options.body);
+  }
+
+  const response = await fetch(url, requestOptions);
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok || !payload?.ok) {
+    const error = new Error(
+      payload?.error?.message || 'Не удалось обновить корзину или избранное.',
+    );
+    error.status = response.status;
+    error.code = payload?.error?.code || 'COMMERCE_REQUEST_FAILED';
+    throw error;
+  }
+
+  return payload;
+}
+
+function createSibDelCommerce() {
+  let cart = [];
+  let favorites = [];
+  let initialized = false;
+  let mutationQueue = Promise.resolve();
+
+  const legacyCart = getLegacyCommerceStorageValue(SIBDEL_LEGACY_CART_KEY);
+  const legacyFavorites = getLegacyCommerceStorageValue(
+    SIBDEL_LEGACY_FAVORITES_KEY,
+  );
 
   const normalizeList = (list, includeQuantity) =>
     (Array.isArray(list) ? list : [])
-      .map((item) => normalizePreviewItem(item))
+      .map((item) => normalizeCommerceItem(item))
       .filter(Boolean)
       .map((item) => ({
         ...item,
         quantity: includeQuantity ? item.quantity : 1,
       }));
-
-  cart = cart === null ? null : normalizeList(cart, true);
-  favorites = favorites === null ? null : normalizeList(favorites, false);
 
   const emit = (reason, item = null) => {
     document.dispatchEvent(
@@ -510,67 +544,159 @@ function createSibDelCommercePreview() {
     );
   };
 
-  const persistCart = (reason, item = null) => {
-    if (cart === null) {
-      cart = [];
-    }
-
-    setPreviewStorageValue(SIBDEL_PREVIEW_CART_KEY, cart);
-    emit(reason, item);
+  const applyCart = (value) => {
+    cart = normalizeList(value?.items || value || [], true);
   };
 
-  const persistFavorites = (reason, item = null) => {
-    if (favorites === null) {
-      favorites = [];
+  const applyFavorites = (value) => {
+    favorites = normalizeList(value?.items || value || [], false);
+  };
+
+  const applyPayload = (payload, reason = 'commerce-synced') => {
+    if (payload?.cart) {
+      applyCart(payload.cart);
     }
 
-    setPreviewStorageValue(SIBDEL_PREVIEW_FAVORITES_KEY, favorites);
-    emit(reason, item);
+    if (payload?.favorites) {
+      applyFavorites(payload.favorites);
+    }
+
+    emit(reason);
+  };
+
+  const refresh = async (reason = 'commerce-refreshed') => {
+    const payload = await requestCommerceApi('/api/commerce');
+    applyPayload(payload, reason);
+    return payload;
+  };
+
+  const importLegacyState = async () => {
+    const normalizedLegacyCart = normalizeList(legacyCart, true);
+    const normalizedLegacyFavorites = normalizeList(legacyFavorites, false);
+
+    if (cart.length === 0 && normalizedLegacyCart.length > 0) {
+      for (const item of normalizedLegacyCart) {
+        if (!item.slug) {
+          continue;
+        }
+
+        try {
+          const payload = await requestCommerceApi('/api/cart/items', {
+            method: 'POST',
+            body: {
+              slug: item.slug,
+              quantity: item.quantity,
+            },
+          });
+          applyCart(payload.cart);
+        } catch {
+          // A legacy preview item may no longer exist in the real catalog.
+        }
+      }
+    }
+
+    if (favorites.length === 0 && normalizedLegacyFavorites.length > 0) {
+      for (const item of normalizedLegacyFavorites) {
+        if (!item.slug) {
+          continue;
+        }
+
+        try {
+          const payload = await requestCommerceApi(
+            `/api/favorites/${encodeURIComponent(item.slug)}`,
+            {
+              method: 'PUT',
+            },
+          );
+          applyFavorites(payload.favorites);
+        } catch {
+          // Ignore stale preview favorites during one-time migration.
+        }
+      }
+    }
+
+    clearLegacyCommerceStorage();
+  };
+
+  const bootstrapPromise = (async () => {
+    try {
+      const payload = await requestCommerceApi('/api/commerce');
+      applyCart(payload.cart);
+      applyFavorites(payload.favorites);
+      await importLegacyState();
+      initialized = true;
+      emit('commerce-loaded');
+    } catch (error) {
+      cart = normalizeList(legacyCart, true);
+      favorites = normalizeList(legacyFavorites, false);
+      initialized = true;
+      emit('commerce-load-failed');
+      console.error('Не удалось загрузить серверное состояние магазина.', error);
+    }
+  })();
+
+  const queueMutation = (operation) => {
+    mutationQueue = mutationQueue
+      .then(() => bootstrapPromise)
+      .then(operation)
+      .catch(async (error) => {
+        console.error('Не удалось синхронизировать состояние магазина.', error);
+
+        document.dispatchEvent(
+          new CustomEvent('sibdel:commerce-request-failed', {
+            detail: {
+              message: error.message,
+              code: error.code,
+            },
+          }),
+        );
+
+        try {
+          await refresh('commerce-rollback');
+        } catch (refreshError) {
+          console.error('Не удалось восстановить серверное состояние магазина.', refreshError);
+        }
+      });
+
+    return mutationQueue;
   };
 
   const findCartIndex = (key) =>
-    (cart || []).findIndex((item) => item.key === String(key));
+    cart.findIndex((item) => item.key === String(key));
 
   const findFavoriteIndex = (key) =>
-    (favorites || []).findIndex((item) => item.key === String(key));
+    favorites.findIndex((item) => item.key === String(key));
 
   const api = {
+    ready() {
+      return bootstrapPromise;
+    },
+
+    refresh(reason = 'commerce-refreshed') {
+      return refresh(reason);
+    },
+
     hasCartState() {
-      return cart !== null;
+      return initialized;
     },
 
     hasFavoritesState() {
-      return favorites !== null;
+      return initialized;
     },
 
-    seedCart(items) {
-      if (cart !== null) {
-        return;
-      }
-
-      cart = normalizeList(items, true);
-      persistCart('cart-seeded');
-    },
-
-    seedFavorites(items) {
-      if (favorites !== null) {
-        return;
-      }
-
-      favorites = normalizeList(items, false);
-      persistFavorites('favorites-seeded');
-    },
+    seedCart() {},
+    seedFavorites() {},
 
     getCart() {
-      return (cart || []).map((item) => ({ ...item }));
+      return cart.map((item) => ({ ...item }));
     },
 
     getFavorites() {
-      return (favorites || []).map((item) => ({ ...item }));
+      return favorites.map((item) => ({ ...item }));
     },
 
     getCartItem(key) {
-      const item = (cart || []).find((entry) => entry.key === String(key));
+      const item = cart.find((entry) => entry.key === String(key));
       return item ? { ...item } : null;
     },
 
@@ -583,17 +709,13 @@ function createSibDelCommercePreview() {
     },
 
     addToCart(rawItem, requestedQuantity = 1) {
-      const normalized = normalizePreviewItem({
+      const normalized = normalizeCommerceItem({
         ...rawItem,
         quantity: requestedQuantity,
       });
 
-      if (!normalized || normalized.available === false) {
+      if (!normalized || normalized.available === false || !normalized.slug) {
         return null;
-      }
-
-      if (cart === null) {
-        cart = [];
       }
 
       const index = findCartIndex(normalized.key);
@@ -604,8 +726,8 @@ function createSibDelCommercePreview() {
           current.max,
           Math.max(
             current.min,
-            normalizePreviewNumber(current.quantity, current.min) +
-              normalizePreviewNumber(requestedQuantity, current.step),
+            normalizeCommerceNumber(current.quantity, current.min) +
+              normalizeCommerceNumber(requestedQuantity, current.step),
           ),
         );
 
@@ -619,7 +741,20 @@ function createSibDelCommercePreview() {
       }
 
       const item = cart[findCartIndex(normalized.key)];
-      persistCart('cart-added', item);
+      emit('cart-added', item);
+
+      queueMutation(async () => {
+        const payload = await requestCommerceApi('/api/cart/items', {
+          method: 'POST',
+          body: {
+            slug: normalized.slug,
+            quantity: requestedQuantity,
+          },
+        });
+        applyCart(payload.cart);
+        emit('cart-synced', item);
+      });
+
       return { ...item };
     },
 
@@ -631,16 +766,43 @@ function createSibDelCommercePreview() {
       }
 
       const item = cart[index];
-      const numericQuantity = normalizePreviewNumber(quantity, item.min);
+      const numericQuantity = normalizeCommerceNumber(quantity, item.min);
 
       if (numericQuantity <= 0) {
         cart.splice(index, 1);
-        persistCart('cart-removed', item);
+        emit('cart-removed', item);
+
+        queueMutation(async () => {
+          const payload = await requestCommerceApi(
+            `/api/cart/items/${encodeURIComponent(item.slug)}`,
+            {
+              method: 'DELETE',
+            },
+          );
+          applyCart(payload.cart);
+          emit('cart-synced');
+        });
+
         return null;
       }
 
       item.quantity = Math.min(item.max, Math.max(item.min, numericQuantity));
-      persistCart('cart-quantity', item);
+      emit('cart-quantity', item);
+
+      queueMutation(async () => {
+        const payload = await requestCommerceApi(
+          `/api/cart/items/${encodeURIComponent(item.slug)}`,
+          {
+            method: 'PATCH',
+            body: {
+              quantity: item.quantity,
+            },
+          },
+        );
+        applyCart(payload.cart);
+        emit('cart-synced', item);
+      });
+
       return { ...item };
     },
 
@@ -652,31 +814,48 @@ function createSibDelCommercePreview() {
       }
 
       const [removed] = cart.splice(index, 1);
-      persistCart('cart-removed', removed);
+      emit('cart-removed', removed);
+
+      queueMutation(async () => {
+        const payload = await requestCommerceApi(
+          `/api/cart/items/${encodeURIComponent(removed.slug)}`,
+          {
+            method: 'DELETE',
+          },
+        );
+        applyCart(payload.cart);
+        emit('cart-synced', removed);
+      });
+
       return { ...removed };
     },
 
     clearCart() {
       const previous = api.getCart();
       cart = [];
-      persistCart('cart-cleared');
+      emit('cart-cleared');
+
+      queueMutation(async () => {
+        const payload = await requestCommerceApi('/api/cart', {
+          method: 'DELETE',
+        });
+        applyCart(payload.cart);
+        emit('cart-synced');
+      });
+
       return previous;
     },
 
     replaceCart(items) {
       cart = normalizeList(items, true);
-      persistCart('cart-replaced');
+      emit('cart-replaced');
     },
 
     setFavorite(rawItem, shouldFavorite = true) {
-      const normalized = normalizePreviewItem(rawItem);
+      const normalized = normalizeCommerceItem(rawItem);
 
-      if (!normalized) {
+      if (!normalized || !normalized.slug) {
         return null;
-      }
-
-      if (favorites === null) {
-        favorites = [];
       }
 
       const index = findFavoriteIndex(normalized.key);
@@ -693,10 +872,21 @@ function createSibDelCommercePreview() {
         favorites.splice(index, 1);
       }
 
-      persistFavorites(
+      emit(
         shouldFavorite ? 'favorite-added' : 'favorite-removed',
         normalized,
       );
+
+      queueMutation(async () => {
+        const payload = await requestCommerceApi(
+          `/api/favorites/${encodeURIComponent(normalized.slug)}`,
+          {
+            method: shouldFavorite ? 'PUT' : 'DELETE',
+          },
+        );
+        applyFavorites(payload.favorites);
+        emit('favorites-synced', normalized);
+      });
 
       return shouldFavorite ? { ...normalized, quantity: 1 } : null;
     },
@@ -704,28 +894,37 @@ function createSibDelCommercePreview() {
     clearFavorites() {
       const previous = api.getFavorites();
       favorites = [];
-      persistFavorites('favorites-cleared');
+      emit('favorites-cleared');
+
+      queueMutation(async () => {
+        const payload = await requestCommerceApi('/api/favorites', {
+          method: 'DELETE',
+        });
+        applyFavorites(payload.favorites);
+        emit('favorites-synced');
+      });
+
       return previous;
     },
 
     replaceFavorites(items) {
       favorites = normalizeList(items, false);
-      persistFavorites('favorites-replaced');
+      emit('favorites-replaced');
     },
 
     getCartQuantity() {
-      return (cart || []).reduce(
-        (sum, item) => sum + Math.max(0, normalizePreviewNumber(item.quantity)),
+      return cart.reduce(
+        (sum, item) => sum + Math.max(0, normalizeCommerceNumber(item.quantity)),
         0,
       );
     },
 
     getCartTotal() {
-      return (cart || []).reduce(
+      return cart.reduce(
         (sum, item) =>
           sum +
-          Math.max(0, normalizePreviewNumber(item.unitPrice)) *
-            Math.max(0, normalizePreviewNumber(item.quantity)),
+          Math.max(0, normalizeCommerceNumber(item.unitPrice)) *
+            Math.max(0, normalizeCommerceNumber(item.quantity)),
         0,
       );
     },
@@ -734,25 +933,25 @@ function createSibDelCommercePreview() {
   return api;
 }
 
-window.SibDelCommerce = createSibDelCommercePreview();
+window.SibDelCommerce = createSibDelCommerce();
 
-function formatPreviewMoney(value) {
+function formatCommerceMoney(value) {
   return `${new Intl.NumberFormat('ru-RU', {
     maximumFractionDigits: 2,
   }).format(Number(value) || 0)} ₽`;
 }
 
-function formatPreviewQuantity(value) {
+function formatCommerceQuantity(value) {
   return new Intl.NumberFormat('ru-RU', {
     maximumFractionDigits: 3,
   }).format(Number(value) || 0);
 }
 
-function getPreviewProductKey(item) {
+function getCommerceProductKey(item) {
   return String(item?.slug || item?.productId || item?.key || '').trim();
 }
 
-function sanitizePreviewImage(value) {
+function sanitizeCommerceImage(value) {
   const image = String(value || '').trim();
 
   if (/^\/site\/images\/[a-zA-Z0-9_./%()\-]+$/.test(image)) {
@@ -773,11 +972,11 @@ function updateGlobalHeaderCartCount() {
   const rounded = Number(quantity.toFixed(3));
   const label =
     rounded > 0
-      ? `В корзине: ${formatPreviewQuantity(rounded)}`
+      ? `В корзине: ${formatCommerceQuantity(rounded)}`
       : 'Корзина пуста';
 
   badges.forEach((badge) => {
-    badge.textContent = formatPreviewQuantity(rounded);
+    badge.textContent = formatCommerceQuantity(rounded);
     badge.hidden = rounded <= 0;
     badge.setAttribute('aria-label', label);
   });
@@ -911,7 +1110,7 @@ function ensureMiniCartPanel(stack = ensureCommerceFeedbackStack()) {
   return panel;
 }
 
-function initGlobalCommercePreview() {
+function initGlobalCommerce() {
   const commerce = window.SibDelCommerce;
 
   if (!commerce) {
@@ -961,7 +1160,7 @@ function initGlobalCommercePreview() {
     }
 
     if (miniImage) {
-      miniImage.src = sanitizePreviewImage(item.image);
+      miniImage.src = sanitizeCommerceImage(item.image);
       miniImage.alt = item.title;
     }
 
@@ -974,16 +1173,16 @@ function initGlobalCommercePreview() {
     }
 
     if (miniQuantity) {
-      miniQuantity.textContent = formatPreviewQuantity(item.quantity);
+      miniQuantity.textContent = formatCommerceQuantity(item.quantity);
     }
 
     if (miniLinePrice) {
-      miniLinePrice.textContent = formatPreviewMoney(item.unitPrice * item.quantity);
+      miniLinePrice.textContent = formatCommerceMoney(item.unitPrice * item.quantity);
     }
 
     if (miniSummary) {
       const quantity = commerce.getCartQuantity();
-      miniSummary.textContent = `${formatPreviewQuantity(quantity)} в корзине · ${formatPreviewMoney(commerce.getCartTotal())}`;
+      miniSummary.textContent = `${formatCommerceQuantity(quantity)} в корзине · ${formatCommerceMoney(commerce.getCartTotal())}`;
     }
 
     if (miniMinus) {
@@ -996,7 +1195,7 @@ function initGlobalCommercePreview() {
   };
 
   const showMiniCart = (item) => {
-    const key = getPreviewProductKey(item);
+    const key = getCommerceProductKey(item);
 
     if (!key || document.querySelector('[data-cart-page]')) {
       return;
@@ -1162,15 +1361,6 @@ function initGlobalCommercePreview() {
     );
   });
 
-  window.addEventListener('storage', (event) => {
-    if (
-      event.key === SIBDEL_PREVIEW_CART_KEY ||
-      event.key === SIBDEL_PREVIEW_FAVORITES_KEY
-    ) {
-      window.location.reload();
-    }
-  });
-
   const getPopularCardKey = (card) => {
     const link = card?.querySelector('.popular-products__name');
 
@@ -1305,7 +1495,7 @@ function initGlobalCommercePreview() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  initGlobalCommercePreview();
+  initGlobalCommerce();
 
   await loadLayoutComponents();
   initMobileHeader();

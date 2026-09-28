@@ -14,8 +14,37 @@ import {
   revokeSessionToken,
 } from "../services/auth.service.js";
 import { sendPasswordResetEmail } from "../services/mail.service.js";
+import {
+  clearGuestCommerceCookie,
+  mergeGuestCommerceIntoUser,
+  readGuestCommerceToken,
+} from "../services/commerce.service.js";
 
 const MIN_FORGOT_RESPONSE_MS = 250;
+
+async function mergeGuestCommerceAfterAuthentication(req, res, userId) {
+  const guestToken = readGuestCommerceToken(req);
+
+  if (!guestToken) {
+    return;
+  }
+
+  try {
+    await mergeGuestCommerceIntoUser({
+      token: guestToken,
+      userId,
+    });
+    clearGuestCommerceCookie(res);
+  } catch (error) {
+    logger.warn(
+      {
+        err: error,
+        userId,
+      },
+      "Guest commerce state merge after authentication failed",
+    );
+  }
+}
 
 function createAuthError(message, statusCode, code) {
   const error = new Error(message);
@@ -145,6 +174,8 @@ export async function login(
       getSessionCookieOptions(),
     );
 
+    await mergeGuestCommerceAfterAuthentication(req, res, user.id);
+
     return res.status(200).json({
       ok: true,
       user,
@@ -215,6 +246,8 @@ export async function register(
       session.token,
       getSessionCookieOptions(),
     );
+
+    await mergeGuestCommerceAfterAuthentication(req, res, user.id);
 
     return res.status(201).json({
       ok: true,
