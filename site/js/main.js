@@ -186,7 +186,7 @@ function initMobileHeader() {
     header.classList.toggle('header--authenticated', isAuthenticated);
 
     const targetHref = isAuthenticated ? '/account/' : '/login.html';
-    const targetText = isAuthenticated ? 'Кабинет' : 'Войти';
+    const targetText = isAuthenticated ? 'Личный кабинет' : 'Войти';
 
     if (accountLink) {
       accountLink.href = targetHref;
