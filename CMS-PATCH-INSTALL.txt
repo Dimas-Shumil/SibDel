@@ -1,0 +1,23 @@
+SibDel — Products / Categories CMS patch
+
+Recommended on the current father's-PC project:
+1. Stop dev server if needed.
+2. Copy patch files over the current sibDel folder, preserving your .env and node_modules.
+3. Run:
+   npm run prisma:validate
+   npm run prisma:generate
+   npm run css
+   npm run test:admin-catalog-smoke
+   npm run test:inventory-smoke
+   npm run dev
+
+Manual pages:
+- /admin/products
+- /admin/product-edit
+- /admin/categories
+- /admin/warehouse
+
+Important:
+- reservedQuantity is never edited by CMS.
+- OWNER stock changes use /api/admin/inventory/.../stock and InventoryMovement ADJUSTMENT.
+- Category deletion with products deactivates the category; only an empty category is physically deleted.

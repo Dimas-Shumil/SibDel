@@ -1,7 +1,18 @@
 import {
   getAdminOrder,
+  listAdminOrders,
   updateOrderStatus,
 } from "../services/order.service.js";
+
+export async function readAdminOrders(req, res, next) {
+  try {
+    const orders = await listAdminOrders(req.validated?.query ?? {});
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ ok: true, orders });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 export async function readAdminOrder(req, res, next) {
   try {

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Отзывы покупателей о продукции Сибирских Деликатесов." />
+    <link rel="stylesheet" href="/site/css/main.css" />
+    <title>Отзывы покупателей — Сибирские Деликатесы</title>
+  </head>
+  <body>
+    <div data-component="header"></div>
+    <main class="reviews-page">
+      <section class="reviews-page__hero">
+        <div class="reviews-page__container">
+          <p class="reviews-page__eyebrow">Сибирские Деликатесы</p>
+          <h1>Отзывы покупателей</h1>
+          <p>Здесь публикуются отзывы, прошедшие модерацию. Оставить отзыв можно на странице товара после завершённой покупки.</p>
+        </div>
+      </section>
+      <section class="reviews-page__content">
+        <div class="reviews-page__container">
+          <div class="reviews-page__grid" data-public-reviews>
+            <p class="reviews-page__empty">Загружаем отзывы...</p>
+          </div>
+          <nav class="reviews-page__pagination" aria-label="Страницы отзывов" data-public-reviews-pagination></nav>
+        </div>
+      </section>
+    </main>
+    <div data-component="footer"></div>
+    <script src="/site/js/main.js" defer></script>
+    <script src="/site/js/reviews.js" defer></script>
+  </body>
+</html>

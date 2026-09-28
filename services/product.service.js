@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { applyActivePromotionsToProducts } from "./promotion.service.js";
 
 function decimalToString(value) {
   if (value === null || value === undefined) {
@@ -170,6 +171,7 @@ export function serializeProductSummary(product, reviewStats = null) {
     unitLabel: product.unitLabel,
     price: decimalToString(product.price),
     oldPrice: decimalToString(product.oldPrice),
+    promotion: product.promotion ?? null,
     step: decimalToString(product.step),
     minQuantity: decimalToString(product.minQuantity),
     stockQuantity: decimalToString(product.stockQuantity),
@@ -303,7 +305,8 @@ export async function getPublicProductBySlug(slug) {
     average: null,
     count: 0,
   };
-  const summary = serializeProductSummary(product, reviewStats);
+  const [pricedProduct] = await applyActivePromotionsToProducts([product]);
+  const summary = serializeProductSummary(pricedProduct, reviewStats);
 
   const relatedProducts = await prisma.product.findMany({
     where: {
@@ -374,9 +377,10 @@ export async function getPublicProductBySlug(slug) {
     },
   });
 
-  const relatedReviewStats = await getReviewStatsMap(
-    relatedProducts.map((item) => item.id),
-  );
+  const [relatedReviewStats, pricedRelatedProducts] = await Promise.all([
+    getReviewStatsMap(relatedProducts.map((item) => item.id)),
+    applyActivePromotionsToProducts(relatedProducts),
+  ]);
 
   return {
     ...summary,
@@ -390,7 +394,7 @@ export async function getPublicProductBySlug(slug) {
     },
     images: product.images.map(serializeImage),
     reviews: product.reviews.map(serializeReview),
-    relatedProducts: relatedProducts.map((item) =>
+    relatedProducts: pricedRelatedProducts.map((item) =>
       serializeProductSummary(
         item,
         relatedReviewStats.get(item.id) || {

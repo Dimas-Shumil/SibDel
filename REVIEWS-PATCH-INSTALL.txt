@@ -1,0 +1,24 @@
+Siberian Delicacies — Reviews patch
+Base: latest project with Products/Categories CMS + Customers CRM + Promotions.
+
+1. Stop npm run dev.
+2. Copy this patch over the current sibDel project with file replacement.
+3. Run:
+   npm run prisma:validate
+   npm run prisma:deploy
+   npm run prisma:generate
+   npm run css
+   npm run test:reviews-smoke
+4. Start:
+   npm run dev
+
+Manual check:
+- /admin/reviews
+- completed CUSTOMER order -> product page -> submit review
+- approve in admin -> review appears on product and rating changes
+- mark Featured -> review appears on the home page
+- /reviews.html shows all approved reviews
+
+The migration adds only DB integrity for Review:
+- partial unique index for one registered user review per product
+- rating CHECK 1..5

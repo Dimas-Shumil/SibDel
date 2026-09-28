@@ -150,6 +150,16 @@ export async function login(
       );
     }
 
+    if (user.role !== "CUSTOMER") {
+      return next(
+        createAuthError(
+          "Для служебной учётной записи используйте вход в админ-панель.",
+          403,
+          "ADMIN_LOGIN_REQUIRED",
+        ),
+      );
+    }
+
     const existingToken =
       req.cookies?.[
         authConfig.sessionCookieName

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="stylesheet" href="/site/css/auth.min.css" />
+    <title>Вход в админ-панель — Сибирские Деликатесы</title>
+  </head>
+  <body class="auth-page" data-admin-login-page>
+    <main class="auth-shell" data-auth-shell>
+      <a class="auth-shell__back" href="/">На главную</a>
+
+      <section class="auth-card" aria-labelledby="admin-login-title">
+        <a class="auth-card__brand" href="/" aria-label="Сибирские Деликатесы — на главную">
+          <svg class="auth-card__brand-mark" viewBox="0 0 56 72" aria-hidden="true">
+            <path d="M28 2 17 20h7L12 35h10L7 53h16v15h10V53h16L34 35h10L32 20h7L28 2Z" fill="currentColor" />
+          </svg>
+          <span class="auth-card__brand-text">
+            <span>Сибирские</span>
+            <span>Деликатесы</span>
+          </span>
+        </a>
+
+        <section class="auth-view is-active">
+          <header class="auth-view__header">
+            <p class="auth-view__eyebrow">Администрирование</p>
+            <h1 class="auth-view__title" id="admin-login-title">Вход в панель</h1>
+            <p class="auth-view__lead">Доступ только для сотрудников с ролью OWNER или STAFF.</p>
+          </header>
+
+          <form class="auth-form" novalidate data-admin-login-form>
+            <div class="auth-field">
+              <label class="auth-field__label" for="admin-email">Email</label>
+              <div class="auth-field__control">
+                <input
+                  class="auth-field__input auth-field__input--plain"
+                  id="admin-email"
+                  name="email"
+                  type="email"
+                  autocomplete="username"
+                  maxlength="191"
+                  placeholder="owner@example.ru"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-field__label" for="admin-password">Пароль</label>
+              <div class="auth-field__control">
+                <input
+                  class="auth-field__input auth-field__input--plain auth-field__input--password"
+                  id="admin-password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  maxlength="256"
+                  placeholder="Введите пароль"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="auth-form__status" role="status" aria-live="polite" data-admin-status></div>
+
+            <button class="auth-submit" type="submit" data-admin-submit>
+              <span>Войти</span>
+              <span class="auth-submit__loader" aria-hidden="true"></span>
+            </button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

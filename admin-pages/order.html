@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Карточка заказа — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="orders" data-admin-order-page>
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/">
+          <span class="admin-brand__mark" aria-hidden="true">▲</span>
+          <span><strong>Сибирские</strong><strong>Деликатесы</strong></span>
+        </a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user">
+          <span class="admin-sidebar__role" data-admin-user-role>...</span>
+          <strong data-admin-user-name>Загрузка...</strong>
+          <span data-admin-user-email></span>
+          <button class="admin-link-button" type="button" data-admin-logout>Выйти</button>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header admin-header--order">
+          <div>
+            <a class="admin-back-link" href="/admin/orders">К списку заказов</a>
+            <p class="admin-eyebrow">Карточка заказа</p>
+            <div class="admin-title-row">
+              <h1 data-order-title>Загрузка...</h1>
+              <span class="admin-status" data-order-status></span>
+            </div>
+            <p class="admin-header__lead" data-order-created></p>
+          </div>
+        </header>
+
+        <div data-order-content>
+          <section class="admin-grid admin-grid--order">
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Клиент</p><h2>Контакты и получение</h2></div></div>
+              <dl class="admin-detail-list" data-order-customer></dl>
+            </article>
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Управление</p><h2>Статус заказа</h2></div></div>
+              <form class="admin-status-form" data-order-status-form>
+                <label>
+                  <span>Следующий статус</span>
+                  <select name="status" data-order-status-select></select>
+                </label>
+                <label>
+                  <span>Комментарий к операции</span>
+                  <textarea name="reason" rows="3" maxlength="500" placeholder="Необязательно"></textarea>
+                </label>
+                <button class="admin-button" type="submit" data-order-status-submit>Изменить статус</button>
+                <p class="admin-form-note" data-order-status-note></p>
+              </form>
+            </article>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Состав</p><h2>Товары заказа</h2></div></div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead><tr><th>Товар</th><th>SKU</th><th>Количество</th><th>Цена</th><th>Резерв</th><th>Сумма</th></tr></thead>
+                <tbody data-order-items></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-grid admin-grid--order-bottom">
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Оплата</p><h2>Итого</h2></div></div>
+              <dl class="admin-money-list" data-order-totals></dl>
+            </article>
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Склад</p><h2>Резервирование</h2></div></div>
+              <div data-order-reservations></div>
+            </article>
+          </section>
+        </div>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

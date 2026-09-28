@@ -157,6 +157,7 @@ export function serializeCommerceItem(product, quantity = 1) {
     available: limits.available,
     unitPrice: decimalToNumber(product.price) ?? 0,
     oldUnitPrice: decimalToNumber(product.oldPrice) ?? decimalToNumber(product.price) ?? 0,
+    promotion: product.promotion ?? null,
     quantity: normalizedQuantity,
     min: limits.min,
     max: limits.max,

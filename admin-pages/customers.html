@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Клиенты — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="customers">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div><p class="admin-eyebrow">CRM · Customers</p><h1>Клиенты</h1><p class="admin-header__lead">Аккаунты покупателей, история заказов, LTV, адреса и внутренняя работа команды.</p></div>
+          <div class="admin-header__actions"><a class="admin-button admin-button--secondary" href="/admin/orders">Заказы</a></div>
+        </header>
+
+        <section class="admin-metrics admin-metrics--customers" aria-label="Показатели клиентской базы">
+          <article class="admin-metric"><span>Всего клиентов</span><strong data-customers-metric="totalCustomers">—</strong><small>зарегистрированные аккаунты</small></article>
+          <article class="admin-metric admin-metric--accent"><span>Активные</span><strong data-customers-metric="activeCustomers">—</strong><small>могут войти в аккаунт</small></article>
+          <article class="admin-metric"><span>Покупатели</span><strong data-customers-metric="buyers">—</strong><small>есть хотя бы один заказ</small></article>
+          <article class="admin-metric"><span>Новые за 30 дней</span><strong data-customers-metric="newCustomers30d">—</strong><small>регистрации за последний месяц</small></article>
+        </section>
+
+        <section class="admin-panel">
+          <form class="admin-toolbar admin-toolbar--customers" data-customers-filter>
+            <label class="admin-search admin-search--grow"><span class="sr-only">Поиск клиентов</span><input type="search" name="q" placeholder="Имя, email или телефон" maxlength="120" autocomplete="off" /></label>
+            <label class="admin-select-wrap"><span class="sr-only">Статус аккаунта</span><select name="status"><option value="all">Все аккаунты</option><option value="active">Активные</option><option value="inactive">Отключённые</option></select></label>
+            <label class="admin-select-wrap"><span class="sr-only">Покупки</span><select name="purchase"><option value="all">Любая история</option><option value="buyers">Есть заказы</option><option value="no-orders">Без заказов</option></select></label>
+            <button class="admin-button" type="submit">Применить</button>
+            <button class="admin-button admin-button--secondary" type="button" data-customers-reset>Сбросить</button>
+          </form>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-table--customers">
+              <thead><tr><th>Клиент</th><th>Контакты</th><th>Заказы</th><th>Завершено</th><th>LTV</th><th>Последний заказ</th><th>Статус</th><th>Регистрация</th></tr></thead>
+              <tbody data-customers-list><tr><td colspan="8" class="admin-table__empty">Загружаем клиентов...</td></tr></tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" data-customers-pagination></div>
+        </section>
+        <p class="admin-form-note admin-page-note">Гостевые заказы без аккаунта остаются в разделе «Заказы» и не объединяются в CRM автоматически по телефону или email.</p>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

@@ -10,6 +10,7 @@ import {
   postInventoryReturn,
 } from "../controllers/inventory.controller.js";
 import { sensitiveRateLimiter } from "../middleware/rate-limit.js";
+import { adminAuth } from "../middleware/admin-auth.js";
 import { requireRoles } from "../middleware/roles.js";
 import { validate } from "../middleware/validate.js";
 
@@ -53,7 +54,7 @@ const adjustmentBodySchema = z
   })
   .strict();
 
-router.use(requireRoles("OWNER", "STAFF"));
+router.use(adminAuth);
 router.use((_req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
   return next();

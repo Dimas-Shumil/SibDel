@@ -624,6 +624,38 @@
                   </div>
                 </div>
 
+                <div class="product-review-write" data-review-composer>
+                  <p class="product-review-write__state" data-review-state>Проверяем возможность оставить отзыв...</p>
+                  <form class="product-review-form" data-review-form hidden>
+                    <div class="product-review-write__head">
+                      <div>
+                        <strong data-review-form-title>Ваш отзыв</strong>
+                        <span data-review-form-subtitle>После отправки отзыв попадёт на модерацию.</span>
+                      </div>
+                      <span class="product-review-write__badge is-pending" data-review-status hidden></span>
+                    </div>
+                    <div class="product-review-form__field">
+                      <span>Оценка</span>
+                      <div class="product-review-rating" role="radiogroup" aria-label="Оценка товара">
+                        <label><input type="radio" name="rating" value="1" required /><span aria-label="1 из 5">★</span></label>
+                        <label><input type="radio" name="rating" value="2" /><span aria-label="2 из 5">★ 2</span></label>
+                        <label><input type="radio" name="rating" value="3" /><span aria-label="3 из 5">★ 3</span></label>
+                        <label><input type="radio" name="rating" value="4" /><span aria-label="4 из 5">★ 4</span></label>
+                        <label><input type="radio" name="rating" value="5" /><span aria-label="5 из 5">★ 5</span></label>
+                      </div>
+                    </div>
+                    <label class="product-review-form__field">
+                      <span>Текст отзыва</span>
+                      <textarea name="text" minlength="10" maxlength="2000" required placeholder="Расскажите о вкусе, качестве и впечатлении от продукта"></textarea>
+                    </label>
+                    <div class="product-review-form__actions">
+                      <button class="product-review-form__submit" type="submit" data-review-submit>Отправить на модерацию</button>
+                      <button class="product-review-form__delete" type="button" data-review-delete hidden>Удалить мой отзыв</button>
+                    </div>
+                    <p class="product-review-form__note">Имя берётся из вашего аккаунта. Администрация может опубликовать или отклонить отзыв, но не редактирует его текст.</p>
+                  </form>
+                </div>
+
                 <div class="product-reviews__list">
                   <article class="product-review-card">
                     <div class="product-review-card__head">

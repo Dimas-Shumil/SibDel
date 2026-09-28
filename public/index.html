@@ -1346,7 +1346,7 @@
 
       <!-- отзывы -->
 
-      <section class="reviews">
+      <section class="reviews" data-featured-reviews-section hidden>
         <div class="reviews__container">
           <div class="reviews__header">
             <h2 class="reviews__title">Отзывы покупателей</h2>
@@ -1362,7 +1362,7 @@
                   type="button"
                   aria-label="Предыдущие отзывы"
                 >
-                  ←
+                  Назад
                 </button>
 
                 <button
@@ -1370,165 +1370,14 @@
                   type="button"
                   aria-label="Следующие отзывы"
                 >
-                  →
+                  Далее
                 </button>
               </div>
             </div>
           </div>
 
           <div class="reviews__slider swiper">
-            <div class="reviews__wrapper swiper-wrapper">
-              <article class="reviews__card reviews__slide swiper-slide">
-                <div class="reviews__card-header">
-                  <div class="reviews__person">
-                    <div class="reviews__avatar" aria-hidden="true">Е</div>
-
-                    <div class="reviews__meta">
-                      <h3 class="reviews__name">Елена С.</h3>
-
-                      <time class="reviews__date" datetime="2026-08-14">
-                        14 августа 2026
-                      </time>
-                    </div>
-                  </div>
-
-                  <div class="reviews__rating" aria-label="Оценка 5 из 5">
-                    ★★★★★
-                  </div>
-                </div>
-
-                <p class="reviews__text">
-                  Отличный магазин! Всегда свежие продукты, особенно колбасы и
-                  сыры. Доставка вовремя, всё приезжает аккуратно упакованным.
-                </p>
-              </article>
-
-              <article class="reviews__card reviews__slide swiper-slide">
-                <div class="reviews__card-header">
-                  <div class="reviews__person">
-                    <div class="reviews__avatar" aria-hidden="true">А</div>
-
-                    <div class="reviews__meta">
-                      <h3 class="reviews__name">Александр К.</h3>
-
-                      <time class="reviews__date" datetime="2026-08-18">
-                        18 августа 2026
-                      </time>
-                    </div>
-                  </div>
-
-                  <div class="reviews__rating" aria-label="Оценка 5 из 5">
-                    ★★★★★
-                  </div>
-                </div>
-
-                <p class="reviews__text">
-                  Заказываем не первый раз. Мясо и полуфабрикаты всегда на
-                  высоте. Особенно нравится продукция собственного производства.
-                </p>
-              </article>
-
-              <article class="reviews__card reviews__slide swiper-slide">
-                <div class="reviews__card-header">
-                  <div class="reviews__person">
-                    <div class="reviews__avatar" aria-hidden="true">М</div>
-
-                    <div class="reviews__meta">
-                      <h3 class="reviews__name">Мария Л.</h3>
-
-                      <time class="reviews__date" datetime="2026-08-20">
-                        20 августа 2026
-                      </time>
-                    </div>
-                  </div>
-
-                  <div class="reviews__rating" aria-label="Оценка 5 из 5">
-                    ★★★★★
-                  </div>
-                </div>
-
-                <p class="reviews__text">
-                  Очень понравились деликатесы и молочная продукция. Всё свежее,
-                  вкусное и действительно качественное. Будем заказывать ещё.
-                </p>
-              </article>
-
-              <article class="reviews__card reviews__slide swiper-slide">
-                <div class="reviews__card-header">
-                  <div class="reviews__person">
-                    <div class="reviews__avatar" aria-hidden="true">Д</div>
-
-                    <div class="reviews__meta">
-                      <h3 class="reviews__name">Дмитрий П.</h3>
-
-                      <time class="reviews__date" datetime="2026-08-23">
-                        23 августа 2026
-                      </time>
-                    </div>
-                  </div>
-
-                  <div class="reviews__rating" aria-label="Оценка 5 из 5">
-                    ★★★★★
-                  </div>
-                </div>
-
-                <p class="reviews__text">
-                  Хороший выбор продукции. Заказ собрали быстро, всё приехало
-                  свежим. Отдельный плюс за удобную доставку и нормальные цены.
-                </p>
-              </article>
-
-              <article class="reviews__card reviews__slide swiper-slide">
-                <div class="reviews__card-header">
-                  <div class="reviews__person">
-                    <div class="reviews__avatar" aria-hidden="true">О</div>
-
-                    <div class="reviews__meta">
-                      <h3 class="reviews__name">Ольга В.</h3>
-
-                      <time class="reviews__date" datetime="2026-08-27">
-                        27 августа 2026
-                      </time>
-                    </div>
-                  </div>
-
-                  <div class="reviews__rating" aria-label="Оценка 5 из 5">
-                    ★★★★★
-                  </div>
-                </div>
-
-                <p class="reviews__text">
-                  Покупали колбасы, сыр и полуфабрикаты. Всё понравилось.
-                  Приятно, что можно заказать продукты местного производства в
-                  одном месте.
-                </p>
-              </article>
-
-              <article class="reviews__card reviews__slide swiper-slide">
-                <div class="reviews__card-header">
-                  <div class="reviews__person">
-                    <div class="reviews__avatar" aria-hidden="true">Н</div>
-
-                    <div class="reviews__meta">
-                      <h3 class="reviews__name">Наталья Р.</h3>
-
-                      <time class="reviews__date" datetime="2026-08-30">
-                        30 августа 2026
-                      </time>
-                    </div>
-                  </div>
-
-                  <div class="reviews__rating" aria-label="Оценка 5 из 5">
-                    ★★★★★
-                  </div>
-                </div>
-
-                <p class="reviews__text">
-                  Заказ привезли вовремя, продукты свежие. Особенно понравились
-                  пельмени и мясные деликатесы. Спасибо за качество и сервис.
-                </p>
-              </article>
-            </div>
+            <div class="reviews__wrapper swiper-wrapper"></div>
           </div>
         </div>
       </section>

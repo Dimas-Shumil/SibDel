@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Категории — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="categories">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header"><div><p class="admin-eyebrow">CMS · Categories</p><h1>Категории</h1><p class="admin-header__lead">Структура каталога без опасного удаления связанных товаров.</p></div><div class="admin-header__actions"><a class="admin-button admin-button--secondary" href="/admin/products">Товары</a></div></header>
+
+        <section class="admin-grid admin-grid--categories">
+          <article class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Редактор</p><h2 data-category-form-title>Новая категория</h2></div><button class="admin-icon-button" type="button" data-category-reset>Новая</button></div>
+            <form class="admin-category-form" data-category-form novalidate>
+              <input type="hidden" name="id" />
+              <label class="admin-field"><span>Название *</span><input name="name" maxlength="150" required /></label>
+              <label class="admin-field"><span>Slug *</span><input name="slug" maxlength="191" required /></label>
+              <label class="admin-field"><span>Описание</span><textarea name="description" rows="5"></textarea></label>
+              <label class="admin-field"><span>URL изображения</span><input name="imageUrl" maxlength="500" placeholder="/uploads/... или /site/img/..." /></label>
+              <label class="admin-field"><span>Порядок</span><input name="sortOrder" type="number" step="1" value="0" /></label>
+              <div class="admin-check-grid admin-check-grid--category">
+                <label class="admin-check"><input type="checkbox" name="isActive" checked /><span>Активна</span></label>
+                <label class="admin-check"><input type="checkbox" name="isFeatured" /><span>Рекомендуемая</span></label>
+              </div>
+              <button class="admin-button admin-button--full" type="submit" data-category-save>Сохранить категорию</button>
+            </form>
+          </article>
+
+          <article class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Каталог</p><h2>Все категории</h2></div></div>
+            <div class="admin-table-wrap">
+              <table class="admin-table admin-table--categories"><thead><tr><th>Категория</th><th>Товаров</th><th>Порядок</th><th>Статус</th><th>Действия</th></tr></thead><tbody data-categories-list><tr><td colspan="5" class="admin-table__empty">Загружаем категории...</td></tr></tbody></table>
+            </div>
+            <p class="admin-form-note admin-category-delete-note">Если у категории есть товары, OWNER не удаляет её физически: система переводит категорию в неактивное состояние.</p>
+          </article>
+        </section>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

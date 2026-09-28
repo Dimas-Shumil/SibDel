@@ -53,6 +53,12 @@ export const sensitiveRateLimiter = createRateLimiter({
   message: "Слишком много попыток выполнить защищённую операцию. Попробуйте позже.",
 });
 
+export const adminMutationRateLimiter = createRateLimiter({
+  limit: 120,
+  identifier: "admin-mutation",
+  message: "Слишком много изменений за короткое время. Попробуйте немного позже.",
+});
+
 export const registrationRateLimiter = createRateLimiter({
   limit: 5,
   identifier: "registration",

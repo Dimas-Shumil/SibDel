@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Обзор — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="dashboard">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/">
+          <span class="admin-brand__mark" aria-hidden="true">▲</span>
+          <span>
+            <strong>Сибирские</strong>
+            <strong>Деликатесы</strong>
+          </span>
+        </a>
+
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+
+        <div class="admin-sidebar__roadmap">
+          <span>Следующий этап</span>
+          <strong>Отзывы · Подписки · Доставка</strong>
+        </div>
+
+        <div class="admin-sidebar__user">
+          <span class="admin-sidebar__role" data-admin-user-role>...</span>
+          <strong data-admin-user-name>Загрузка...</strong>
+          <span data-admin-user-email></span>
+          <button class="admin-link-button" type="button" data-admin-logout>Выйти</button>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <p class="admin-eyebrow">Управление платформой</p>
+            <h1>Обзор</h1>
+            <p class="admin-header__lead">Заказы, клиенты и склад в одной рабочей точке.</p>
+          </div>
+          <div class="admin-header__actions">
+            <a class="admin-button admin-button--secondary" href="/admin/orders">Открыть заказы</a>
+            <a class="admin-button" href="/admin/warehouse">Открыть склад</a>
+          </div>
+        </header>
+
+        <section class="admin-metrics" aria-label="Ключевые показатели">
+          <article class="admin-metric">
+            <span>Заказов сегодня</span>
+            <strong data-dashboard-metric="ordersToday">—</strong>
+            <small>создано с начала дня</small>
+          </article>
+          <article class="admin-metric admin-metric--accent">
+            <span>Новые заказы</span>
+            <strong data-dashboard-metric="newOrders">—</strong>
+            <small>ожидают подтверждения</small>
+          </article>
+          <article class="admin-metric">
+            <span>В работе</span>
+            <strong data-dashboard-metric="activeOrders">—</strong>
+            <small>подтверждены и выполняются</small>
+          </article>
+          <article class="admin-metric">
+            <span>Сумма заказов сегодня</span>
+            <strong data-dashboard-metric="orderValueToday">—</strong>
+            <small>без отменённых заказов</small>
+          </article>
+        </section>
+
+        <section class="admin-grid admin-grid--dashboard">
+          <article class="admin-panel admin-panel--wide">
+            <div class="admin-panel__head">
+              <div>
+                <p class="admin-panel__eyebrow">Последние события</p>
+                <h2>Свежие заказы</h2>
+              </div>
+              <a class="admin-text-link" href="/admin/orders">Все заказы</a>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Заказ</th>
+                    <th>Клиент</th>
+                    <th>Статус</th>
+                    <th>Сумма</th>
+                    <th>Создан</th>
+                  </tr>
+                </thead>
+                <tbody data-dashboard-orders>
+                  <tr><td colspan="5" class="admin-table__empty">Загружаем заказы...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <aside class="admin-panel admin-panel--compact">
+            <div class="admin-panel__head">
+              <div>
+                <p class="admin-panel__eyebrow">Склад</p>
+                <h2>Состояние</h2>
+              </div>
+            </div>
+            <dl class="admin-stat-list">
+              <div>
+                <dt>Товаров на учёте</dt>
+                <dd data-dashboard-metric="trackedProducts">—</dd>
+              </div>
+              <div>
+                <dt>Нет доступного остатка</dt>
+                <dd data-dashboard-metric="outOfStockProducts">—</dd>
+              </div>
+              <div>
+                <dt>Активных резервов</dt>
+                <dd data-dashboard-metric="activeReservations">—</dd>
+              </div>
+              <div>
+                <dt>Зарезервировано единиц</dt>
+                <dd data-dashboard-metric="reservedUnits">—</dd>
+              </div>
+              <div>
+                <dt>Активных клиентов</dt>
+                <dd data-dashboard-metric="customerCount">—</dd>
+              </div>
+            </dl>
+            <a class="admin-button admin-button--full" href="/admin/warehouse">Перейти на склад</a>
+          </aside>
+        </section>
+
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

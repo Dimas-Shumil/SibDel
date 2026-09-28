@@ -16,6 +16,7 @@ const sessionCookieOptions = Object.freeze({
 
 export const authConfig = Object.freeze({
   sessionCookieName: env.SESSION_COOKIE_NAME,
+  adminSessionCookieName: `${env.SESSION_COOKIE_NAME}_admin`,
   sessionTtlMs,
   sessionTouchIntervalMs: 15 * 60 * 1000,
   maxSessionsPerUser: 10,
@@ -31,6 +32,20 @@ export function getSessionCookieOptions() {
 }
 
 export function getClearSessionCookieOptions() {
+  const { maxAge, ...options } = sessionCookieOptions;
+
+  return {
+    ...options,
+  };
+}
+
+export function getAdminSessionCookieOptions() {
+  return {
+    ...sessionCookieOptions,
+  };
+}
+
+export function getClearAdminSessionCookieOptions() {
   const { maxAge, ...options } = sessionCookieOptions;
 
   return {

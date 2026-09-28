@@ -970,6 +970,180 @@ function initProductCartPreview() {
   });
 }
 
+const PRODUCT_REVIEW_STATUS_LABELS = Object.freeze({
+  PENDING: 'На модерации',
+  APPROVED: 'Опубликован',
+  REJECTED: 'Отклонён',
+});
+
+async function productReviewFetch(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: 'same-origin',
+    ...options,
+    headers: {
+      Accept: 'application/json',
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.headers || {}),
+    },
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || !payload?.ok) {
+    const error = new Error(payload?.error?.message || 'Не удалось выполнить запрос.');
+    error.status = response.status;
+    error.code = payload?.error?.code;
+    throw error;
+  }
+  return payload;
+}
+
+function setProductReviewComposerMessage(html) {
+  const state = document.querySelector('[data-review-state]');
+  const form = document.querySelector('[data-review-form]');
+  if (state) {
+    state.innerHTML = html;
+    state.hidden = false;
+  }
+  if (form) form.hidden = true;
+}
+
+function fillProductReviewForm(review = null) {
+  const form = document.querySelector('[data-review-form]');
+  const state = document.querySelector('[data-review-state]');
+  const title = document.querySelector('[data-review-form-title]');
+  const subtitle = document.querySelector('[data-review-form-subtitle]');
+  const status = document.querySelector('[data-review-status]');
+  const submit = document.querySelector('[data-review-submit]');
+  const deleteButton = document.querySelector('[data-review-delete]');
+  if (!(form instanceof HTMLFormElement)) return;
+
+  state && (state.hidden = true);
+  form.hidden = false;
+  form.dataset.reviewId = review?.id ? String(review.id) : '';
+
+  form.querySelectorAll('input[name="rating"]').forEach((input) => {
+    input.checked = Boolean(review && Number(input.value) === Number(review.rating));
+  });
+  const text = form.elements.namedItem('text');
+  if (text instanceof HTMLTextAreaElement) text.value = review?.text || '';
+
+  if (title) title.textContent = review ? 'Ваш отзыв' : 'Оставить отзыв';
+  if (subtitle) {
+    subtitle.textContent = review
+      ? 'Изменение текста или оценки снова отправит отзыв на модерацию.'
+      : 'Отзыв станет виден после модерации.';
+  }
+  if (submit) submit.textContent = review ? 'Сохранить изменения' : 'Отправить на модерацию';
+  if (deleteButton) deleteButton.hidden = !review;
+
+  if (status) {
+    if (review?.status) {
+      status.hidden = false;
+      status.textContent = PRODUCT_REVIEW_STATUS_LABELS[review.status] || review.status;
+      status.classList.remove('is-pending', 'is-approved', 'is-rejected');
+      status.classList.add(`is-${String(review.status).toLowerCase()}`);
+    } else {
+      status.hidden = true;
+    }
+  }
+}
+
+async function loadProductReviewEligibility() {
+  const page = document.querySelector('[data-product-page]');
+  const productId = Number(page?.dataset.productId);
+  if (!Number.isInteger(productId) || productId <= 0) return;
+
+  try {
+    const payload = await productReviewFetch(`/api/reviews/eligibility?productId=${productId}`);
+    if (payload.eligibility.review) {
+      fillProductReviewForm(payload.eligibility.review);
+      return;
+    }
+    if (payload.eligibility.canReview) {
+      fillProductReviewForm(null);
+      return;
+    }
+    setProductReviewComposerMessage('Оставить отзыв можно после завершённой покупки этого товара.');
+  } catch (error) {
+    if (error.status === 401) {
+      const returnTo = encodeURIComponent(window.location.pathname + window.location.search + '#reviews');
+      setProductReviewComposerMessage(`Чтобы оставить отзыв после покупки, <a href="/login.html?returnTo=${returnTo}">войдите в аккаунт</a>.`);
+      return;
+    }
+    if (error.status === 403) {
+      setProductReviewComposerMessage('Отзывы покупателей доступны из клиентского аккаунта.');
+      return;
+    }
+    setProductReviewComposerMessage(escapeProductHtml(error.message));
+  }
+}
+
+async function refreshProductReviewsAfterMutation() {
+  const slug = getProductSlugFromPage();
+  if (!slug) return;
+  try {
+    const product = await fetchPublicProduct(slug);
+    renderProductReviews(product);
+  } catch {
+    // The saved review state is still shown even if the secondary refresh fails.
+  }
+}
+
+function initProductReviewComposer() {
+  const form = document.querySelector('[data-review-form]');
+  const deleteButton = document.querySelector('[data-review-delete]');
+  if (!(form instanceof HTMLFormElement)) return;
+
+  void loadProductReviewEligibility();
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const page = document.querySelector('[data-product-page]');
+    const productId = Number(page?.dataset.productId);
+    const data = new FormData(form);
+    const rating = Number(data.get('rating'));
+    const text = String(data.get('text') || '').trim();
+    const reviewId = Number(form.dataset.reviewId);
+    const editing = Number.isInteger(reviewId) && reviewId > 0;
+    const submit = document.querySelector('[data-review-submit]');
+
+    if (!Number.isInteger(productId) || !Number.isInteger(rating) || rating < 1 || rating > 5) return;
+    if (submit instanceof HTMLButtonElement) submit.disabled = true;
+
+    try {
+      await productReviewFetch(editing ? `/api/reviews/${reviewId}` : '/api/reviews', {
+        method: editing ? 'PATCH' : 'POST',
+        body: JSON.stringify(editing ? { rating, text } : { productId, rating, text }),
+      });
+      await refreshProductReviewsAfterMutation();
+      await loadProductReviewEligibility();
+    } catch (error) {
+      setProductReviewComposerMessage(escapeProductHtml(error.message));
+      window.setTimeout(() => void loadProductReviewEligibility(), 2600);
+    } finally {
+      if (submit instanceof HTMLButtonElement && submit.isConnected) submit.disabled = false;
+    }
+  });
+
+  deleteButton?.addEventListener('click', async () => {
+    const reviewId = Number(form.dataset.reviewId);
+    if (!Number.isInteger(reviewId) || reviewId <= 0) return;
+    if (!window.confirm('Удалить ваш отзыв? Это действие нельзя отменить.')) return;
+    deleteButton.disabled = true;
+    try {
+      await productReviewFetch(`/api/reviews/${reviewId}`, { method: 'DELETE' });
+      await refreshProductReviewsAfterMutation();
+      await loadProductReviewEligibility();
+    } catch (error) {
+      setProductReviewComposerMessage(escapeProductHtml(error.message));
+      window.setTimeout(() => void loadProductReviewEligibility(), 2600);
+    } finally {
+      if (deleteButton.isConnected) deleteButton.disabled = false;
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const ready = await hydrateProductPage();
 
@@ -983,4 +1157,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   initProductQuantity();
   initProductTabs();
   initProductCartPreview();
+  initProductReviewComposer();
 });

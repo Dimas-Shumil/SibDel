@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Карточка товара — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="products" data-admin-product-editor>
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <a class="admin-back-link" href="/admin/products">К списку товаров</a>
+        <header class="admin-header admin-header--order">
+          <div><p class="admin-eyebrow">CMS · Product</p><h1 data-product-editor-title>Новый товар</h1><p class="admin-header__lead" data-product-editor-lead>Заполните карточку товара. Остаток проводится отдельной складской операцией.</p></div>
+          <div class="admin-header__actions"><button class="admin-button" type="submit" form="admin-product-form" data-product-save>Сохранить</button></div>
+        </header>
+
+        <form id="admin-product-form" class="admin-product-form" data-product-form novalidate>
+          <section class="admin-grid admin-grid--editor">
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Основное</p><h2>Карточка товара</h2></div></div>
+              <div class="admin-form-grid">
+                <label class="admin-field admin-field--wide"><span>Название *</span><input name="name" maxlength="200" required autocomplete="off" /></label>
+                <label class="admin-field"><span>Slug *</span><input name="slug" maxlength="191" required autocomplete="off" /></label>
+                <label class="admin-field"><span>SKU *</span><input name="sku" maxlength="100" required autocomplete="off" /></label>
+                <label class="admin-field admin-field--wide"><span>Категория *</span><select name="categoryId" data-product-category required><option value="">Выберите категорию</option></select></label>
+                <label class="admin-field admin-field--wide"><span>Краткое описание</span><textarea name="shortDescription" maxlength="500" rows="3"></textarea></label>
+                <label class="admin-field admin-field--wide"><span>Полное описание</span><textarea name="description" rows="8"></textarea></label>
+              </div>
+            </article>
+
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Продажи</p><h2>Цена и единица</h2></div></div>
+              <div class="admin-form-grid admin-form-grid--compact">
+                <label class="admin-field"><span>Цена *</span><input name="price" type="number" min="0.01" step="0.01" required /></label>
+                <label class="admin-field"><span>Старая цена</span><input name="oldPrice" type="number" min="0.01" step="0.01" /></label>
+                <label class="admin-field"><span>Единица *</span><select name="unit" required><option value="PIECE">Штука</option><option value="KILOGRAM">Килограмм</option><option value="GRAM">Грамм</option><option value="LITER">Литр</option><option value="MILLILITER">Миллилитр</option><option value="PACKAGE">Упаковка</option></select></label>
+                <label class="admin-field"><span>Подпись единицы</span><input name="unitLabel" maxlength="100" placeholder="500 г, упаковка" /></label>
+                <label class="admin-field"><span>Шаг количества *</span><input name="step" type="number" min="0.001" step="0.001" value="1" required /></label>
+                <label class="admin-field"><span>Минимум *</span><input name="minQuantity" type="number" min="0.001" step="0.001" value="1" required /></label>
+                <label class="admin-field"><span>Порядок</span><input name="sortOrder" type="number" step="1" value="0" /></label>
+              </div>
+              <div class="admin-check-grid">
+                <label class="admin-check"><input type="checkbox" name="isActive" checked /><span>Опубликован</span></label>
+                <label class="admin-check"><input type="checkbox" name="isAvailable" checked /><span>Доступен к заказу</span></label>
+                <label class="admin-check"><input type="checkbox" name="isPopular" /><span>Популярный</span></label>
+                <label class="admin-check"><input type="checkbox" name="isFeatured" /><span>Рекомендуемый</span></label>
+                <label class="admin-check"><input type="checkbox" name="isNew" /><span>Новинка</span></label>
+              </div>
+            </article>
+          </section>
+
+          <section class="admin-grid admin-grid--editor admin-editor-row">
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Структура</p><h2>Характеристики</h2></div></div>
+              <div class="admin-form-grid">
+                <label class="admin-field admin-field--wide"><span>Преимущества — по одному на строку</span><textarea name="highlights" rows="6" placeholder="Натуральный состав&#10;Собственное производство"></textarea></label>
+                <label class="admin-field admin-field--wide"><span>Характеристики — JSON-объект</span><textarea name="characteristics" rows="8" spellcheck="false" placeholder='{"Состав":"Оленина, соль","Упаковка":"Вакуум"}'></textarea></label>
+                <label class="admin-field admin-field--wide"><span>Пищевая ценность — JSON-объект</span><textarea name="nutrition" rows="7" spellcheck="false" placeholder='{"Белки":"24 г","Жиры":"8 г"}'></textarea></label>
+              </div>
+            </article>
+
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Inventory</p><h2>Остаток</h2></div></div>
+              <div class="admin-inventory-balances admin-inventory-balances--editor">
+                <div><span>Фактический</span><strong data-product-stock>0</strong></div>
+                <div><span>Резерв</span><strong data-product-reserved>0</strong></div>
+                <div><span>Доступно</span><strong data-product-available>0</strong></div>
+              </div>
+              <label class="admin-field"><span>Новый фактический остаток</span><input name="stockQuantity" type="number" min="0" step="0.001" data-product-stock-input /></label>
+              <p class="admin-form-note" data-product-stock-note>OWNER может изменить остаток здесь. Операция проводится через InventoryMovement → ADJUSTMENT и попадает в audit log.</p>
+            </article>
+          </section>
+
+          <section class="admin-panel admin-editor-row">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">SEO</p><h2>Поисковая выдача</h2></div></div>
+            <div class="admin-form-grid">
+              <label class="admin-field admin-field--wide"><span>SEO title</span><input name="seoTitle" maxlength="255" /></label>
+              <label class="admin-field admin-field--wide"><span>SEO description</span><textarea name="seoDescription" maxlength="500" rows="4"></textarea></label>
+            </div>
+          </section>
+        </form>
+
+        <section class="admin-panel admin-editor-row" data-product-images-section>
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Media</p><h2>Изображения</h2></div><span class="admin-muted">JPG / PNG / WebP · до 8 МБ · максимум 12</span></div>
+          <form class="admin-upload-form" data-product-images-form>
+            <input type="file" name="images" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple data-product-images-input />
+            <button class="admin-button" type="submit">Загрузить</button>
+          </form>
+          <p class="admin-form-note" data-product-images-note>Сначала сохраните новый товар, затем добавьте изображения.</p>
+          <div class="admin-image-grid" data-product-images></div>
+        </section>
+
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

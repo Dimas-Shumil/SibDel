@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Карточка клиента — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="customers" data-admin-customer-detail>
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div><p class="admin-eyebrow"><a class="admin-text-link" href="/admin/customers">Клиенты</a> · карточка</p><h1 data-customer-title>Загрузка...</h1><p class="admin-header__lead" data-customer-subtitle>Получаем данные клиента.</p></div>
+          <div class="admin-header__actions" data-customer-actions></div>
+        </header>
+
+        <section class="admin-metrics" aria-label="Показатели клиента">
+          <article class="admin-metric"><span>Всего заказов</span><strong data-customer-metric="ordersCount">—</strong><small>включая отменённые</small></article>
+          <article class="admin-metric admin-metric--accent"><span>LTV</span><strong data-customer-metric="lifetimeValue">—</strong><small>только завершённые заказы</small></article>
+          <article class="admin-metric"><span>Активные заказы</span><strong data-customer-metric="activeOrdersCount">—</strong><small>сейчас в работе</small></article>
+          <article class="admin-metric"><span>Последний заказ</span><strong class="admin-metric__date" data-customer-metric="lastOrderAt">—</strong><small>по связанному аккаунту</small></article>
+        </section>
+
+        <section class="admin-grid admin-grid--customer">
+          <article class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Аккаунт</p><h2>Профиль клиента</h2></div><span data-customer-status></span></div>
+            <dl class="admin-detail-list" data-customer-profile></dl>
+          </article>
+          <article class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Контакты</p><h2>Адреса</h2></div><span class="admin-muted" data-customer-address-count></span></div>
+            <div class="admin-address-list" data-customer-addresses><p class="admin-muted">Загружаем адреса...</p></div>
+          </article>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Commerce</p><h2>История заказов</h2></div><a class="admin-text-link" href="/admin/orders">Все заказы</a></div>
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-table--customer-orders"><thead><tr><th>Заказ</th><th>Снапшот контакта</th><th>Статус</th><th>Получение</th><th>Сумма</th><th>Создан</th></tr></thead><tbody data-customer-orders><tr><td colspan="6" class="admin-table__empty">Загружаем заказы...</td></tr></tbody></table>
+          </div>
+        </section>
+
+        <section class="admin-grid admin-grid--customer-bottom">
+          <article class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">CRM</p><h2>Внутренние заметки</h2></div></div>
+            <form class="admin-note-form" data-customer-note-form>
+              <label><span>Комментарий команды</span><textarea name="text" maxlength="1000" placeholder="Например: предпочитает самовывоз; просил позвонить перед сборкой"></textarea></label>
+              <div class="admin-note-form__footer"><p class="admin-form-note">Заметки видят только OWNER/STAFF. Клиенту они не показываются.</p><button class="admin-button" type="submit" data-customer-note-submit>Добавить заметку</button></div>
+            </form>
+            <div class="admin-timeline" data-customer-timeline><p class="admin-muted">Загружаем историю...</p></div>
+          </article>
+          <article class="admin-panel">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Безопасность</p><h2>Доступ к аккаунту</h2></div></div>
+            <dl class="admin-detail-list" data-customer-security></dl>
+            <p class="admin-form-note">Отключение аккаунта не отменяет заказы. Все действующие сессии и токены восстановления будут отозваны.</p>
+          </article>
+        </section>
+
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

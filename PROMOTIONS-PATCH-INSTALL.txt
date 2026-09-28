@@ -1,0 +1,17 @@
+Siberian Delicacies — Promotions patch
+
+1. Stop `npm run dev` before copying the patch.
+2. Extract this archive over the current sibDel project with file replacement.
+3. No Prisma migration is required: schema.prisma and migrations are unchanged.
+4. Run:
+   npm run prisma:validate
+   npm run prisma:generate
+   npm run css
+   npm run test:promotions-smoke
+5. Start:
+   npm run dev
+6. Manual check:
+   /admin/promotions
+   create/edit promotion -> catalog/product -> cart -> checkout.
+
+The promotions smoke test talks directly to PostgreSQL, so the dev server does not need to be running for that test.

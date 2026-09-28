@@ -24,7 +24,11 @@
     "test:checkout-smoke": "node scripts/smoke-checkout.mjs",
     "test:inventory-smoke": "node scripts/smoke-inventory.mjs",
     "test:inventory-consistency": "node scripts/check-inventory.mjs",
-    "inventory:backfill": "node scripts/backfill-inventory-reservations.mjs"
+    "inventory:backfill": "node scripts/backfill-inventory-reservations.mjs",
+    "test:admin-catalog-smoke": "node scripts/smoke-admin-catalog.mjs",
+    "test:admin-customers-smoke": "node scripts/smoke-admin-customers.mjs",
+    "test:promotions-smoke": "node scripts/smoke-promotions.mjs",
+    "test:reviews-smoke": "node scripts/smoke-reviews.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

@@ -342,6 +342,68 @@ function initPopularProductsSlider() {
   });
 }
 
+function escapeHomeReviewHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function formatHomeReviewDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+async function hydrateFeaturedReviews() {
+  const wrapper = document.querySelector('.reviews__wrapper');
+  if (!wrapper) return;
+
+  try {
+    const response = await fetch('/api/reviews/featured?limit=12', {
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+    });
+    const payload = await response.json().catch(() => null);
+    const reviews = payload?.ok && Array.isArray(payload.reviews) ? payload.reviews : [];
+    if (!response.ok || reviews.length === 0) return;
+
+    wrapper.innerHTML = reviews.map((review) => {
+      const author = String(review.authorName || 'Покупатель');
+      const initial = author.trim().charAt(0).toUpperCase() || 'П';
+      const rating = Math.max(1, Math.min(5, Number(review.rating) || 5));
+      const productLink = review.product?.slug
+        ? `<a class="reviews__product" href="/product.html?slug=${encodeURIComponent(review.product.slug)}">${escapeHomeReviewHtml(review.product.name)}</a>`
+        : '';
+      return `
+        <article class="reviews__card reviews__slide swiper-slide">
+          <div class="reviews__card-header">
+            <div class="reviews__person">
+              <div class="reviews__avatar" aria-hidden="true">${escapeHomeReviewHtml(initial)}</div>
+              <div class="reviews__meta">
+                <h3 class="reviews__name">${escapeHomeReviewHtml(author)}</h3>
+                <time class="reviews__date" datetime="${escapeHomeReviewHtml(String(review.createdAt || ''))}">${escapeHomeReviewHtml(formatHomeReviewDate(review.createdAt))}</time>
+              </div>
+            </div>
+            <div class="reviews__rating" aria-label="Оценка ${rating} из 5">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+          </div>
+          <p class="reviews__text">${escapeHomeReviewHtml(review.text)}</p>
+          ${productLink}
+        </article>`;
+    }).join('');
+
+    document.querySelector('[data-featured-reviews-section]')?.removeAttribute('hidden');
+  } catch {
+    // Keep the featured reviews section hidden if the API is temporarily unavailable.
+  }
+}
+
 function initReviewsSlider() {
   const slider = document.querySelector(
     '.reviews__slider',
@@ -1505,6 +1567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.querySelector('[data-home-page]')) {
     initPromotionsSlider();
     initPopularProductsSlider();
+    await hydrateFeaturedReviews();
     initReviewsSlider();
   }
 });

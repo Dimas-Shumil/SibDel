@@ -14,6 +14,15 @@ const ORDER_STATUS_TRANSITIONS = Object.freeze({
   CANCELLED: new Set(),
 });
 
+function decimalToNumber(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const parsed = Number(value?.toString?.() ?? value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function createOrderError(message, statusCode, code, details) {
   const error = new Error(message);
   error.statusCode = statusCode;
@@ -60,7 +69,20 @@ function mapDeliveryStatus(order, status) {
   }
 }
 
-function serializeOrder(order) {
+function serializeReservation(reservation) {
+  return {
+    id: reservation.id,
+    productId: reservation.productId,
+    orderItemId: reservation.orderItemId,
+    quantity: decimalToNumber(reservation.quantity) ?? 0,
+    status: reservation.status,
+    createdAt: reservation.createdAt,
+    releasedAt: reservation.releasedAt,
+    committedAt: reservation.committedAt,
+  };
+}
+
+function serializeOrderSummary(order) {
   return {
     id: order.id,
     number: order.number,
@@ -69,21 +91,130 @@ function serializeOrder(order) {
     deliveryStatus: order.deliveryStatus,
     deliveryMethod: order.deliveryMethod,
     paymentMethod: order.paymentMethod,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    customerEmail: order.customerEmail,
+    total: decimalToNumber(order.total) ?? 0,
+    currency: order.currency,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    itemsCount: order._count?.items ?? 0,
+    activeReservations: order.inventoryReservations?.length ?? 0,
+  };
+}
+
+function serializeOrder(order) {
+  return {
+    id: order.id,
+    number: order.number,
+    userId: order.userId,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    deliveryStatus: order.deliveryStatus,
+    deliveryMethod: order.deliveryMethod,
+    paymentMethod: order.paymentMethod,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    customerEmail: order.customerEmail,
+    deliveryAddressSnapshot: order.deliveryAddressSnapshot,
+    requestedReceiveDate: order.requestedReceiveDate,
+    requestedTimeWindow: order.requestedTimeWindow,
+    comment: order.comment,
+    subtotal: decimalToNumber(order.subtotal) ?? 0,
+    discountTotal: decimalToNumber(order.discountTotal) ?? 0,
+    deliveryPrice: decimalToNumber(order.deliveryPrice) ?? 0,
+    deliveryPriceConfirmed: order.deliveryPriceConfirmed,
+    total: decimalToNumber(order.total) ?? 0,
+    currency: order.currency,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
     confirmedAt: order.confirmedAt,
     completedAt: order.completedAt,
     cancelledAt: order.cancelledAt,
-    inventoryReservations: order.inventoryReservations?.map((reservation) => ({
-      id: reservation.id,
-      productId: reservation.productId,
-      orderItemId: reservation.orderItemId,
-      quantity: Number(reservation.quantity?.toString?.() ?? reservation.quantity),
-      status: reservation.status,
-      createdAt: reservation.createdAt,
-      releasedAt: reservation.releasedAt,
-      committedAt: reservation.committedAt,
+    allowedStatuses: [...(ORDER_STATUS_TRANSITIONS[order.status] ?? [])],
+    user: order.user ?? null,
+    items: order.items?.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      productName: item.productName,
+      sku: item.sku,
+      unit: item.unit,
+      quantity: decimalToNumber(item.quantity) ?? 0,
+      baseUnitPrice: decimalToNumber(item.baseUnitPrice) ?? 0,
+      unitPrice: decimalToNumber(item.unitPrice) ?? 0,
+      discountTotal: decimalToNumber(item.discountTotal) ?? 0,
+      total: decimalToNumber(item.total) ?? 0,
+      reservation: item.inventoryReservation
+        ? serializeReservation(item.inventoryReservation)
+        : null,
     })) ?? [],
+    inventoryReservations:
+      order.inventoryReservations?.map(serializeReservation) ?? [],
+  };
+}
+
+export async function listAdminOrders({
+  q = "",
+  status,
+  page = 1,
+  limit = 25,
+} = {}) {
+  const normalizedQuery = String(q || "").trim();
+  const where = {
+    ...(status ? { status } : {}),
+    ...(normalizedQuery
+      ? {
+          OR: [
+            { number: { contains: normalizedQuery, mode: "insensitive" } },
+            { customerName: { contains: normalizedQuery, mode: "insensitive" } },
+            { customerPhone: { contains: normalizedQuery, mode: "insensitive" } },
+            { customerEmail: { contains: normalizedQuery, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [total, orders] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        number: true,
+        status: true,
+        paymentStatus: true,
+        deliveryStatus: true,
+        deliveryMethod: true,
+        paymentMethod: true,
+        customerName: true,
+        customerPhone: true,
+        customerEmail: true,
+        total: true,
+        currency: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: { select: { items: true } },
+        inventoryReservations: {
+          where: { status: "ACTIVE" },
+          select: { id: true },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    items: orders.map(serializeOrderSummary),
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.max(1, Math.ceil(total / limit)),
+    },
   };
 }
 
@@ -91,6 +222,21 @@ export async function getAdminOrder(orderKey) {
   const order = await prisma.order.findFirst({
     where: { OR: createOrderLookup(orderKey) },
     include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+      items: {
+        orderBy: { id: "asc" },
+        include: {
+          inventoryReservation: true,
+        },
+      },
       inventoryReservations: {
         orderBy: { id: "asc" },
       },
@@ -128,7 +274,22 @@ export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason 
       if (order.status === nextStatus) {
         const current = await transaction.order.findUnique({
           where: { id: order.id },
-          include: { inventoryReservations: { orderBy: { id: "asc" } } },
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                phone: true,
+              },
+            },
+            items: {
+              orderBy: { id: "asc" },
+              include: { inventoryReservation: true },
+            },
+            inventoryReservations: { orderBy: { id: "asc" } },
+          },
         });
         return serializeOrder(current);
       }
@@ -163,7 +324,7 @@ export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason 
       }
 
       const now = new Date();
-      const updated = await transaction.order.update({
+      await transaction.order.update({
         where: { id: order.id },
         data: {
           status: nextStatus,
@@ -173,9 +334,6 @@ export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason 
             : {}),
           ...(nextStatus === "COMPLETED" ? { completedAt: now } : {}),
           ...(nextStatus === "CANCELLED" ? { cancelledAt: now } : {}),
-        },
-        include: {
-          inventoryReservations: { orderBy: { id: "asc" } },
         },
       });
 
@@ -191,6 +349,26 @@ export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason 
             to: nextStatus,
             reason,
           },
+        },
+      });
+
+      const updated = await transaction.order.findUnique({
+        where: { id: order.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              phone: true,
+            },
+          },
+          items: {
+            orderBy: { id: "asc" },
+            include: { inventoryReservation: true },
+          },
+          inventoryReservations: { orderBy: { id: "asc" } },
         },
       });
 

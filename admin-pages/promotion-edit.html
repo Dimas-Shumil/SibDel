@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Редактор акции — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="promotions" data-admin-promotion-editor>
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <a class="admin-back-link" href="/admin/promotions">К списку акций</a>
+        <header class="admin-header admin-header--order">
+          <div><p class="admin-eyebrow">Commerce · Promotion</p><h1 data-promotion-editor-title>Новая акция</h1><p class="admin-header__lead" data-promotion-editor-lead>Настройте скидку, период и область действия. Пустая область означает акцию на весь каталог.</p></div>
+          <div class="admin-header__actions"><button class="admin-button admin-button--danger" type="button" data-promotion-delete hidden>Удалить</button><button class="admin-button" type="submit" form="admin-promotion-form" data-promotion-save>Сохранить</button></div>
+        </header>
+
+        <form id="admin-promotion-form" class="admin-product-form" data-promotion-form novalidate>
+          <section class="admin-grid admin-grid--promotion-editor">
+            <article class="admin-panel">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Основное</p><h2>Параметры акции</h2></div><span data-promotion-runtime-status></span></div>
+              <div class="admin-form-grid">
+                <label class="admin-field admin-field--wide"><span>Название *</span><input name="name" maxlength="180" required autocomplete="off" /></label>
+                <label class="admin-field"><span>Slug *</span><input name="slug" maxlength="191" required autocomplete="off" /></label>
+                <label class="admin-field"><span>Статус *</span><select name="status" required><option value="DRAFT">Черновик</option><option value="ACTIVE">Активна / по расписанию</option><option value="PAUSED">На паузе</option></select></label>
+                <label class="admin-field"><span>Тип скидки *</span><select name="type" required><option value="PERCENT">Процент</option><option value="FIXED">Фиксированная сумма</option></select></label>
+                <label class="admin-field"><span>Размер скидки *</span><input name="discountValue" type="number" min="0.01" step="0.01" required /></label>
+                <label class="admin-field"><span>Начало *</span><input name="startsAt" type="datetime-local" required /></label>
+                <label class="admin-field"><span>Окончание *</span><input name="endsAt" type="datetime-local" required /></label>
+                <label class="admin-field admin-field--wide"><span>Описание</span><textarea name="description" maxlength="10000" rows="5"></textarea></label>
+              </div>
+              <div class="admin-check-grid"><label class="admin-check"><input type="checkbox" name="isFeatured" /><span>Featured / приоритетный маркетинговый блок</span></label></div>
+            </article>
+
+            <article class="admin-panel admin-panel--promotion-summary">
+              <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Правила</p><h2>Как считается скидка</h2></div></div>
+              <div class="admin-promotion-rules">
+                <p><strong>PERCENT</strong> уменьшает текущую цену товара на указанный процент.</p>
+                <p><strong>FIXED</strong> уменьшает цену каждой единицы товара на фиксированную сумму.</p>
+                <p>Если подходит несколько акций, применяется только та, которая даёт меньшую финальную цену.</p>
+                <p>Старая цена товара остаётся референсом, а акция считается от текущей цены.</p>
+              </div>
+              <div class="admin-promotion-preview" data-promotion-preview></div>
+            </article>
+          </section>
+
+          <section class="admin-panel admin-editor-row">
+            <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Scope</p><h2>Область действия</h2><p class="admin-form-note">Можно выбрать товары, категории или оба варианта. Если ничего не выбрано — акция глобальная.</p></div><span class="admin-muted" data-promotion-target-count></span></div>
+            <div class="admin-grid admin-grid--promotion-targets">
+              <div class="admin-promotion-target-group">
+                <div class="admin-promotion-target-head"><strong>Категории</strong><button class="admin-link-button" type="button" data-promotion-clear-categories>Очистить</button></div>
+                <div class="admin-target-list" data-promotion-categories><p class="admin-muted">Загружаем категории...</p></div>
+              </div>
+              <div class="admin-promotion-target-group">
+                <div class="admin-promotion-target-head"><strong>Товары</strong><label class="admin-search admin-search--targets"><span class="sr-only">Поиск товаров</span><input type="search" placeholder="Название или SKU" data-promotion-product-search /></label></div>
+                <div class="admin-target-list admin-target-list--products" data-promotion-products><p class="admin-muted">Загружаем товары...</p></div>
+              </div>
+            </div>
+          </section>
+        </form>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

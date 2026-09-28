@@ -13,9 +13,10 @@ import { prisma } from "./lib/prisma.js";
 import { securityMiddleware } from "./middleware/security.js";
 import { apiRateLimiter } from "./middleware/rate-limit.js";
 import { authMiddleware } from "./middleware/auth.js";
-import { adminAuth } from "./middleware/admin-auth.js";
+import { adminSessionContext } from "./middleware/admin-auth.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import authRouter from "./routes/auth.routes.js";
+import adminRouter from "./routes/admin.routes.js";
 import accountRouter from "./routes/account.routes.js";
 import catalogRouter from "./routes/catalog.routes.js";
 import categoriesRouter from "./routes/categories.routes.js";
@@ -25,7 +26,12 @@ import favoritesRouter from "./routes/favorites.routes.js";
 import commerceRouter from "./routes/commerce.routes.js";
 import checkoutRouter from "./routes/checkout.routes.js";
 import inventoryRouter from "./routes/inventory.routes.js";
+import adminCatalogRouter from "./routes/admin-catalog.routes.js";
 import ordersRouter from "./routes/orders.routes.js";
+import adminCustomersRouter from "./routes/admin-customers.routes.js";
+import promotionsRouter from "./routes/promotions.routes.js";
+import reviewsRouter from "./routes/reviews.routes.js";
+import adminReviewsRouter from "./routes/admin-reviews.routes.js";
 import {
   notFoundHandler,
   errorHandler,
@@ -190,6 +196,11 @@ app.use(
   accountRouter,
 );
 
+app.use(
+  "/api/admin",
+  adminRouter,
+);
+
 app.use("/api/catalog", catalogRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/products", productsRouter);
@@ -198,17 +209,41 @@ app.use("/api/cart", cartRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/checkout", checkoutRouter);
 app.use("/api/admin/inventory", inventoryRouter);
+app.use("/api/admin/catalog", adminCatalogRouter);
 app.use("/api/admin/orders", ordersRouter);
+app.use("/api/admin/customers", adminCustomersRouter);
+app.use("/api/admin/promotions", promotionsRouter);
+app.use("/api/reviews", reviewsRouter);
+app.use("/api/admin/reviews", adminReviewsRouter);
 
 app.get("/admin/login", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Pragma", "no-cache");
+
   return res.sendFile(
     path.join(adminPagesPath, "login.html"),
   );
 });
 
+function requireAdminPage(req, res, next) {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Pragma", "no-cache");
+
+  if (!req.auth?.user) {
+    return res.redirect(302, "/admin/login");
+  }
+
+  if (!["OWNER", "STAFF"].includes(req.auth.user.role)) {
+    return res.status(403).send("Недостаточно прав для доступа к админ-панели.");
+  }
+
+  return next();
+}
+
 app.use(
   "/admin",
-  adminAuth,
+  adminSessionContext,
+  requireAdminPage,
   express.static(adminPagesPath, {
     dotfiles: "deny",
     extensions: ["html"],

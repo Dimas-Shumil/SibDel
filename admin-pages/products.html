@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Товары — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="products">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Следующий этап</span><strong>Отзывы · Подписки · Доставка</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div><p class="admin-eyebrow">CMS · Catalog</p><h1>Товары</h1><p class="admin-header__lead">Каталог, публикация, цены, изображения и связанный складской остаток.</p></div>
+          <div class="admin-header__actions"><a class="admin-button admin-button--secondary" href="/admin/categories">Категории</a><a class="admin-button" href="/admin/product-edit">Создать товар</a></div>
+        </header>
+
+        <section class="admin-panel">
+          <form class="admin-toolbar admin-toolbar--catalog" data-products-filter>
+            <label class="admin-search admin-search--grow"><span class="sr-only">Поиск товаров</span><input type="search" name="q" placeholder="Название, SKU или slug" maxlength="120" autocomplete="off" /></label>
+            <label class="admin-select-wrap"><span class="sr-only">Категория</span><select name="categoryId" data-product-category-filter><option value="">Все категории</option></select></label>
+            <label class="admin-select-wrap"><span class="sr-only">Публикация</span><select name="visibility"><option value="all">Все товары</option><option value="active">Опубликованные</option><option value="inactive">Скрытые</option></select></label>
+            <button class="admin-button" type="submit">Применить</button>
+            <button class="admin-button admin-button--secondary" type="button" data-products-reset>Сбросить</button>
+          </form>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-table--products">
+              <thead><tr><th>Товар</th><th>Категория</th><th>Цена</th><th>Факт</th><th>Резерв</th><th>Доступно</th><th>Статус</th><th>Обновлён</th></tr></thead>
+              <tbody data-products-list><tr><td colspan="8" class="admin-table__empty">Загружаем товары...</td></tr></tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" data-products-pagination></div>
+        </section>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

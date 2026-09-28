@@ -7,6 +7,7 @@ import {
   normalizeCommerceQuantity,
   serializeCommerceItem,
 } from "./commerce.service.js";
+import { applyActivePromotionsToProducts } from "./promotion.service.js";
 
 function createCartError(message, statusCode, code) {
   const error = new Error(message);
@@ -70,19 +71,22 @@ async function getOrCreateCart(owner, client = prisma) {
   });
 }
 
-function serializeCart(cart) {
-  const items = (cart?.items || []).map((item) =>
-    serializeCommerceItem(item.product, item.quantity),
+async function serializeCart(cart, client = prisma) {
+  const sourceItems = cart?.items || [];
+  const pricedProducts = await applyActivePromotionsToProducts(
+    sourceItems.map((item) => item.product),
+    client,
+  );
+  const pricedById = new Map(pricedProducts.map((product) => [product.id, product]));
+  const items = sourceItems.map((item) =>
+    serializeCommerceItem(pricedById.get(item.productId) || item.product, item.quantity),
   );
 
   const totals = items.reduce(
     (result, item) => {
       const quantity = Number(item.quantity) || 0;
       const unitPrice = Number(item.unitPrice) || 0;
-      const oldUnitPrice = Math.max(
-        unitPrice,
-        Number(item.oldUnitPrice) || unitPrice,
-      );
+      const oldUnitPrice = Math.max(unitPrice, Number(item.oldUnitPrice) || unitPrice);
 
       result.lines += 1;
       result.quantity += quantity;
@@ -90,12 +94,7 @@ function serializeCart(cart) {
       result.oldTotal += oldUnitPrice * quantity;
       return result;
     },
-    {
-      lines: 0,
-      quantity: 0,
-      total: 0,
-      oldTotal: 0,
-    },
+    { lines: 0, quantity: 0, total: 0, oldTotal: 0 },
   );
 
   return {
@@ -113,10 +112,10 @@ function serializeCart(cart) {
 
 export async function getCart(owner) {
   if (!owner) {
-    return serializeCart(null);
+    return await serializeCart(null);
   }
 
-  return serializeCart(await findCart(owner));
+  return await serializeCart(await findCart(owner));
 }
 
 export async function addCartItem(owner, { slug, quantity }) {
@@ -204,7 +203,7 @@ export async function addCartItem(owner, { slug, quantity }) {
 
 export async function setCartItemQuantity(owner, { slug, quantity }) {
   if (!owner) {
-    return serializeCart(null);
+    return await serializeCart(null);
   }
 
   const product = await findPurchasableProductBySlug(slug);
@@ -225,7 +224,7 @@ export async function setCartItemQuantity(owner, { slug, quantity }) {
   });
 
   if (!cart) {
-    return serializeCart(null);
+    return await serializeCart(null);
   }
 
   const limits = getProductCommerceLimits(product);
@@ -277,7 +276,7 @@ export async function setCartItemQuantity(owner, { slug, quantity }) {
 
 export async function removeCartItem(owner, slug) {
   if (!owner) {
-    return serializeCart(null);
+    return await serializeCart(null);
   }
 
   const product = await prisma.product.findUnique({
@@ -314,7 +313,7 @@ export async function removeCartItem(owner, slug) {
 
 export async function clearCart(owner) {
   if (!owner) {
-    return serializeCart(null);
+    return await serializeCart(null);
   }
 
   const cart = await prisma.cart.findFirst({

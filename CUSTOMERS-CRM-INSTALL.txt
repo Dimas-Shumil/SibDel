@@ -1,0 +1,18 @@
+SibDel — Customers CRM patch
+
+1. Остановить npm run dev (Ctrl+C).
+2. Распаковать содержимое patch поверх текущего C:\Users\ШУМ\WORKS\sibDel с заменой файлов.
+3. Выполнить:
+
+npm run prisma:validate
+npm run css
+npm run test:admin-customers-smoke
+npm run dev
+
+Prisma schema НЕ менялась. Миграция и prisma:generate для этого patch не требуются.
+
+Проверка в браузере:
+/admin/customers
+/admin/customer?id=<ID>
+
+Smoke-тест создаёт временного CUSTOMER, два заказа, CRM-заметку, проверяет LTV, деактивацию, отзыв сессии/token reset, реактивацию и очищает тестовые данные.

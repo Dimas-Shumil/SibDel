@@ -9,6 +9,7 @@ import {
   serializeCommerceItem,
 } from "./commerce.service.js";
 import { reserveInventoryForOrder } from "./inventory.service.js";
+import { applyActivePromotionsToProducts } from "./promotion.service.js";
 
 function createCheckoutError(message, statusCode, code, details) {
   const error = new Error(message);
@@ -121,28 +122,34 @@ function validateCheckoutCartItem(item) {
   return null;
 }
 
-function calculateCart(cart) {
+async function calculateCart(cart, client = prisma) {
   const issues = [];
   let subtotalCents = 0;
   let discountCents = 0;
   let merchandiseTotalCents = 0;
 
-  const items = (cart?.items || []).map((item) => {
+  const sourceItems = cart?.items || [];
+  const pricedProducts = await applyActivePromotionsToProducts(
+    sourceItems.map((item) => item.product),
+    client,
+  );
+  const pricedById = new Map(pricedProducts.map((product) => [product.id, product]));
+
+  const items = sourceItems.map((item) => {
     const issue = validateCheckoutCartItem(item);
 
-    if (issue) {
-      issues.push(issue);
-    }
+    if (issue) issues.push(issue);
 
     const quantity = roundQuantity(decimalToNumber(item.quantity) ?? 0);
-    const pricing = buildLinePricing(item.product, quantity);
+    const pricedProduct = pricedById.get(item.productId) || item.product;
+    const pricing = buildLinePricing(pricedProduct, quantity);
 
     subtotalCents += pricing.baseLineCents;
     discountCents += Math.max(0, pricing.baseLineCents - pricing.currentLineCents);
     merchandiseTotalCents += pricing.currentLineCents;
 
     return {
-      ...serializeCommerceItem(item.product, item.quantity),
+      ...serializeCommerceItem(pricedProduct, item.quantity),
       sku: item.product.sku,
       unit: item.product.unit,
       baseUnitPrice: pricing.baseUnitPrice,
@@ -158,9 +165,7 @@ function calculateCart(cart) {
     issues,
     summary: {
       lines: items.length,
-      quantity: roundQuantity(
-        items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0),
-      ),
+      quantity: roundQuantity(items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)),
       subtotal: fromCents(subtotalCents),
       discount: fromCents(discountCents),
       merchandiseTotal: fromCents(merchandiseTotalCents),
@@ -359,7 +364,7 @@ export async function getCheckoutState({ owner, userId = null, receiveDate = nul
       : [],
   ]);
 
-  const calculated = calculateCart(cart);
+  const calculated = await calculateCart(cart);
 
   return {
     cart: calculated,
@@ -532,7 +537,7 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
           );
         }
 
-        const calculated = calculateCart(cart);
+        const calculated = await calculateCart(cart, transaction);
 
         if (calculated.issues.length > 0) {
           throw createCheckoutError(

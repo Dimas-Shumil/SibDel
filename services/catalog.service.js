@@ -3,6 +3,7 @@ import {
   getReviewStatsMap,
   serializeProductSummary,
 } from "./product.service.js";
+import { applyActivePromotionsToProducts } from "./promotion.service.js";
 
 async function getAvailabilityProductIds(query) {
   const hasSpecificAvailability = query.lowStock || query.outOfStock;
@@ -269,14 +270,15 @@ export async function getPublicCatalog(query) {
     }),
   ]);
 
-  const reviewStats = await getReviewStatsMap(
-    products.map((product) => product.id),
-  );
+  const [reviewStats, pricedProducts] = await Promise.all([
+    getReviewStatsMap(products.map((product) => product.id)),
+    applyActivePromotionsToProducts(products),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return {
-    products: products.map((product) =>
+    products: pricedProducts.map((product) =>
       serializeProductSummary(
         product,
         reviewStats.get(product.id) || {
