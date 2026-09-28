@@ -405,12 +405,19 @@ async function seedProducts() {
       throw new Error(`Seed category not found: ${product.categorySlug}`);
     }
 
-    const { categorySlug: _categorySlug, images, ...productData } = product;
+    const {
+      categorySlug: _categorySlug,
+      images,
+      stockQuantity,
+      ...productData
+    } = product;
 
     const savedProduct = await prisma.product.upsert({
       where: {
         slug: product.slug,
       },
+      // Inventory is operational data. Re-running seed must never reset a
+      // real stock balance after orders/reservations have started.
       update: {
         ...productData,
         categoryId: category.id,
@@ -419,14 +426,39 @@ async function seedProducts() {
       },
       create: {
         ...productData,
+        stockQuantity,
         categoryId: category.id,
         isActive: true,
         isAvailable: true,
       },
       select: {
         id: true,
+        stockQuantity: true,
+        reservedQuantity: true,
       },
     });
+
+    if (savedProduct.stockQuantity !== null) {
+      const movementCount = await prisma.inventoryMovement.count({
+        where: {
+          productId: savedProduct.id,
+        },
+      });
+
+      if (movementCount === 0) {
+        await prisma.inventoryMovement.create({
+          data: {
+            productId: savedProduct.id,
+            type: "ADJUSTMENT",
+            onHandDelta: savedProduct.stockQuantity,
+            reservedDelta: "0.000",
+            balanceOnHand: savedProduct.stockQuantity,
+            balanceReserved: savedProduct.reservedQuantity,
+            reason: "Начальный остаток при создании seed-товара",
+          },
+        });
+      }
+    }
 
     await prisma.productImage.deleteMany({
       where: {

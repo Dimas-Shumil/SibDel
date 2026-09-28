@@ -8,6 +8,7 @@ import {
   normalizeCommerceQuantity,
   serializeCommerceItem,
 } from "./commerce.service.js";
+import { reserveInventoryForOrder } from "./inventory.service.js";
 
 function createCheckoutError(message, statusCode, code, details) {
   const error = new Error(message);
@@ -593,6 +594,8 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
           },
           select: ORDER_RESULT_SELECT,
         });
+
+        await reserveInventoryForOrder(transaction, created.id);
 
         await transaction.cartItem.deleteMany({
           where: {

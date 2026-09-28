@@ -32,12 +32,14 @@ function getDiscountPercent(price, oldPrice) {
 
 function getStockState(product) {
   const stock = decimalToNumber(product.stockQuantity);
+  const reserved = Math.max(0, decimalToNumber(product.reservedQuantity) ?? 0);
+  const availableStock = stock === null ? null : Math.max(0, stock - reserved);
 
-  if (!product.isAvailable || (stock !== null && stock <= 0)) {
+  if (!product.isAvailable || (availableStock !== null && availableStock <= 0)) {
     return "out";
   }
 
-  if (stock !== null && stock <= 5) {
+  if (availableStock !== null && availableStock <= 5) {
     return "low";
   }
 
@@ -171,6 +173,17 @@ export function serializeProductSummary(product, reviewStats = null) {
     step: decimalToString(product.step),
     minQuantity: decimalToString(product.minQuantity),
     stockQuantity: decimalToString(product.stockQuantity),
+    reservedQuantity: decimalToString(product.reservedQuantity ?? 0),
+    availableQuantity:
+      product.stockQuantity === null
+        ? null
+        : decimalToString(
+            Math.max(
+              0,
+              (decimalToNumber(product.stockQuantity) ?? 0) -
+                (decimalToNumber(product.reservedQuantity) ?? 0),
+            ),
+          ),
     isAvailable: product.isAvailable && stockState !== "out",
     stockState,
     isPopular: product.isPopular,
@@ -228,6 +241,7 @@ export async function getPublicProductBySlug(slug) {
       step: true,
       minQuantity: true,
       stockQuantity: true,
+      reservedQuantity: true,
       isAvailable: true,
       isPopular: true,
       isFeatured: true,
@@ -327,6 +341,7 @@ export async function getPublicProductBySlug(slug) {
       step: true,
       minQuantity: true,
       stockQuantity: true,
+      reservedQuantity: true,
       isAvailable: true,
       isPopular: true,
       isFeatured: true,

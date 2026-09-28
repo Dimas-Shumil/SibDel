@@ -8,6 +8,7 @@ import {
   prisma,
 } from "../lib/prisma.js";
 import { hashOpaqueToken } from "../utils/tokens.js";
+import { releaseInventoryForOrder } from "../services/inventory.service.js";
 
 const baseUrl = env.APP_URL.replace(/\/$/, "");
 const origin = new URL(baseUrl).origin;
@@ -66,10 +67,22 @@ async function cleanup() {
 
   try {
     if (createdOrderId) {
-      await prisma.order.deleteMany({
-        where: {
-          id: createdOrderId,
-        },
+      await prisma.$transaction(async (transaction) => {
+        await releaseInventoryForOrder(transaction, createdOrderId, {
+          reason: "Cleanup checkout smoke-test",
+        });
+
+        await transaction.inventoryMovement.deleteMany({
+          where: {
+            orderId: createdOrderId,
+          },
+        });
+
+        await transaction.order.deleteMany({
+          where: {
+            id: createdOrderId,
+          },
+        });
       });
     }
 

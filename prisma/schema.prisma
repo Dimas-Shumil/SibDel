@@ -66,6 +66,21 @@ enum PaymentMethod {
   ON_RECEIPT
 }
 
+enum InventoryReservationStatus {
+  ACTIVE
+  RELEASED
+  COMMITTED
+}
+
+enum InventoryMovementType {
+  RECEIPT
+  RESERVE
+  RELEASE
+  SALE
+  RETURN
+  ADJUSTMENT
+}
+
 enum SubscriptionStatus {
   ACTIVE
   PAUSED
@@ -126,7 +141,8 @@ model User {
   reviews       Review[]
   subscriptions UserSubscription[]
 
-  adminActivities AdminActivity[] @relation("AdminActivityActor")
+  adminActivities     AdminActivity[]      @relation("AdminActivityActor")
+  inventoryMovements InventoryMovement[]   @relation("InventoryMovementActor")
 
   @@index([role, isActive])
   @@index([createdAt])
@@ -251,7 +267,8 @@ model Product {
 
   minQuantity Decimal @default(1) @db.Decimal(12, 3)
 
-  stockQuantity Decimal? @db.Decimal(14, 3)
+  stockQuantity    Decimal? @db.Decimal(14, 3)
+  reservedQuantity Decimal  @default(0) @db.Decimal(14, 3)
 
   isActive    Boolean @default(true)
   isAvailable Boolean @default(true)
@@ -275,8 +292,10 @@ model Product {
   cartItems  CartItem[]
   favorites      Favorite[]
   guestFavorites GuestFavorite[]
-  orderItems     OrderItem[]
-  reviews    Review[]
+  orderItems             OrderItem[]
+  inventoryReservations InventoryReservation[]
+  inventoryMovements    InventoryMovement[]
+  reviews                Review[]
 
   promotionProducts PromotionProduct[]
 
@@ -285,6 +304,7 @@ model Product {
   @@index([isFeatured, isActive])
   @@index([isNew, isActive])
   @@index([createdAt])
+  @@index([stockQuantity, reservedQuantity])
 }
 
 model ProductImage {
@@ -429,8 +449,10 @@ model Order {
 
   pickupPoint PickupPoint? @relation(fields: [pickupPointId], references: [id], onDelete: SetNull)
 
-  items    OrderItem[]
-  payments Payment[]
+  items                 OrderItem[]
+  payments              Payment[]
+  inventoryReservations InventoryReservation[]
+  inventoryMovements    InventoryMovement[]
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
@@ -464,8 +486,68 @@ model OrderItem {
 
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
+  inventoryReservation InventoryReservation?
+  inventoryMovements   InventoryMovement[]
+
   @@index([orderId])
   @@index([productId])
+}
+
+model InventoryReservation {
+  id Int @id @default(autoincrement())
+
+  orderId     Int
+  orderItemId Int @unique
+  productId   Int
+
+  quantity Decimal @db.Decimal(14, 3)
+
+  status InventoryReservationStatus @default(ACTIVE)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  releasedAt  DateTime?
+  committedAt DateTime?
+
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, status])
+  @@index([productId, status])
+  @@index([createdAt])
+}
+
+model InventoryMovement {
+  id Int @id @default(autoincrement())
+
+  productId   Int
+  orderId     Int?
+  orderItemId Int?
+  actorId     Int?
+
+  type InventoryMovementType
+
+  onHandDelta   Decimal @default(0) @db.Decimal(14, 3)
+  reservedDelta Decimal @default(0) @db.Decimal(14, 3)
+
+  balanceOnHand   Decimal? @db.Decimal(14, 3)
+  balanceReserved Decimal  @db.Decimal(14, 3)
+
+  reason   String? @db.VarChar(500)
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  order     Order?     @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  actor     User?      @relation("InventoryMovementActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt])
+  @@index([orderId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([type, createdAt])
 }
 
 model Payment {

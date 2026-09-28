@@ -24,6 +24,8 @@ import cartRouter from "./routes/cart.routes.js";
 import favoritesRouter from "./routes/favorites.routes.js";
 import commerceRouter from "./routes/commerce.routes.js";
 import checkoutRouter from "./routes/checkout.routes.js";
+import inventoryRouter from "./routes/inventory.routes.js";
+import ordersRouter from "./routes/orders.routes.js";
 import {
   notFoundHandler,
   errorHandler,
@@ -195,6 +197,8 @@ app.use("/api/commerce", commerceRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/checkout", checkoutRouter);
+app.use("/api/admin/inventory", inventoryRouter);
+app.use("/api/admin/orders", ordersRouter);
 
 app.get("/admin/login", (_req, res) => {
   return res.sendFile(

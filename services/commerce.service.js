@@ -21,6 +21,7 @@ const PRODUCT_COMMERCE_SELECT = Object.freeze({
   step: true,
   minQuantity: true,
   stockQuantity: true,
+  reservedQuantity: true,
   isActive: true,
   isAvailable: true,
   isPopular: true,
@@ -93,7 +94,10 @@ export function getProductCommerceLimits(product) {
   const min = Math.max(0.001, decimalToNumber(product.minQuantity) ?? 1);
   const step = Math.max(0.001, decimalToNumber(product.step) ?? 1);
   const stock = decimalToNumber(product.stockQuantity);
-  const max = stock === null ? 999 : Math.max(0, stock);
+  const reserved = Math.max(0, decimalToNumber(product.reservedQuantity) ?? 0);
+  const availableStock =
+    stock === null ? null : Math.max(0, stock - reserved);
+  const max = availableStock === null ? 999 : availableStock;
   const available =
     product.isActive === true &&
     product.category?.isActive !== false &&

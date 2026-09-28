@@ -4,56 +4,62 @@ import {
   serializeProductSummary,
 } from "./product.service.js";
 
-function buildAvailabilityFilter(query) {
-  const conditions = [];
-
-  // lowStock/outOfStock are more specific states than the broad
-  // "available" flag. The UI keeps "available" checked by default,
-  // so a specific state must not be neutralized by that default.
+async function getAvailabilityProductIds(query) {
   const hasSpecificAvailability = query.lowStock || query.outOfStock;
 
+  if (query.lowStock && query.outOfStock) {
+    const rows = await prisma.$queryRaw`
+      SELECT "id"
+      FROM "Product"
+      WHERE
+        "isAvailable" = false
+        OR (
+          "stockQuantity" IS NOT NULL
+          AND ("stockQuantity" - "reservedQuantity") <= 5
+        )
+    `;
+    return rows.map((row) => row.id);
+  }
+
   if (query.lowStock) {
-    conditions.push({
-      isAvailable: true,
-      stockQuantity: {
-        gt: 0,
-        lte: 5,
-      },
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT "id"
+      FROM "Product"
+      WHERE "isAvailable" = true
+        AND "stockQuantity" IS NOT NULL
+        AND ("stockQuantity" - "reservedQuantity") > 0
+        AND ("stockQuantity" - "reservedQuantity") <= 5
+    `;
+    return rows.map((row) => row.id);
   }
 
   if (query.outOfStock) {
-    conditions.push({
-      OR: [
-        {
-          isAvailable: false,
-        },
-        {
-          stockQuantity: {
-            lte: 0,
-          },
-        },
-      ],
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT "id"
+      FROM "Product"
+      WHERE "isAvailable" = false
+        OR (
+          "stockQuantity" IS NOT NULL
+          AND ("stockQuantity" - "reservedQuantity") <= 0
+        )
+    `;
+    return rows.map((row) => row.id);
   }
 
   if (query.available && !hasSpecificAvailability) {
-    conditions.push({
-      isAvailable: true,
-      OR: [
-        {
-          stockQuantity: null,
-        },
-        {
-          stockQuantity: {
-            gt: 0,
-          },
-        },
-      ],
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT "id"
+      FROM "Product"
+      WHERE "isAvailable" = true
+        AND (
+          "stockQuantity" IS NULL
+          OR ("stockQuantity" - "reservedQuantity") > 0
+        )
+    `;
+    return rows.map((row) => row.id);
   }
 
-  return conditions;
+  return null;
 }
 
 function buildOrderBy(sort) {
@@ -190,21 +196,19 @@ function buildWhere(query) {
     where.isPopular = true;
   }
 
-  const availabilityConditions = buildAvailabilityFilter(query);
-
-  if (availabilityConditions.length > 0) {
-    where.AND = [
-      {
-        OR: availabilityConditions,
-      },
-    ];
-  }
-
   return where;
 }
 
 export async function getPublicCatalog(query) {
   const where = buildWhere(query);
+  const availabilityProductIds = await getAvailabilityProductIds(query);
+
+  if (availabilityProductIds !== null) {
+    where.id = {
+      in: availabilityProductIds,
+    };
+  }
+
   const page = query.page;
   const limit = query.limit;
   const skip = (page - 1) * limit;
@@ -231,6 +235,7 @@ export async function getPublicCatalog(query) {
         step: true,
         minQuantity: true,
         stockQuantity: true,
+        reservedQuantity: true,
         isAvailable: true,
         isPopular: true,
         isFeatured: true,
