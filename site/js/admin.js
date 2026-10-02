@@ -2366,6 +2366,204 @@ async function initAdminReviews() {
 }
 
 
+const ADMIN_SUBSCRIPTION_STATUS_LABELS = Object.freeze({
+  ACTIVE: "Активна",
+  PAUSED: "На паузе",
+  CANCELLED: "Отменена",
+  EXPIRED: "Истекла",
+});
+
+function subscriptionStatusMarkup(status) {
+  return `<span class="admin-status ${adminStatusClass(status)}">${escapeAdminHtml(ADMIN_SUBSCRIPTION_STATUS_LABELS[status] || status || "—")}</span>`;
+}
+
+function subscriptionIntervalLabel(days) {
+  if (Number(days) === 7) return "Раз в неделю";
+  if (Number(days) === 14) return "Раз в 2 недели";
+  if (Number(days) === 30) return "Раз в 30 дней";
+  return days ? `Раз в ${days} дней` : "—";
+}
+
+function getSubscriptionsQueryState() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    q: params.get("q") || "",
+    status: params.get("status") || "all",
+    page: Math.max(1, Number(params.get("page") || 1) || 1),
+  };
+}
+
+function syncSubscriptionsForm(state) {
+  const form = document.querySelector("[data-subscriptions-filter]");
+  if (!(form instanceof HTMLFormElement)) return;
+  const q = form.elements.namedItem("q");
+  const status = form.elements.namedItem("status");
+  if (q) q.value = state.q;
+  if (status) status.value = state.status;
+}
+
+function renderSubscriptionsMetrics(metrics) {
+  document.querySelectorAll("[data-subscriptions-metric]").forEach((element) => {
+    element.textContent = String(metrics?.[element.dataset.subscriptionsMetric] ?? "—");
+  });
+}
+
+function renderSubscriptionsList(subscriptions) {
+  const body = document.querySelector("[data-subscriptions-list]");
+  if (!body) return;
+  if (!subscriptions.length) {
+    body.innerHTML = '<tr><td colspan="7" class="admin-table__empty">Подписок по этим условиям нет.</td></tr>';
+    return;
+  }
+  body.innerHTML = subscriptions.map((subscription) => {
+    const products = (subscription.items || []).slice(0, 3).map((item) => item.productName).join(", ");
+    const extra = Math.max(0, (subscription.items || []).length - 3);
+    return `<tr>
+      <td><strong>${escapeAdminHtml(subscription.customer?.name || "—")}</strong><small>${escapeAdminHtml(subscription.customer?.phone || subscription.customer?.email || "")}</small></td>
+      <td><span class="admin-subscription-products">${escapeAdminHtml(products || "Нет товаров")}${extra ? ` +${extra}` : ""}</span><small>${subscription.summary?.unavailableCount ? `Недоступно: ${subscription.summary.unavailableCount}` : `${subscription.items?.length || 0} поз.`}</small></td>
+      <td><strong>${escapeAdminHtml(formatAdminMoney(subscription.summary?.total || 0))}</strong><small>доставка отдельно</small></td>
+      <td>${escapeAdminHtml(subscriptionIntervalLabel(subscription.intervalDays))}</td>
+      <td>${escapeAdminHtml(formatAdminDate(subscription.nextDeliveryAt, false))}</td>
+      <td>${subscriptionStatusMarkup(subscription.status)}</td>
+      <td><button class="admin-icon-button" type="button" data-subscription-open="${subscription.id}">Открыть</button></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderSubscriptionsPagination(pagination, state) {
+  const container = document.querySelector("[data-subscriptions-pagination]");
+  if (!container) return;
+  const href = (page) => {
+    const params = new URLSearchParams();
+    if (state.q) params.set("q", state.q);
+    if (state.status !== "all") params.set("status", state.status);
+    params.set("page", String(page));
+    return `/admin/subscriptions?${params.toString()}`;
+  };
+  container.innerHTML = `<span>${escapeAdminHtml(String(pagination.total))} подписок</span><div>
+    ${pagination.page > 1 ? `<a class="admin-pagination__button" href="${href(pagination.page - 1)}">Назад</a>` : ""}
+    <span class="admin-pagination__current">${pagination.page} / ${pagination.pages}</span>
+    ${pagination.page < pagination.pages ? `<a class="admin-pagination__button" href="${href(pagination.page + 1)}">Далее</a>` : ""}
+  </div>`;
+}
+
+async function loadAdminSubscriptions() {
+  const state = getSubscriptionsQueryState();
+  syncSubscriptionsForm(state);
+  const params = new URLSearchParams({ page: String(state.page), limit: "30", status: state.status });
+  if (state.q) params.set("q", state.q);
+  const payload = await adminFetch(`/api/admin/subscriptions?${params.toString()}`);
+  renderSubscriptionsMetrics(payload.subscriptions.metrics);
+  renderSubscriptionsList(payload.subscriptions.items || []);
+  renderSubscriptionsPagination(payload.subscriptions.pagination, state);
+}
+
+function renderSubscriptionDetail(subscription) {
+  const panel = document.querySelector("[data-subscription-detail]");
+  const body = document.querySelector("[data-subscription-detail-body]");
+  const title = document.querySelector("[data-subscription-detail-title]");
+  if (!panel || !body || !subscription) return;
+  panel.hidden = false;
+  if (title) title.textContent = `Подписка #${subscription.id} · ${subscription.customer?.name || "клиент"}`;
+
+  const itemRows = (subscription.items || []).map((item) => `<tr><td><strong>${escapeAdminHtml(item.productName)}</strong><small>${escapeAdminHtml(item.sku || "")}</small></td><td>${escapeAdminHtml(formatAdminQuantity(item.quantity))}</td><td>${escapeAdminHtml(formatAdminMoney(item.unitPrice))}</td><td>${escapeAdminHtml(formatAdminMoney(item.total))}</td><td>${item.available ? "Доступен" : "Требует замены"}</td></tr>`).join("");
+  const deliveryRows = (subscription.deliveries || []).map((delivery) => `<tr><td>${escapeAdminHtml(formatAdminDate(delivery.scheduledFor, false))}</td><td>${escapeAdminHtml(delivery.status)}</td><td>${delivery.order ? `<a class="admin-table__primary" href="/admin/order?order=${encodeURIComponent(delivery.order.number)}">${escapeAdminHtml(delivery.order.number)}</a>` : escapeAdminHtml(delivery.failureMessage || "—")}</td><td>${delivery.order ? escapeAdminHtml(formatAdminMoney(delivery.order.total, delivery.order.currency)) : "—"}</td></tr>`).join("");
+  const events = (subscription.events || []).map((event) => `<div class="admin-timeline__item"><div class="admin-timeline__meta"><strong>${escapeAdminHtml(event.action)}</strong><span>${escapeAdminHtml(formatAdminDate(event.createdAt))}</span></div><p>${escapeAdminHtml(event.description || "—")}</p><small>${escapeAdminHtml(event.actor?.name || event.source || "SYSTEM")}</small></div>`).join("");
+  const ownerOnly = currentAdminUser?.role === "OWNER";
+  const actions = `${subscription.canPause ? `<button class="admin-button admin-button--secondary" data-subscription-admin-action="pause" data-subscription-id="${subscription.id}" type="button">Пауза</button>` : ""}
+    ${subscription.canResume ? `<button class="admin-button" data-subscription-admin-action="resume" data-subscription-id="${subscription.id}" type="button">Возобновить</button>` : ""}
+    ${ownerOnly && subscription.canCancel ? `<button class="admin-button admin-button--danger" data-subscription-admin-action="cancel" data-subscription-id="${subscription.id}" type="button">Отменить</button>` : ""}
+    ${ownerOnly && subscription.isDue ? `<button class="admin-button" data-subscription-admin-action="generate" data-subscription-id="${subscription.id}" type="button">Сформировать наступивший заказ</button>` : ""}`;
+
+  body.innerHTML = `<div class="admin-subscription-detail__summary">
+      <div><span>Статус</span><strong>${subscriptionStatusMarkup(subscription.status)}</strong></div>
+      <div><span>Периодичность</span><strong>${escapeAdminHtml(subscriptionIntervalLabel(subscription.intervalDays))}</strong></div>
+      <div><span>Следующая доставка</span><strong>${escapeAdminHtml(formatAdminDate(subscription.nextDeliveryAt, false))}</strong></div>
+      <div><span>Ориентировочно</span><strong>${escapeAdminHtml(formatAdminMoney(subscription.summary?.total || 0))}</strong></div>
+    </div>
+    <p class="admin-form-note"><strong>Адрес:</strong> ${escapeAdminHtml(subscription.address?.formatted || "Не настроен")}</p>
+    <div class="admin-subscription-actions">${actions}</div>
+    <h3 class="admin-subscription-section-title">Состав</h3>
+    <div class="admin-table-wrap"><table class="admin-table admin-table--subscription-items"><thead><tr><th>Товар</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><th>Состояние</th></tr></thead><tbody>${itemRows || '<tr><td colspan="5" class="admin-table__empty">Нет товаров</td></tr>'}</tbody></table></div>
+    <h3 class="admin-subscription-section-title">Связанные доставки и заказы</h3>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Дата</th><th>Результат</th><th>Заказ / ошибка</th><th>Сумма</th></tr></thead><tbody>${deliveryRows || '<tr><td colspan="4" class="admin-table__empty">История доставок пуста</td></tr>'}</tbody></table></div>
+    <h3 class="admin-subscription-section-title">История изменений</h3><div class="admin-timeline">${events || '<p class="admin-form-note">История пока пуста.</p>'}</div>`;
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function openAdminSubscription(subscriptionId) {
+  const payload = await adminFetch(`/api/admin/subscriptions/${subscriptionId}`);
+  renderSubscriptionDetail(payload.subscription);
+}
+
+async function initAdminSubscriptions() {
+  if (document.body.dataset.adminPage !== "subscriptions") return;
+  const dueButton = document.querySelector("[data-subscriptions-generate-due]");
+  if (dueButton && currentAdminUser?.role === "OWNER") dueButton.hidden = false;
+
+  try { await loadAdminSubscriptions(); } catch (error) { showAdminToast(error.message, "error"); }
+
+  const form = document.querySelector("[data-subscriptions-filter]");
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement)) return;
+    const data = new FormData(form);
+    const params = new URLSearchParams();
+    const q = String(data.get("q") || "").trim();
+    const status = String(data.get("status") || "all");
+    if (q) params.set("q", q);
+    if (status !== "all") params.set("status", status);
+    window.location.assign(`/admin/subscriptions${params.size ? `?${params.toString()}` : ""}`);
+  });
+  document.querySelector("[data-subscriptions-reset]")?.addEventListener("click", () => window.location.assign("/admin/subscriptions"));
+  document.querySelector("[data-subscription-detail-close]")?.addEventListener("click", () => {
+    const panel = document.querySelector("[data-subscription-detail]");
+    if (panel) panel.hidden = true;
+  });
+
+  document.querySelector("[data-subscriptions-list]")?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-subscription-open]");
+    if (!button) return;
+    try { await openAdminSubscription(Number(button.dataset.subscriptionOpen)); } catch (error) { showAdminToast(error.message, "error"); }
+  });
+
+  document.querySelector("[data-subscription-detail-body]")?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-subscription-admin-action]");
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return;
+    const id = Number(button.dataset.subscriptionId);
+    const action = button.dataset.subscriptionAdminAction;
+    if (!Number.isInteger(id)) return;
+    if (action === "cancel" && !window.confirm("Отменить подписку клиента без возможности возобновления?")) return;
+    if (action === "generate" && !window.confirm("Сформировать наступивший плановый заказ? Товары будут зарезервированы на складе.")) return;
+    button.disabled = true;
+    try {
+      if (action === "pause") await adminFetch(`/api/admin/subscriptions/${id}/pause`, { method: "POST" });
+      if (action === "resume") await adminFetch(`/api/admin/subscriptions/${id}/resume`, { method: "POST", body: JSON.stringify({}) });
+      if (action === "cancel") await adminFetch(`/api/admin/subscriptions/${id}/cancel`, { method: "POST" });
+      if (action === "generate") await adminFetch(`/api/admin/subscriptions/${id}/generate`, { method: "POST", body: JSON.stringify({}) });
+      showAdminToast(action === "generate" ? "Плановый заказ сформирован." : "Подписка обновлена.");
+      await loadAdminSubscriptions();
+      await openAdminSubscription(id);
+    } catch (error) {
+      showAdminToast(error.message, "error");
+      button.disabled = false;
+    }
+  });
+
+  dueButton?.addEventListener("click", async () => {
+    if (currentAdminUser?.role !== "OWNER" || dueButton.disabled) return;
+    if (!window.confirm("Сформировать все наступившие плановые заказы?")) return;
+    dueButton.disabled = true;
+    try {
+      const payload = await adminFetch("/api/admin/subscriptions/actions/generate-due", { method: "POST", body: JSON.stringify({ limit: 100 }) });
+      showAdminToast(`Создано: ${payload.generation.created}, ошибок: ${payload.generation.failed}.`);
+      await loadAdminSubscriptions();
+    } catch (error) { showAdminToast(error.message, "error"); }
+    finally { dueButton.disabled = false; }
+  });
+}
+
+
 async function initAdminApplication() {
   await initAdminLogin();
 
@@ -2386,6 +2584,7 @@ async function initAdminApplication() {
     initAdminPromotions(),
     initAdminPromotionEditor(),
     initAdminReviews(),
+    initAdminSubscriptions(),
   ]);
 }
 

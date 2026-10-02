@@ -32,6 +32,8 @@ import adminCustomersRouter from "./routes/admin-customers.routes.js";
 import promotionsRouter from "./routes/promotions.routes.js";
 import reviewsRouter from "./routes/reviews.routes.js";
 import adminReviewsRouter from "./routes/admin-reviews.routes.js";
+import subscriptionsRouter from "./routes/subscriptions.routes.js";
+import adminSubscriptionsRouter from "./routes/admin-subscriptions.routes.js";
 import {
   notFoundHandler,
   errorHandler,
@@ -156,6 +158,10 @@ app.get(
   },
 );
 
+app.get("/subscription.html", (_req, res) => {
+  return res.redirect(302, "/account/subscription");
+});
+
 app.use(
   express.static(publicPath, {
     dotfiles: "deny",
@@ -215,6 +221,8 @@ app.use("/api/admin/customers", adminCustomersRouter);
 app.use("/api/admin/promotions", promotionsRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/admin/reviews", adminReviewsRouter);
+app.use("/api/subscriptions", subscriptionsRouter);
+app.use("/api/admin/subscriptions", adminSubscriptionsRouter);
 
 app.get("/admin/login", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");

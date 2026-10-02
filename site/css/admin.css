@@ -1848,3 +1848,112 @@ button {
     width: 100%;
   }
 }
+/* Subscriptions */
+.admin-metrics--subscriptions {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.admin-toolbar--subscriptions {
+  flex-wrap: wrap;
+}
+
+.admin-toolbar--subscriptions .admin-select-wrap {
+  min-width: 170px;
+}
+
+.admin-table--subscriptions {
+  min-width: 1180px;
+}
+
+.admin-subscription-products {
+  display: block;
+  max-width: 330px;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.admin-subscription-detail {
+  margin-top: 18px;
+}
+
+.admin-subscription-detail__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-subscription-detail__summary > div {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid rgba(100, 70, 40, 0.12);
+  border-radius: 13px;
+  background: rgba(245, 234, 212, 0.28);
+}
+
+.admin-subscription-detail__summary span {
+  color: #92795f;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-subscription-detail__summary strong {
+  color: #3d2c1e;
+  font-size: 12px;
+}
+
+.admin-subscription-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 22px;
+}
+
+.admin-subscription-section-title {
+  margin: 22px 0 10px;
+  color: #443221;
+  font-size: 14px;
+}
+
+.admin-table--subscription-items {
+  min-width: 820px;
+}
+
+.admin-status.is-active {
+  border-color: rgba(79, 91, 36, 0.2);
+  color: #526126;
+  background: #edf0df;
+}
+
+.admin-status.is-paused {
+  border-color: rgba(163, 111, 33, 0.24);
+  color: #835918;
+  background: #f8ecd2;
+}
+
+.admin-status.is-cancelled, .admin-status.is-expired {
+  border-color: rgba(143, 68, 52, 0.2);
+  color: #8e493a;
+  background: #f4e5e0;
+}
+
+@media (max-width: 1180px) {
+  .admin-subscription-detail__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .admin-metrics--subscriptions, .admin-subscription-detail__summary {
+    grid-template-columns: 1fr;
+  }
+  .admin-toolbar--subscriptions .admin-select-wrap {
+    min-width: 0;
+    width: 100%;
+  }
+  .admin-subscription-actions .admin-button {
+    width: 100%;
+  }
+}

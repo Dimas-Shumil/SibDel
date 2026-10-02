@@ -3583,3 +3583,219 @@ body.account-menu-open {
     width: 100%;
   }
 }
+/* Subscription delivery */
+.account-subscription-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+
+.account-subscription-card__copy {
+  max-width: 780px;
+  min-width: 0;
+}
+
+.account-subscription-card__details {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.account-subscription-card__details div {
+  display: grid;
+  align-content: start;
+  justify-content: normal;
+  gap: 6px;
+  min-width: 0;
+}
+
+.account-subscription-card__details dd {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.account-subscription-items {
+  display: grid;
+  gap: 10px;
+}
+
+.account-subscription-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 18px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid rgba(111, 84, 57, 0.12);
+  border-radius: 14px;
+  background: rgba(245, 234, 212, 0.54);
+}
+.account-subscription-item > div {
+  display: grid;
+  gap: 4px;
+}
+.account-subscription-item strong {
+  color: #4a321e;
+  font-size: 13px;
+}
+.account-subscription-item span,
+.account-subscription-item small {
+  color: #8b7258;
+  font-size: 11px;
+}
+.account-subscription-item > span {
+  color: #354019;
+  font-weight: 800;
+}
+.account-subscription-item > small {
+  grid-column: 1/-1;
+}
+.account-subscription-item.is-unavailable {
+  border-color: rgba(148, 81, 62, 0.22);
+  background: rgba(148, 81, 62, 0.05);
+}
+
+.account-subscription-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-subscription-history {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+}
+.account-subscription-history h3 {
+  margin: 0;
+  color: #4a321e;
+  font-size: 15px;
+}
+
+.account-subscription-history__item {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(111, 84, 57, 0.1);
+}
+.account-subscription-history__item span {
+  color: #8b7258;
+  font-size: 10px;
+}
+.account-subscription-history__item p {
+  margin: 0;
+  color: #4a321e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.account-subscription-form-panel {
+  margin-top: 18px;
+}
+
+.account-subscription-picker {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.account-subscription-picker__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+.account-subscription-picker__head strong {
+  color: #4a321e;
+  font-size: 13px;
+}
+.account-subscription-picker__head span {
+  color: #8b7258;
+  font-size: 10px;
+}
+
+.account-subscription-picker__list {
+  display: grid;
+  gap: 8px;
+  max-height: 480px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.account-subscription-product {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 110px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 13px;
+  border: 1px solid rgba(111, 84, 57, 0.12);
+  border-radius: 13px;
+  background: rgba(245, 234, 212, 0.44);
+  cursor: pointer;
+}
+.account-subscription-product > input[type=checkbox] {
+  width: 17px;
+  height: 17px;
+  accent-color: #4f5b24;
+}
+
+.account-subscription-product__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.account-subscription-product__copy strong {
+  color: #4a321e;
+  font-size: 12px;
+}
+.account-subscription-product__copy small {
+  color: #8b7258;
+  font-size: 10px;
+}
+
+.account-subscription-product__qty {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid rgba(111, 84, 57, 0.2);
+  border-radius: 10px;
+  color: #4a321e;
+  background: rgba(245, 234, 212, 0.86);
+}
+.account-subscription-product__qty:disabled {
+  opacity: 0.45;
+}
+
+.account-subscription-picker__empty {
+  margin: 0;
+  color: #8b7258;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+  .account-subscription-card__details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 680px) {
+  .account-subscription-card__details {
+    grid-template-columns: 1fr;
+  }
+  .account-subscription-history__item {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .account-subscription-picker__head {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .account-subscription-product {
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+  .account-subscription-product__qty {
+    grid-column: 2;
+  }
+  .account-subscription-actions .account-button {
+    width: 100%;
+  }
+}

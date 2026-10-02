@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Подписки — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="subscriptions">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+          <a class="admin-nav__link" href="/admin/subscriptions" data-admin-nav="subscriptions"><span>Подписки</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Commerce</span><strong>Регулярные доставки · Заказы · Склад</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div><p class="admin-eyebrow">Commerce · Subscriptions</p><h1>Подписки</h1><p class="admin-header__lead">Регулярные доставки формируют обычные заказы с актуальными ценами, Promotions и резервированием склада. Автосписание оплаты не выполняется.</p></div>
+          <button class="admin-button" type="button" data-subscriptions-generate-due hidden>Сформировать наступившие</button>
+        </header>
+
+        <section class="admin-metrics admin-metrics--subscriptions" aria-label="Показатели подписок">
+          <article class="admin-metric"><span>Всего</span><strong data-subscriptions-metric="total">—</strong><small>все подписки</small></article>
+          <article class="admin-metric admin-metric--accent"><span>Активные</span><strong data-subscriptions-metric="active">—</strong><small>создают заказы по расписанию</small></article>
+          <article class="admin-metric"><span>На паузе</span><strong data-subscriptions-metric="paused">—</strong><small>временно остановлены</small></article>
+          <article class="admin-metric"><span>К обработке</span><strong data-subscriptions-metric="due">—</strong><small>дата доставки наступила</small></article>
+        </section>
+
+        <section class="admin-panel">
+          <form class="admin-toolbar admin-toolbar--subscriptions" data-subscriptions-filter>
+            <label class="admin-search admin-search--grow"><span class="sr-only">Поиск</span><input type="search" name="q" placeholder="Клиент, телефон, email, товар или SKU" maxlength="120" autocomplete="off" /></label>
+            <label class="admin-select-wrap"><span class="sr-only">Статус</span><select name="status"><option value="all">Все статусы</option><option value="ACTIVE">Активные</option><option value="PAUSED">На паузе</option><option value="CANCELLED">Отменённые</option><option value="EXPIRED">Истекшие</option></select></label>
+            <button class="admin-button" type="submit">Применить</button>
+            <button class="admin-button admin-button--secondary" type="button" data-subscriptions-reset>Сбросить</button>
+          </form>
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-table--subscriptions">
+              <thead><tr><th>Клиент</th><th>Состав</th><th>Стоимость</th><th>Период</th><th>Следующая доставка</th><th>Статус</th><th></th></tr></thead>
+              <tbody data-subscriptions-list><tr><td colspan="7" class="admin-table__empty">Загружаем подписки...</td></tr></tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" data-subscriptions-pagination></div>
+        </section>
+
+        <section class="admin-panel admin-subscription-detail" data-subscription-detail hidden>
+          <div class="admin-panel__head"><div><span>Карточка подписки</span><h2 data-subscription-detail-title>Подписка</h2></div><button class="admin-icon-button" type="button" data-subscription-detail-close>Закрыть</button></div>
+          <div data-subscription-detail-body></div>
+        </section>
+
+        <p class="admin-form-note admin-page-note">В production планировщик должен регулярно запускать <code>npm run subscriptions:generate-due</code>. Уникальная запись доставки и детерминированный checkout key защищают от повторного заказа за одну дату.</p>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

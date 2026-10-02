@@ -43,6 +43,7 @@ const accountStore = {
   orders: [],
   addresses: [],
   subscription: null,
+  subscriptionOptions: null,
   lastRemovedFavorites: [],
   loaded: {
     orders: false,
@@ -164,8 +165,15 @@ async function loadAddresses() {
 }
 
 async function loadSubscription() {
-  const payload = await requestAccountJson('/api/account/subscription');
-  return { data: payload?.subscription || null, backendAvailable: true };
+  const [subscriptionPayload, optionsPayload] = await Promise.all([
+    requestAccountJson('/api/subscriptions/me'),
+    requestAccountJson('/api/subscriptions/options'),
+  ]);
+  return {
+    data: subscriptionPayload?.subscription || null,
+    options: optionsPayload?.options || { addresses: [], products: [], intervals: [] },
+    backendAvailable: true,
+  };
 }
 
 async function loadAccountNavigation() {
@@ -850,15 +858,67 @@ function initAddressModal() {
   });
 }
 
+function subscriptionIntervalLabel(days) {
+  if (Number(days) === 7) return 'Раз в неделю';
+  if (Number(days) === 14) return 'Раз в 2 недели';
+  if (Number(days) === 30) return 'Раз в 30 дней';
+  return days ? `Раз в ${days} дней` : '—';
+}
+
+function renderSubscriptionForm(subscription = null) {
+  const root = getAccountView('subscription');
+  if (!root) return;
+  const options = accountStore.subscriptionOptions || { addresses: [], products: [], intervals: [] };
+  const addressSelect = root.querySelector('[data-subscription-address-select]');
+  const intervalSelect = root.querySelector('[data-subscription-interval-select]');
+  const dateInput = root.querySelector('[data-subscription-date]');
+  const productsRoot = root.querySelector('[data-subscription-products]');
+  const title = root.querySelector('[data-subscription-form-title]');
+  if (title) title.textContent = subscription ? 'Изменить подписку' : 'Новая подписка';
+
+  if (addressSelect) {
+    addressSelect.innerHTML = options.addresses?.length
+      ? options.addresses.map((address) => `<option value="${address.id}" ${Number(subscription?.address?.id) === Number(address.id) ? 'selected' : ''}>${escapeAccountHtml(address.title || address.formatted || 'Адрес')}</option>`).join('')
+      : '<option value="">Сначала добавьте адрес в кабинете</option>';
+  }
+  if (intervalSelect) {
+    intervalSelect.innerHTML = (options.intervals || []).map((item) => `<option value="${item.days}" ${Number(subscription?.intervalDays || 7) === Number(item.days) ? 'selected' : ''}>${escapeAccountHtml(item.label)}</option>`).join('');
+  }
+  if (dateInput) {
+    const fallbackToday = new Date().toISOString().slice(0, 10);
+    dateInput.min = options.today || fallbackToday;
+    dateInput.max = options.maxNextDeliveryDate || '';
+    dateInput.value = subscription?.nextDeliveryAt
+      ? String(subscription.nextDeliveryAt).slice(0, 10)
+      : options.defaultNextDeliveryDate || fallbackToday;
+  }
+
+  const selected = new Map((subscription?.items || []).filter((item) => item.productId).map((item) => [Number(item.productId), Number(item.quantity)]));
+  if (productsRoot) {
+    productsRoot.innerHTML = options.products?.length
+      ? options.products.map((product) => {
+          const quantity = selected.get(Number(product.productId)) ?? Number(product.min || 1);
+          const checked = selected.has(Number(product.productId));
+          return `<label class="account-subscription-product">
+            <input type="checkbox" data-subscription-product-check value="${product.productId}" ${checked ? 'checked' : ''}>
+            <span class="account-subscription-product__copy"><strong>${escapeAccountHtml(product.title)}</strong><small>${escapeAccountHtml(formatAccountMoney(product.unitPrice))}${product.measure ? ` · ${escapeAccountHtml(product.measure)}` : ''}</small></span>
+            <input class="account-subscription-product__qty" type="number" data-subscription-product-qty data-product-id="${product.productId}" min="${product.min}" max="${product.max}" step="${product.step}" value="${quantity}" ${checked ? '' : 'disabled'} aria-label="Количество ${escapeAccountHtml(product.title)}">
+          </label>`;
+        }).join('')
+      : '<p class="account-subscription-picker__empty">Сейчас нет доступных товаров для подписки.</p>';
+  }
+}
+
 function renderSubscription(subscription) {
   const root = getAccountView('subscription');
   if (!root) return;
-
   const card = root.querySelector('[data-account-subscription]');
   const empty = root.querySelector('[data-account-empty]');
   const loading = root.querySelector('[data-account-loading]');
   if (loading) loading.hidden = true;
   if (!card || !empty) return;
+
+  renderSubscriptionForm(subscription);
 
   if (!subscription) {
     card.hidden = true;
@@ -868,11 +928,135 @@ function renderSubscription(subscription) {
 
   card.hidden = false;
   empty.hidden = true;
-  setElementText('[data-subscription-name]', subscription.plan?.name || subscription.name, 'Подписка', root);
-  setElementText('[data-subscription-description]', subscription.plan?.description || subscription.description, '', root);
   setElementText('[data-subscription-status]', subscriptionStatusLabels[subscription.status] || subscription.status, '—', root);
-  setElementText('[data-subscription-expires]', formatAccountDate(subscription.expiresAt), '—', root);
-  setElementText('[data-subscription-renew]', subscription.autoRenew ? 'Включено' : 'Выключено', '—', root);
+  setElementText('[data-subscription-next]', formatAccountDate(subscription.nextDeliveryAt), '—', root);
+  setElementText('[data-subscription-interval]', subscriptionIntervalLabel(subscription.intervalDays), '—', root);
+  setElementText('[data-subscription-address]', subscription.address?.formatted || subscription.address?.title, '—', root);
+  setElementText('[data-subscription-total]', subscription.summary ? `${formatAccountMoney(subscription.summary.total)} + доставка` : '—', '—', root);
+
+  const itemsRoot = root.querySelector('[data-subscription-items]');
+  if (itemsRoot) {
+    itemsRoot.innerHTML = (subscription.items || []).map((item) => `<article class="account-subscription-item ${item.available ? '' : 'is-unavailable'}">
+      <div><strong>${escapeAccountHtml(item.productName)}</strong><span>${escapeAccountHtml(String(item.quantity))}${item.unitLabel ? ` ${escapeAccountHtml(item.unitLabel)}` : ''}</span></div>
+      <span>${escapeAccountHtml(formatAccountMoney(item.total))}</span>
+      ${item.available ? '' : '<small>Товар требует замены перед следующей доставкой</small>'}
+    </article>`).join('');
+  }
+
+  const actions = root.querySelector('[data-subscription-actions]');
+  if (actions) {
+    actions.innerHTML = `${subscription.canPause ? '<button class="account-button account-button--secondary" type="button" data-subscription-action="pause">Приостановить</button>' : ''}
+      ${subscription.canResume ? '<button class="account-button account-button--primary" type="button" data-subscription-action="resume">Возобновить</button>' : ''}
+      <button class="account-button account-button--soft" type="button" data-subscription-action="edit">Изменить</button>
+      ${subscription.canCancel ? '<button class="account-button account-button--secondary" type="button" data-subscription-action="cancel">Отменить подписку</button>' : ''}`;
+  }
+
+  const historyRoot = root.querySelector('[data-subscription-history]');
+  if (historyRoot) {
+    const deliveries = (subscription.deliveries || []).slice(0, 5).map((delivery) => ({
+      date: delivery.createdAt,
+      text: delivery.order ? `Создан заказ №${delivery.order.number} на ${formatAccountDate(delivery.scheduledFor)}` : `Доставка ${formatAccountDate(delivery.scheduledFor)}: ${delivery.failureMessage || delivery.status}`,
+    }));
+    const events = (subscription.events || []).slice(0, 8).map((event) => ({ date: event.createdAt, text: event.description || event.action }));
+    const history = [...deliveries, ...events].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+    historyRoot.innerHTML = history.length
+      ? history.map((item) => `<div class="account-subscription-history__item"><span>${escapeAccountHtml(formatAccountDate(item.date))}</span><p>${escapeAccountHtml(item.text)}</p></div>`).join('')
+      : '<p class="account-subscription-picker__empty">История пока пуста.</p>';
+  }
+}
+
+async function refreshSubscription() {
+  accountStore.loaded.subscription = false;
+  await ensureSubscriptionLoaded();
+  renderSubscription(accountStore.subscription);
+}
+
+function initSubscriptionControls() {
+  const root = getAccountView('subscription');
+  if (!root) return;
+  const panel = root.querySelector('[data-subscription-form-panel]');
+  const form = root.querySelector('[data-subscription-form]');
+  const status = root.querySelector('[data-subscription-form-status]');
+
+  const setFormOpen = (open, editing = false) => {
+    if (!panel) return;
+    panel.hidden = !open;
+    if (open) {
+      renderSubscriptionForm(editing ? accountStore.subscription : null);
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  root.addEventListener('change', (event) => {
+    const checkbox = event.target.closest('[data-subscription-product-check]');
+    if (!checkbox) return;
+    const row = checkbox.closest('.account-subscription-product');
+    const quantity = row?.querySelector('[data-subscription-product-qty]');
+    if (quantity) quantity.disabled = !checkbox.checked;
+  });
+
+  root.addEventListener('click', async (event) => {
+    const open = event.target.closest('[data-subscription-open-form]');
+    if (open) { setFormOpen(true, false); return; }
+    const close = event.target.closest('[data-subscription-close-form]');
+    if (close) { setFormOpen(false); return; }
+    const actionButton = event.target.closest('[data-subscription-action]');
+    if (!actionButton || actionButton.disabled) return;
+    const action = actionButton.dataset.subscriptionAction;
+    if (action === 'edit') { setFormOpen(true, true); return; }
+    if (action === 'cancel' && !window.confirm('Отменить подписку? Возобновить отменённую подписку будет нельзя.')) return;
+
+    actionButton.disabled = true;
+    try {
+      if (action === 'pause') await requestAccountJson('/api/subscriptions/me/pause', { method: 'POST' });
+      if (action === 'resume') await requestAccountJson('/api/subscriptions/me/resume', { method: 'POST', body: {} });
+      if (action === 'cancel') await requestAccountJson('/api/subscriptions/me/cancel', { method: 'POST' });
+      showAccountToast(action === 'pause' ? 'Подписка приостановлена' : action === 'resume' ? 'Подписка возобновлена' : 'Подписка отменена');
+      setFormOpen(false);
+      await refreshSubscription();
+    } catch (error) {
+      showAccountToast(error instanceof Error ? error.message : 'Не удалось изменить подписку.');
+      actionButton.disabled = false;
+    }
+  });
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!(form instanceof HTMLFormElement)) return;
+    const submit = form.querySelector('button[type="submit"]');
+    const data = new FormData(form);
+    const items = [...form.querySelectorAll('[data-subscription-product-check]:checked')].map((checkbox) => {
+      const row = checkbox.closest('.account-subscription-product');
+      const quantity = row?.querySelector('[data-subscription-product-qty]');
+      return { productId: Number(checkbox.value), quantity: Number(quantity?.value || 0) };
+    });
+    if (!items.length) {
+      if (status) status.textContent = 'Выберите хотя бы один товар.';
+      return;
+    }
+    const payload = {
+      addressId: Number(data.get('addressId')),
+      intervalDays: Number(data.get('intervalDays')),
+      nextDeliveryDate: String(data.get('nextDeliveryDate') || ''),
+      items,
+    };
+    if (submit) submit.disabled = true;
+    if (status) status.textContent = 'Сохраняем…';
+    try {
+      await requestAccountJson(accountStore.subscription ? '/api/subscriptions/me' : '/api/subscriptions', {
+        method: accountStore.subscription ? 'PATCH' : 'POST',
+        body: payload,
+      });
+      if (status) status.textContent = '';
+      showAccountToast(accountStore.subscription ? 'Подписка обновлена' : 'Подписка создана');
+      setFormOpen(false);
+      await refreshSubscription();
+    } catch (error) {
+      if (status) status.textContent = error instanceof Error ? error.message : 'Не удалось сохранить подписку.';
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
 }
 
 function initSettingsForms() {
@@ -1025,8 +1209,9 @@ async function ensureAddressesLoaded() {
 async function ensureSubscriptionLoaded() {
   if (accountStore.loaded.subscription) return;
 
-  const { data, backendAvailable } = await loadSubscription();
+  const { data, options, backendAvailable } = await loadSubscription();
   accountStore.subscription = data;
+  accountStore.subscriptionOptions = options;
   accountStore.backendAvailable.subscription = backendAvailable;
   accountStore.loaded.subscription = true;
 }
@@ -1165,6 +1350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initFavoritesActions();
     initAddressModal();
     initSettingsForms();
+    initSubscriptionControls();
     initLogout();
     initRepeatOrder();
     initAccountRetry();

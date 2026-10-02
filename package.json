@@ -28,7 +28,9 @@
     "test:admin-catalog-smoke": "node scripts/smoke-admin-catalog.mjs",
     "test:admin-customers-smoke": "node scripts/smoke-admin-customers.mjs",
     "test:promotions-smoke": "node scripts/smoke-promotions.mjs",
-    "test:reviews-smoke": "node scripts/smoke-reviews.mjs"
+    "test:reviews-smoke": "node scripts/smoke-reviews.mjs",
+    "subscriptions:generate-due": "node scripts/generate-subscription-orders.mjs",
+    "test:subscriptions-smoke": "node scripts/smoke-subscriptions.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

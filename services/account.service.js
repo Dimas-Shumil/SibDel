@@ -9,6 +9,7 @@ import {
   normalizeCommerceQuantity,
 } from "./commerce.service.js";
 import { getCart } from "./cart.service.js";
+import { getCustomerSubscription } from "./subscription.service.js";
 
 const SAFE_USER_SELECT = Object.freeze({
   id: true,
@@ -327,6 +328,23 @@ export async function deleteAccountAddress(userId, addressId) {
       );
     }
 
+    const subscriptionUsingAddress = await transaction.userSubscription.findFirst({
+      where: {
+        userId,
+        addressId,
+        status: { in: ["ACTIVE", "PAUSED"] },
+      },
+      select: { id: true },
+    });
+
+    if (subscriptionUsingAddress) {
+      throw createAccountError(
+        "Этот адрес используется в активной подписке. Сначала измените адрес доставки в подписке.",
+        409,
+        "ADDRESS_USED_BY_SUBSCRIPTION",
+      );
+    }
+
     await transaction.address.delete({
       where: {
         id: addressId,
@@ -595,39 +613,5 @@ export async function repeatAccountOrder(userId, orderKey) {
 }
 
 export async function getAccountSubscription(userId) {
-  return prisma.userSubscription.findFirst({
-    where: {
-      userId,
-      status: {
-        in: ["ACTIVE", "PAUSED"],
-      },
-      expiresAt: {
-        gt: new Date(),
-      },
-    },
-    orderBy: {
-      expiresAt: "desc",
-    },
-    select: {
-      id: true,
-      status: true,
-      startsAt: true,
-      expiresAt: true,
-      autoRenew: true,
-      cancelledAt: true,
-      createdAt: true,
-      updatedAt: true,
-      plan: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          price: true,
-          durationDays: true,
-          discountPercent: true,
-        },
-      },
-    },
-  });
+  return getCustomerSubscription(userId);
 }
