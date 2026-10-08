@@ -10,6 +10,7 @@ import {
 } from "./commerce.service.js";
 import { reserveInventoryForOrder } from "./inventory.service.js";
 import { applyActivePromotionsToProducts } from "./promotion.service.js";
+import { getActiveDeliveryZones, quoteDelivery, moneyToKopecks, kopecksToRubles } from "./delivery.service.js";
 
 function createCheckoutError(message, statusCode, code, details) {
   const error = new Error(message);
@@ -276,6 +277,7 @@ const ORDER_RESULT_SELECT = Object.freeze({
   discountTotal: true,
   deliveryPrice: true,
   deliveryPriceConfirmed: true,
+  deliveryTermsSnapshot: true,
   total: true,
   currency: true,
   requestedReceiveDate: true,
@@ -298,8 +300,8 @@ function serializeOrderResult(order) {
   };
 }
 
-export async function getCheckoutState({ owner, userId = null, receiveDate = null }) {
-  const [cart, user, defaultAddress, pickupPoints, deliverySlots] = await Promise.all([
+export async function getCheckoutState({ owner, userId = null, receiveDate = null, receiveMethod = null, deliveryZoneId = null, pickupPointId = null }) {
+  const [cart, user, defaultAddress, pickupPoints, deliverySlots, deliveryZones] = await Promise.all([
     findCheckoutCart(owner),
     userId
       ? prisma.user.findFirst({
@@ -362,9 +364,26 @@ export async function getCheckoutState({ owner, userId = null, receiveDate = nul
           },
         })
       : [],
+    getActiveDeliveryZones(),
   ]);
 
   const calculated = await calculateCart(cart);
+  // Quotes are informational: order creation always recalculates inside its transaction.
+  if (calculated.items.length && calculated.issues.length === 0 && receiveMethod) {
+    const hasSelection = receiveMethod === "delivery" ? Boolean(deliveryZoneId) : (Boolean(pickupPointId) || pickupPoints.length === 0);
+    if (hasSelection) {
+      const quote = await quoteDelivery({
+        method: receiveMethod === "pickup" ? "PICKUP" : "DELIVERY",
+        merchandiseTotal: calculated.summary.merchandiseTotal,
+        deliveryZoneId: receiveMethod === "delivery" ? deliveryZoneId : null,
+        pickupPointId: receiveMethod === "pickup" ? pickupPointId : null,
+      });
+      calculated.summary.deliveryPrice = quote.deliveryPrice;
+      calculated.summary.deliveryPriceConfirmed = quote.deliveryPriceConfirmed;
+      calculated.summary.total = kopecksToRubles(moneyToKopecks(calculated.summary.merchandiseTotal) + moneyToKopecks(quote.deliveryPrice));
+      calculated.summary.isFinal = true;
+    }
+  }
 
   return {
     cart: calculated,
@@ -380,108 +399,57 @@ export async function getCheckoutState({ owner, userId = null, receiveDate = nul
     defaultAddress: serializeAddress(defaultAddress),
     pickupPoints,
     deliverySlots,
+    deliveryZones,
     capabilities: {
       guestCheckout: true,
       pickup: true,
       pickupPointSelectionRequired: pickupPoints.length > 0,
       promoCodes: false,
       onlinePayment: false,
-      deliveryPriceCalculation: false,
+      deliveryPriceCalculation: true,
     },
   };
 }
 
-async function resolveDeliverySelection(transaction, input) {
+async function resolveDeliverySelection(transaction, input, merchandiseTotal) {
   const receiveDate = parseReceiveDate(input.receiveDate);
   let deliverySlotId = null;
   let requestedTimeWindow = null;
-  let pickupPointId = null;
-  let deliveryAddressSnapshot = null;
-  let deliveryPriceConfirmed = false;
 
   if (input.receiveSlotId) {
     const slot = await transaction.deliverySlot.findFirst({
-      where: {
-        id: input.receiveSlotId,
-        date: receiveDate,
-        isActive: true,
-      },
-      select: {
-        id: true,
-        startTime: true,
-        endTime: true,
-      },
+      where: { id: input.receiveSlotId, date: receiveDate, isActive: true },
+      select: { id: true, startTime: true, endTime: true, capacity: true },
     });
-
-    if (!slot) {
-      throw createCheckoutError(
-        "Выбранный временной интервал больше недоступен.",
-        409,
-        "DELIVERY_SLOT_UNAVAILABLE",
-      );
+    if (!slot) throw createCheckoutError("Выбранный временной интервал больше недоступен.", 409, "DELIVERY_SLOT_UNAVAILABLE");
+    if (slot.capacity !== null) {
+      const reserved = await transaction.order.count({
+        where: { deliverySlotId: slot.id, status: { not: "CANCELLED" } },
+      });
+      if (reserved >= slot.capacity) throw createCheckoutError("В выбранном интервале закончились места.", 409, "DELIVERY_SLOT_FULL");
     }
-
     deliverySlotId = slot.id;
     requestedTimeWindow = `${slot.startTime}–${slot.endTime}`;
   }
 
-  if (input.receiveMethod === "pickup") {
-    if (input.pickupPointId) {
-      const pickupPoint = await transaction.pickupPoint.findFirst({
-        where: {
-          id: input.pickupPointId,
-          isActive: true,
-        },
-        select: {
-          id: true,
-          name: true,
-          address: true,
-        },
-      });
-
-      if (!pickupPoint) {
-        throw createCheckoutError(
-          "Выбранная точка самовывоза больше недоступна.",
-          409,
-          "PICKUP_POINT_UNAVAILABLE",
-        );
-      }
-
-      pickupPointId = pickupPoint.id;
-      deliveryAddressSnapshot = `${pickupPoint.name}, ${pickupPoint.address}`;
-    } else {
-      const hasConfiguredPickupPoint = await transaction.pickupPoint.findFirst({
-        where: {
-          isActive: true,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      if (hasConfiguredPickupPoint) {
-        throw createCheckoutError(
-          "Выберите точку самовывоза.",
-          400,
-          "PICKUP_POINT_REQUIRED",
-        );
-      }
-
-      deliveryAddressSnapshot = "Точка самовывоза будет подтверждена менеджером";
-    }
-
-    deliveryPriceConfirmed = true;
-  } else {
-    deliveryAddressSnapshot = formatAddressSnapshot(input);
-  }
-
+  const quote = await quoteDelivery({
+    client: transaction,
+    method: input.receiveMethod === "pickup" ? "PICKUP" : "DELIVERY",
+    merchandiseTotal,
+    deliveryZoneId: input.receiveMethod === "delivery" ? input.deliveryZoneId : null,
+    pickupPointId: input.receiveMethod === "pickup" ? input.pickupPointId : null,
+    address: input.receiveMethod === "delivery" ? input.address : null,
+  });
   return {
     receiveDate,
     deliverySlotId,
     requestedTimeWindow,
-    pickupPointId,
-    deliveryAddressSnapshot,
-    deliveryPriceConfirmed,
+    pickupPointId: quote.pickupPointId,
+    deliveryZoneId: quote.deliveryZoneId,
+    deliveryAddressSnapshot: input.receiveMethod === "delivery" ? formatAddressSnapshot(input) : quote.deliveryAddressSnapshot,
+    deliveryTermsSnapshot: quote.snapshot,
+    deliveryPrice: quote.deliveryPrice,
+    deliveryPriceConfirmed: quote.deliveryPriceConfirmed,
   };
 }
 
@@ -548,12 +516,12 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
           );
         }
 
-        const delivery = await resolveDeliverySelection(transaction, input);
+        const delivery = await resolveDeliverySelection(transaction, input, calculated.summary.merchandiseTotal);
         const subtotal = calculated.summary.subtotal;
         const discountTotal = calculated.summary.discount;
         const merchandiseTotal = calculated.summary.merchandiseTotal;
-        const deliveryPrice = 0;
-        const total = Number((merchandiseTotal + deliveryPrice).toFixed(2));
+        const deliveryPrice = delivery.deliveryPrice;
+        const total = kopecksToRubles(moneyToKopecks(merchandiseTotal) + moneyToKopecks(deliveryPrice));
 
         const created = await transaction.order.create({
           data: {
@@ -569,6 +537,8 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
             paymentMethod:
               input.paymentMethod === "on-receipt" ? "ON_RECEIPT" : "ONLINE",
             deliverySlotId: delivery.deliverySlotId,
+            deliveryZoneId: delivery.deliveryZoneId,
+            deliveryTermsSnapshot: delivery.deliveryTermsSnapshot,
             pickupPointId: delivery.pickupPointId,
             customerName: input.name,
             customerPhone: input.phone,

@@ -347,14 +347,24 @@
          </div>
          <div class="account-order-products" data-order-products="">
          </div>
-         <div class="account-order-total">
-          <span>
-           Итого
-          </span>
-          <strong data-order-total="">
-           0 ₽
-          </strong>
-         </div>
+          <div class="account-order-breakdown" aria-label="Стоимость заказа">
+           <div class="account-order-breakdown__row">
+            <span>Товары до скидки</span>
+            <strong data-order-subtotal>0 ₽</strong>
+           </div>
+           <div class="account-order-breakdown__row account-order-breakdown__row--discount" data-order-discount-row hidden>
+            <span>Скидка</span>
+            <strong data-order-discount>0 ₽</strong>
+           </div>
+           <div class="account-order-breakdown__row">
+            <span>Доставка</span>
+            <strong data-order-shipping>—</strong>
+           </div>
+          </div>
+          <div class="account-order-total">
+           <span>Итого</span>
+           <strong data-order-total>0 ₽</strong>
+          </div>
         </section>
         <aside class="account-order-detail__aside">
          <div class="account-order-info">
@@ -371,12 +381,20 @@
             </dd>
            </div>
            <div>
-            <dt>
-             Адрес
+            <dt data-order-address-label>
+             Адрес доставки
             </dt>
             <dd data-order-address="">
              —
             </dd>
+           </div>
+           <div data-order-receive-date-row hidden>
+            <dt>Дата получения</dt>
+            <dd data-order-receive-date>—</dd>
+           </div>
+           <div data-order-receive-window-row hidden>
+            <dt>Интервал получения</dt>
+            <dd data-order-receive-window>—</dd>
            </div>
            <div>
             <dt>

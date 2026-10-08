@@ -11,6 +11,9 @@ export async function readCheckout(req, res, next) {
       owner,
       userId: req.user?.id ?? null,
       receiveDate: req.validated?.query?.date ?? null,
+      receiveMethod: req.validated?.query?.receiveMethod ?? null,
+      deliveryZoneId: req.validated?.query?.deliveryZoneId ?? null,
+      pickupPointId: req.validated?.query?.pickupPointId ?? null,
     });
 
     res.setHeader("Cache-Control", "no-store");

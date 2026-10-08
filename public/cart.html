@@ -16,7 +16,7 @@
   <body>
     <div data-component="header"></div>
 
-    <main class="cart-page" data-cart-page data-free-delivery-threshold="3000">
+    <main class="cart-page" data-cart-page>
       <section class="commerce-intro" aria-labelledby="cart-title">
         <div class="commerce-intro__container">
           <nav class="commerce-breadcrumbs" aria-label="Хлебные крошки">
@@ -52,11 +52,11 @@
                   </svg>
                 </span>
                 <div class="cart-delivery-progress__copy">
-                  <strong data-delivery-progress-title>До бесплатной доставки осталось 674 ₽</strong>
-                  <span>Бесплатная доставка для заказов от 3 000 ₽</span>
+                  <strong data-delivery-progress-title>Стоимость доставки зависит от населённого пункта</strong>
+                  <span>Тариф и бесплатную доставку рассчитаем после выбора города при оформлении.</span>
                 </div>
               </div>
-              <div class="cart-delivery-progress__track" aria-hidden="true">
+              <div class="cart-delivery-progress__track" aria-hidden="true" hidden>
                 <span class="cart-delivery-progress__bar" data-delivery-progress-bar style="width: 77.5%"></span>
               </div>
             </div>

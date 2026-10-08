@@ -30,7 +30,9 @@
     "test:promotions-smoke": "node scripts/smoke-promotions.mjs",
     "test:reviews-smoke": "node scripts/smoke-reviews.mjs",
     "subscriptions:generate-due": "node scripts/generate-subscription-orders.mjs",
-    "test:subscriptions-smoke": "node scripts/smoke-subscriptions.mjs"
+    "test:subscriptions-smoke": "node scripts/smoke-subscriptions.mjs",
+    "test:delivery-unit": "node --test tests/delivery-pricing.test.mjs",
+    "test:delivery-smoke": "node scripts/smoke-delivery.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -42,7 +44,7 @@
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
     "multer": "^2.3.0",
-    "nodemailer": "^9.1.1",
+    "nodemailer": "10.0.16",
     "pg": "^8.23.0",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",

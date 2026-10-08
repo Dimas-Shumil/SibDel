@@ -857,6 +857,42 @@
   font-size: 26px;
 }
 
+.account-order-breakdown {
+  margin-top: 14px;
+  padding-top: 15px;
+  border-top: 1px solid $color-border;
+}
+
+.account-order-breakdown__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 7px 0;
+  font-size: 14px;
+  color: $color-text-soft;
+
+  strong {
+    color: $color-text;
+    font-weight: 650;
+    text-align: right;
+  }
+
+  &--discount strong {
+    color: $color-forest-dark;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.account-order-total {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid $color-border;
+}
+
 .account-favorites-preview,
 .account-favorites-grid {
   display: grid;

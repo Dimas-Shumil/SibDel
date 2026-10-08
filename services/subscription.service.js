@@ -9,6 +9,7 @@ import {
 } from "./commerce.service.js";
 import { reserveInventoryForOrder } from "./inventory.service.js";
 import { applyActivePromotionsToProducts } from "./promotion.service.js";
+import { quoteDelivery, moneyToKopecks, kopecksToRubles } from "./delivery.service.js";
 
 const ALLOWED_INTERVAL_DAYS = new Set([7, 14, 30]);
 const MAX_SUBSCRIPTION_ITEMS = 30;
@@ -392,6 +393,24 @@ async function priceSubscriptionItems(items, client = prisma) {
 async function serializeSubscription(subscription, client = prisma) {
   if (!subscription) return null;
   const priced = await priceSubscriptionItems(subscription.items || [], client);
+  // Preview is informative: every scheduled order is recalculated at generation.
+  // An unavailable zone/minimum must not masquerade as a confirmed 0 ₽ fee.
+  if (subscription.address && priced.summary.isOrderable) {
+    try {
+      const quote = await quoteDelivery({
+        client, method: "DELIVERY", city: subscription.address.city,
+        merchandiseTotal: priced.summary.merchandiseTotal,
+      });
+      priced.summary.deliveryPrice = quote.deliveryPrice;
+      priced.summary.deliveryPriceConfirmed = true;
+      priced.summary.total = kopecksToRubles(
+        moneyToKopecks(priced.summary.merchandiseTotal) + moneyToKopecks(quote.deliveryPrice),
+      );
+    } catch (error) {
+      if (!error?.expose) throw error;
+      priced.summary.deliveryWarning = error.message;
+    }
+  }
   return {
     id: subscription.id,
     status: subscription.status,
@@ -630,6 +649,13 @@ export async function createCustomerSubscription({ userId, input }) {
 
       const address = await getOwnedAddress(transaction, userId, input.addressId);
       const items = await prepareSubscriptionItems(transaction, input.items);
+      const merchandiseCents = items.reduce(
+        (sum, item) => sum + Math.round(moneyToKopecks(item.lastUnitPrice) * item.quantity), 0,
+      );
+      await quoteDelivery({
+        client: transaction, method: "DELIVERY", city: address.city,
+        merchandiseTotal: kopecksToRubles(merchandiseCents),
+      });
 
       const created = await transaction.userSubscription.create({
         data: {
@@ -697,6 +723,13 @@ export async function updateCustomerSubscription({ userId, input }) {
 
     if (Object.hasOwn(input, "addressId")) {
       const address = await getOwnedAddress(transaction, userId, input.addressId);
+      const availableZone = await transaction.deliveryZone.findFirst({
+        where: { locality: { equals: address.city.trim(), mode: "insensitive" }, isActive: true },
+        select: { id: true },
+      });
+      if (!availableZone) {
+        throw subscriptionError("Для выбранного адреса доставка не настроена.", 409, "SUBSCRIPTION_DELIVERY_ZONE_UNAVAILABLE");
+      }
       data.addressId = input.addressId;
       data.addressSnapshot = formatAddressSnapshot(address);
       metadata.addressId = input.addressId;
@@ -1179,8 +1212,14 @@ export async function generateSubscriptionOrder({ subscriptionId, scheduledFor =
       }
 
       const lines = await prepareOrderLines(subscription, transaction);
-      const deliveryPrice = 0;
-      const total = money(lines.merchandiseTotal + deliveryPrice);
+      const quote = await quoteDelivery({
+        client: transaction,
+        method: "DELIVERY",
+        city: subscription.address.city,
+        merchandiseTotal: lines.merchandiseTotal,
+      });
+      const deliveryPrice = quote.deliveryPrice;
+      const total = kopecksToRubles(moneyToKopecks(lines.merchandiseTotal) + moneyToKopecks(deliveryPrice));
       const checkoutKey = subscriptionCheckoutKey(subscriptionId, targetDate);
 
       const duplicateOrder = await transaction.order.findUnique({ where: { checkoutKey }, select: { id: true, number: true, total: true, currency: true } });
@@ -1226,6 +1265,8 @@ export async function generateSubscriptionOrder({ subscriptionId, scheduledFor =
           paymentStatus: "PENDING",
           deliveryStatus: "PENDING",
           deliveryMethod: "DELIVERY",
+          deliveryZoneId: quote.deliveryZoneId,
+          deliveryTermsSnapshot: quote.snapshot,
           paymentMethod: "ON_RECEIPT",
           addressId: subscription.address.id,
           customerName: subscription.address.recipientName || [subscription.user.firstName, subscription.user.lastName].filter(Boolean).join(" ") || "Покупатель",
@@ -1238,7 +1279,7 @@ export async function generateSubscriptionOrder({ subscriptionId, scheduledFor =
           subtotal: lines.subtotal.toFixed(2),
           discountTotal: lines.discountTotal.toFixed(2),
           deliveryPrice: deliveryPrice.toFixed(2),
-          deliveryPriceConfirmed: false,
+          deliveryPriceConfirmed: true,
           total: total.toFixed(2),
           currency: "RUB",
           items: {

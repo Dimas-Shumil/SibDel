@@ -158,6 +158,7 @@ function initCheckoutPage() {
   const pickupPanel = page.querySelector('[data-checkout-pickup-panel]');
   const pickupHint = page.querySelector('[data-checkout-pickup-hint]');
   const pickupSelect = page.querySelector('[data-checkout-field="pickupPointId"]');
+  const zoneSelect = page.querySelector('[data-checkout-field="deliveryZoneId"]');
   const addressInput = page.querySelector('[data-checkout-field="address"]');
   const dateInput = page.querySelector('[data-checkout-field="receiveDate"]');
   const slotSelect = page.querySelector('[data-checkout-field="receiveSlot"]');
@@ -182,6 +183,7 @@ function initCheckoutPage() {
   let idempotencyKey = createCheckoutIdempotencyKey();
   let userEditedContact = false;
   let userEditedAddress = false;
+  let quoteRequestNumber = 0;
 
   const setFormStatus = (message = '', type = 'error') => {
     if (!formStatus) return;
@@ -237,6 +239,11 @@ function initCheckoutPage() {
     if (deliveryPanel) deliveryPanel.hidden = !isDelivery;
     if (pickupPanel) pickupPanel.hidden = isDelivery;
 
+    if (zoneSelect) {
+      zoneSelect.required = isDelivery;
+      zoneSelect.disabled = !isDelivery;
+      if (!isDelivery) clearFieldError('deliveryZoneId');
+    }
     if (addressInput) {
       addressInput.required = isDelivery;
       addressInput.disabled = !isDelivery;
@@ -258,12 +265,14 @@ function initCheckoutPage() {
     const selectionRequired = points.length > 0;
 
     if (pickupSelect) {
+      const previousPoint = pickupSelect.value;
       pickupSelect.innerHTML = selectionRequired
         ? [
             '<option value="">Выберите точку самовывоза</option>',
             ...points.map((point) => `<option value="${point.id}">${escapeCheckoutHtml(point.name)} — ${escapeCheckoutHtml(point.address)}</option>`),
           ].join('')
         : '<option value="">Точку подтвердим после оформления</option>';
+      if (points.some((point) => String(point.id) === previousPoint)) pickupSelect.value = previousPoint;
     }
 
     if (pickupRadio) {
@@ -274,6 +283,21 @@ function initCheckoutPage() {
       pickupHint.textContent = selectionRequired
         ? 'Выберите удобную точку самовывоза.'
         : 'Самовывоз доступен. Адрес и время выдачи подтвердит менеджер после оформления.';
+    }
+  };
+
+  const renderDeliveryZones = () => {
+    if (!zoneSelect) return;
+    const previous = zoneSelect.value;
+    const zones = checkoutState?.deliveryZones || [];
+    zoneSelect.innerHTML = [
+      '<option value="">Выберите населённый пункт</option>',
+      ...zones.map((zone) => `<option value="${zone.id}">${escapeCheckoutHtml(zone.locality)} — ${formatCheckoutMoney(zone.deliveryPrice)}</option>`),
+    ].join('');
+    if (zones.some((zone) => String(zone.id) === previous)) zoneSelect.value = previous;
+    if (pickupRadio && zones.length === 0) {
+      // Checkout remains available for pickup even before delivery tariffs are configured.
+      setFormStatus('Доставка пока не настроена. Можно выбрать самовывоз.', 'error');
     }
   };
 
@@ -376,10 +400,18 @@ function initCheckoutPage() {
   };
 
   const refreshCheckoutState = async ({ date = dateInput?.value || '', preserveStatus = false } = {}) => {
-    const query = date ? `?date=${encodeURIComponent(date)}` : '';
-    const payload = await requestCheckoutApi(`/api/checkout${query}`);
+    const requestNumber = ++quoteRequestNumber;
+    const params = new URLSearchParams();
+    if (date) params.set('date', date);
+    const method = form.elements.receiveMethod?.value || 'delivery';
+    params.set('receiveMethod', method);
+    if (method === 'delivery' && zoneSelect?.value) params.set('deliveryZoneId', zoneSelect.value);
+    if (method === 'pickup' && pickupSelect?.value) params.set('pickupPointId', pickupSelect.value);
+    const payload = await requestCheckoutApi(`/api/checkout?${params.toString()}`);
+    if (requestNumber !== quoteRequestNumber) return;
     checkoutState = payload.checkout;
     renderPickupPoints();
+    renderDeliveryZones();
     renderSlots();
     renderPaymentCapabilities();
     applyCustomerDefaults();
@@ -399,6 +431,7 @@ function initCheckoutPage() {
     const receiveMethod = form.elements.receiveMethod?.value || 'delivery';
     const address = String(form.elements.address?.value || '').trim();
     const pickupPointId = String(form.elements.pickupPointId?.value || '').trim();
+    const deliveryZoneId = String(zoneSelect?.value || '').trim();
     const receiveDate = String(form.elements.receiveDate?.value || '').trim();
     const agreement = Boolean(form.elements.agreement?.checked);
     const phoneDigits = phone.replace(/\D/g, '');
@@ -408,6 +441,7 @@ function initCheckoutPage() {
     if (name.length < 2) errors.push(['name', 'Укажите имя, чтобы мы знали, как к вам обращаться.']);
     if (phoneDigits.length < 10 || phoneDigits.length > 15) errors.push(['phone', 'Проверьте номер телефона.']);
     if (!emailPattern.test(email)) errors.push(['email', 'Введите корректный email.']);
+    if (receiveMethod === 'delivery' && !deliveryZoneId) errors.push(['deliveryZoneId', 'Выберите населённый пункт доставки.']);
     if (receiveMethod === 'delivery' && address.length < 5) errors.push(['address', 'Укажите адрес доставки.']);
     if (receiveMethod === 'pickup' && checkoutState?.capabilities?.pickupPointSelectionRequired === true && !pickupPointId) errors.push(['pickupPointId', 'Выберите точку самовывоза.']);
     if (!receiveDate) errors.push(['receiveDate', 'Выберите дату получения.']);
@@ -491,16 +525,28 @@ function initCheckoutPage() {
 
     if (target.name === 'receiveMethod') syncReceiveMethod();
     if (target.name === 'paymentMethod') syncChoiceCards();
-    if (target.name === 'receiveDate') {
-      try {
-        await refreshCheckoutState({ date: target.value, preserveStatus: true });
-      } catch (error) {
-        setFormStatus(error.message);
-      }
-    }
     if (target.dataset.checkoutField) {
       clearFieldError(target.dataset.checkoutField);
       setFormStatus('');
+    }
+    if (['receiveDate', 'receiveMethod', 'deliveryZoneId', 'pickupPointId'].includes(target.name)) {
+      // Invalidate the previous zone quote immediately. An unsuccessful request
+      // must never leave an outdated amount displayed as a confirmed total.
+      const summary = checkoutState?.cart?.summary;
+      if (summary) {
+        summary.deliveryPrice = null;
+        summary.deliveryPriceConfirmed = false;
+        summary.isFinal = false;
+        summary.total = summary.merchandiseTotal;
+        renderCheckout();
+      }
+      try {
+        // The date must come from the DATE control, not from the changed zone,
+        // point or receive-method control (which may also trigger this handler).
+        await refreshCheckoutState({ preserveStatus: true });
+      } catch (error) {
+        setFormStatus(error.message);
+      }
     }
   });
 
@@ -542,12 +588,13 @@ function initCheckoutPage() {
           phone: String(form.elements.phone.value || '').trim(),
           email: String(form.elements.email.value || '').trim(),
           receiveMethod: form.elements.receiveMethod.value,
+          deliveryZoneId: form.elements.receiveMethod.value === 'delivery' && zoneSelect?.value ? Number(zoneSelect.value) : null,
           address: String(form.elements.address?.value || '').trim(),
           entrance: String(form.elements.entrance?.value || '').trim(),
           floor: String(form.elements.floor?.value || '').trim(),
           receiveDate: form.elements.receiveDate.value,
           receiveSlotId: form.elements.receiveSlot?.value ? Number(form.elements.receiveSlot.value) : null,
-          pickupPointId: form.elements.pickupPointId?.value ? Number(form.elements.pickupPointId.value) : null,
+          pickupPointId: form.elements.receiveMethod.value === 'pickup' && form.elements.pickupPointId?.value ? Number(form.elements.pickupPointId.value) : null,
           paymentMethod: form.elements.paymentMethod.value,
           comment: String(form.elements.comment?.value || '').trim(),
           agreement: Boolean(form.elements.agreement.checked),

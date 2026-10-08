@@ -463,6 +463,8 @@ model Order {
   inventoryMovements    InventoryMovement[]
   subscriptionDelivery  SubscriptionDelivery?
 
+  deliveryTermsSnapshot Json?
+
   @@index([userId, createdAt])
   @@index([status, createdAt])
   @@index([paymentStatus])
@@ -611,6 +613,10 @@ model DeliveryZone {
   updatedAt DateTime @updatedAt
 
   orders Order[]
+
+  locality String? @unique @db.VarChar(120)
+
+  freeDeliveryFrom Decimal? @db.Decimal(12, 2)
 
   @@index([isActive, sortOrder])
 }

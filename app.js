@@ -34,6 +34,8 @@ import reviewsRouter from "./routes/reviews.routes.js";
 import adminReviewsRouter from "./routes/admin-reviews.routes.js";
 import subscriptionsRouter from "./routes/subscriptions.routes.js";
 import adminSubscriptionsRouter from "./routes/admin-subscriptions.routes.js";
+import deliveryRouter from "./routes/delivery.routes.js";
+import adminDeliveryRouter from "./routes/admin-delivery.routes.js";
 import {
   notFoundHandler,
   errorHandler,
@@ -214,6 +216,8 @@ app.use("/api/commerce", commerceRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/checkout", checkoutRouter);
+app.use("/api/delivery", deliveryRouter);
+app.use("/api/admin/delivery", adminDeliveryRouter);
 app.use("/api/admin/inventory", inventoryRouter);
 app.use("/api/admin/catalog", adminCatalogRouter);
 app.use("/api/admin/orders", ordersRouter);

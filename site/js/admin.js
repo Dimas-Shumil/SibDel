@@ -498,6 +498,9 @@ function renderAdminOrder(order) {
       adminDetailRow("Дата", escapeAdminHtml(formatAdminDate(order.requestedReceiveDate, false))),
       adminDetailRow("Время", escapeAdminHtml(order.requestedTimeWindow || "—")),
       adminDetailRow("Адрес", escapeAdminHtml(order.deliveryAddressSnapshot || (order.deliveryMethod === "PICKUP" ? "Самовывоз" : "—"))),
+      adminDetailRow("Зона / тариф", escapeAdminHtml(order.deliveryTermsSnapshot?.zoneName
+        ? `${order.deliveryTermsSnapshot.zoneName} · ${formatAdminMoney(order.deliveryTermsSnapshot.tariff)}${order.deliveryTermsSnapshot.freeDeliveryApplied ? " · бесплатно от порога" : ""}`
+        : (order.deliveryTermsSnapshot?.method === "PICKUP" ? "Самовывоз бесплатно" : "Не указан"))),
       adminDetailRow("Комментарий", escapeAdminHtml(order.comment || "—")),
     ].join("");
   }
@@ -2564,6 +2567,113 @@ async function initAdminSubscriptions() {
 }
 
 
+async function initAdminDelivery() {
+  if (document.body.dataset.adminPage !== "delivery") return;
+  let deliveryData = null;
+  const isOwner = currentAdminUser?.role === "OWNER";
+  if (!isOwner) document.querySelectorAll("[data-delivery-editor]").forEach((editor) => { editor.hidden = true; });
+
+  const numberOrNull = (form, name) => {
+    const raw = String(form.elements[name]?.value || "").trim();
+    return raw === "" ? null : Number(raw);
+  };
+  const stringOrNull = (form, name) => String(form.elements[name]?.value || "").trim() || null;
+  const serialiseForm = (kind, form) => {
+    const common = {
+      isActive: Boolean(form.elements.isActive.checked),
+    };
+    if (kind === "zones") return {
+      ...common,
+      name: String(form.elements.name.value).trim(),
+      locality: stringOrNull(form, "locality"),
+      description: stringOrNull(form, "description"),
+      deliveryPrice: Number(form.elements.deliveryPrice.value),
+      minOrderAmount: numberOrNull(form, "minOrderAmount"),
+      freeDeliveryFrom: numberOrNull(form, "freeDeliveryFrom"),
+      sortOrder: Number(form.elements.sortOrder.value),
+    };
+    if (kind === "pickup-points") return {
+      ...common,
+      name: String(form.elements.name.value).trim(),
+      address: String(form.elements.address.value).trim(),
+      phone: stringOrNull(form, "phone"),
+      workingHours: stringOrNull(form, "workingHours"),
+      sortOrder: Number(form.elements.sortOrder.value),
+    };
+    return {
+      ...common,
+      date: String(form.elements.date.value),
+      startTime: String(form.elements.startTime.value),
+      endTime: String(form.elements.endTime.value),
+      capacity: numberOrNull(form, "capacity"),
+    };
+  };
+
+  const recordList = (kind) => ({ zones: deliveryData?.zones, "pickup-points": deliveryData?.pickupPoints, slots: deliveryData?.slots })[kind] || [];
+  const render = (kind) => {
+    const body = document.querySelector(`[data-delivery-list="${kind}"]`);
+    if (!body) return;
+    const rows = recordList(kind).map((record) => {
+      const button = isOwner ? `<button class="admin-button admin-button--secondary" type="button" data-delivery-edit="${kind}" data-id="${record.id}">Изменить</button>` : "";
+      const status = record.isActive ? "Активен" : "Выключен";
+      if (kind === "zones") return `<tr><td>${escapeAdminHtml(record.name)}</td><td>${escapeAdminHtml(record.locality || "Не настроен")}</td><td>${formatAdminMoney(record.deliveryPrice)}</td><td>${record.minOrderAmount === null ? "Нет" : formatAdminMoney(record.minOrderAmount)}</td><td>${record.freeDeliveryFrom === null ? "Нет" : formatAdminMoney(record.freeDeliveryFrom)}</td><td>${status}</td><td>${button}</td></tr>`;
+      if (kind === "pickup-points") return `<tr><td>${escapeAdminHtml(record.name)}</td><td>${escapeAdminHtml(record.address)}</td><td>${escapeAdminHtml(record.workingHours || "—")}</td><td>${status}</td><td>${button}</td></tr>`;
+      return `<tr><td>${escapeAdminHtml(String(record.date).slice(0, 10))}</td><td>${escapeAdminHtml(record.startTime)}–${escapeAdminHtml(record.endTime)}</td><td>${record.capacity ?? "Без ограничения"}</td><td>${status}</td><td>${button}</td></tr>`;
+    });
+    body.innerHTML = rows.join("") || `<tr><td colspan="${kind === "zones" ? 7 : 5}" class="admin-table__empty">Записей пока нет.</td></tr>`;
+  };
+  const load = async () => {
+    deliveryData = await adminFetch("/api/admin/delivery");
+    for (const kind of ["zones", "pickup-points", "slots"]) render(kind);
+  };
+  const reset = (kind) => {
+    const form = document.querySelector(`[data-delivery-form="${kind}"]`);
+    if (!(form instanceof HTMLFormElement)) return;
+    form.reset();
+    form.elements.id.value = "";
+    if (kind === "slots") form.elements.date.value = new Date().toLocaleDateString("sv-SE");
+    const header = document.querySelector(`[data-delivery-title="${kind}"]`);
+    if (header) header.textContent = ({ zones: "Добавить зону", "pickup-points": "Добавить пункт", slots: "Добавить интервал" })[kind];
+  };
+  for (const kind of ["zones", "pickup-points", "slots"]) {
+    document.querySelector(`[data-delivery-reset="${kind}"]`)?.addEventListener("click", () => reset(kind));
+    document.querySelector(`[data-delivery-list="${kind}"]`)?.addEventListener("click", (event) => {
+      const button = event.target.closest(`[data-delivery-edit="${kind}"]`);
+      if (!button || !isOwner) return;
+      const record = recordList(kind).find((entry) => entry.id === Number(button.dataset.id));
+      const form = document.querySelector(`[data-delivery-form="${kind}"]`);
+      if (!record || !(form instanceof HTMLFormElement)) return;
+      form.elements.id.value = record.id;
+      for (const [key, value] of Object.entries(record)) {
+        const field = form.elements[key];
+        if (!field || key === "id") continue;
+        if (field.type === "checkbox") field.checked = Boolean(value);
+        else field.value = value === null || value === undefined ? "" : (key === "date" ? String(value).slice(0, 10) : String(value));
+      }
+      const title = document.querySelector(`[data-delivery-title="${kind}"]`);
+      if (title) title.textContent = "Редактирование #" + record.id;
+      form.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
+    const form = document.querySelector(`[data-delivery-form="${kind}"]`);
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!isOwner || !(form instanceof HTMLFormElement) || !form.reportValidity()) return;
+      const id = form.elements.id.value;
+      const data = serialiseForm(kind, form);
+      const submit = form.querySelector('[type="submit"]');
+      submit.disabled = true;
+      try {
+        await adminFetch(`/api/admin/delivery/${kind}${id ? `/${id}` : ""}`, { method: id ? "PATCH" : "POST", body: JSON.stringify(data) });
+        showAdminToast("Настройки доставки сохранены.");
+        reset(kind);
+        await load();
+      } catch (error) { showAdminToast(error.message, "error"); }
+      finally { submit.disabled = false; }
+    });
+  }
+  try { await load(); } catch (error) { showAdminToast(error.message, "error"); }
+}
+
 async function initAdminApplication() {
   await initAdminLogin();
 
@@ -2585,6 +2695,7 @@ async function initAdminApplication() {
     initAdminPromotionEditor(),
     initAdminReviews(),
     initAdminSubscriptions(),
+    initAdminDelivery(),
   ]);
 }
 

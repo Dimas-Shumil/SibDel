@@ -2533,6 +2533,39 @@ main {
   font-size: 26px;
 }
 
+.account-order-breakdown {
+  margin-top: 14px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(100, 70, 40, 0.28);
+}
+
+.account-order-breakdown__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 7px 0;
+  font-size: 14px;
+  color: #6f5439;
+}
+.account-order-breakdown__row strong {
+  color: #4a321e;
+  font-weight: 650;
+  text-align: right;
+}
+.account-order-breakdown__row--discount strong {
+  color: #354019;
+}
+.account-order-breakdown__row[hidden] {
+  display: none;
+}
+
+.account-order-total {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(100, 70, 40, 0.28);
+}
+
 .account-favorites-preview,
 .account-favorites-grid {
   display: grid;

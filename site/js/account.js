@@ -460,6 +460,23 @@ function formatAccountMoney(value) {
   return `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(Number(value) || 0)} ₽`;
 }
 
+function formatAccountReceiveDate(value) {
+  if (!value) return null;
+
+  const dateKey = String(value).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return null;
+
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dateKey) return null;
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
 function formatAccountDate(value) {
   if (!value) {
     return '—';
@@ -569,9 +586,37 @@ function renderOrder(order) {
   detail.hidden = false;
   setElementText('[data-order-title]', `Заказ №${order.number || order.id || '—'}`, 'Заказ', root);
   setElementText('[data-order-status]', orderStatusLabels[order.status] || order.status || 'Статус уточняется', '—', root);
-  setElementText('[data-order-total]', order.deliveryPriceConfirmed === false ? `${formatAccountMoney(order.total)} + доставка` : formatAccountMoney(order.total), '0 ₽', root);
-  setElementText('[data-order-delivery]', order.deliveryMethod === 'PICKUP' ? 'Самовывоз' : 'Доставка', '—', root);
+
+  const discount = Number(order.discountTotal) || 0;
+  const deliveryPrice = Number(order.deliveryPrice) || 0;
+  const deliveryConfirmed = order.deliveryPriceConfirmed !== false;
+  const isPickup = order.deliveryMethod === 'PICKUP';
+  const receiveDate = formatAccountReceiveDate(order.requestedReceiveDate);
+  const receiveWindow = String(order.requestedTimeWindow || '').trim();
+
+  setElementText('[data-order-subtotal]', formatAccountMoney(order.subtotal), '0 ₽', root);
+  setElementText('[data-order-discount]', `−${formatAccountMoney(discount)}`, '0 ₽', root);
+  setElementText('[data-order-shipping]',
+    deliveryConfirmed ? (deliveryPrice === 0 ? 'Бесплатно' : formatAccountMoney(deliveryPrice)) : 'Уточняется',
+    '—', root);
+  setElementText('[data-order-total]',
+    deliveryConfirmed ? formatAccountMoney(order.total) : `${formatAccountMoney(order.total)} + доставка`,
+    '0 ₽', root);
+
+  const discountRow = root.querySelector('[data-order-discount-row]');
+  if (discountRow) discountRow.hidden = discount <= 0;
+
+  setElementText('[data-order-delivery]', isPickup ? 'Самовывоз' : 'Курьерская доставка', '—', root);
   setElementText('[data-order-address]', order.deliveryAddressSnapshot || order.pickupPoint?.address, 'Адрес не указан', root);
+  setElementText('[data-order-address-label]', isPickup ? 'Пункт получения' : 'Адрес доставки', 'Адрес', root);
+  setElementText('[data-order-receive-date]', receiveDate, '—', root);
+  setElementText('[data-order-receive-window]', receiveWindow, '—', root);
+
+  const receiveDateRow = root.querySelector('[data-order-receive-date-row]');
+  const receiveWindowRow = root.querySelector('[data-order-receive-window-row]');
+  if (receiveDateRow) receiveDateRow.hidden = !receiveDate;
+  if (receiveWindowRow) receiveWindowRow.hidden = !receiveWindow;
+
   setElementText('[data-order-payment]', paymentMethodLabels[order.paymentMethod] || paymentStatusLabels[order.paymentStatus] || order.paymentStatus, 'Способ оплаты не указан', root);
   setElementText('[data-order-date]', formatAccountDate(order.createdAt), '—', root);
 
@@ -932,7 +977,7 @@ function renderSubscription(subscription) {
   setElementText('[data-subscription-next]', formatAccountDate(subscription.nextDeliveryAt), '—', root);
   setElementText('[data-subscription-interval]', subscriptionIntervalLabel(subscription.intervalDays), '—', root);
   setElementText('[data-subscription-address]', subscription.address?.formatted || subscription.address?.title, '—', root);
-  setElementText('[data-subscription-total]', subscription.summary ? `${formatAccountMoney(subscription.summary.total)} + доставка` : '—', '—', root);
+  setElementText('[data-subscription-total]', subscription.summary ? (subscription.summary.deliveryPriceConfirmed ? `${formatAccountMoney(subscription.summary.total)} (включая доставку)` : `${formatAccountMoney(subscription.summary.total)} + доставка${subscription.summary.deliveryWarning ? ` · ${subscription.summary.deliveryWarning}` : ''}`) : '—', '—', root);
 
   const itemsRoot = root.querySelector('[data-subscription-items]');
   if (itemsRoot) {

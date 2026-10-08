@@ -344,8 +344,7 @@ function initCartPage() {
   const mobileTotalOutput = page.querySelector('[data-cart-mobile-total]');
   const mobileBar = page.querySelector('[data-cart-mobile-bar]');
   const deliveryTitle = page.querySelector('[data-delivery-progress-title]');
-  const deliveryBar = page.querySelector('[data-delivery-progress-bar]');
-  const freeDeliveryThreshold = Number(page.dataset.freeDeliveryThreshold) || 3000;
+
 
   if (!itemsRoot) {
     return;
@@ -408,17 +407,7 @@ function initCartPage() {
       mobileTotalOutput.textContent = formatCommerceMoney(totals.total);
     }
 
-    if (deliveryTitle && deliveryBar) {
-      const remaining = Math.max(0, freeDeliveryThreshold - totals.total);
-      const progress = freeDeliveryThreshold
-        ? Math.min(100, (totals.total / freeDeliveryThreshold) * 100)
-        : 100;
-
-      deliveryBar.style.width = `${progress}%`;
-      deliveryTitle.textContent = remaining
-        ? `До бесплатной доставки осталось ${formatCommerceMoney(remaining)}`
-        : 'Бесплатная доставка уже доступна';
-    }
+    if (deliveryTitle) deliveryTitle.textContent = 'Стоимость доставки зависит от населённого пункта';
 
     if (cartContent) cartContent.hidden = isEmpty;
     if (cartSummary) cartSummary.hidden = isEmpty;

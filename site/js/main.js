@@ -1571,3 +1571,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     initReviewsSlider();
   }
 });
+
+// Delivery information is rendered exclusively from the current server-side tariff list.
+async function hydratePublicDelivery() {
+  const root = document.querySelector('[data-public-delivery]');
+  if (!root) return;
+  const zoneRoot = root.querySelector('[data-public-delivery-zones]');
+  const pickupRoot = root.querySelector('[data-public-delivery-pickup]');
+  const createCard = (title, lines) => {
+    const article = document.createElement('article');
+    article.className = 'delivery-info__card';
+    const h = document.createElement('h3');
+    h.textContent = title;
+    article.append(h);
+    for (const line of lines) {
+      const p = document.createElement('p');
+      p.textContent = line;
+      article.append(p);
+    }
+    return article;
+  };
+  try {
+    const response = await fetch('/api/delivery/zones', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+    const data = await response.json();
+    if (!response.ok || !data?.ok) throw new Error('Данные недоступны');
+    const format = (value) => `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(Number(value))} ₽`;
+    if (zoneRoot) {
+      zoneRoot.replaceChildren();
+      for (const zone of data.zones || []) zoneRoot.append(createCard(zone.locality, [
+        zone.deliveryPrice === 0 ? 'Доставка бесплатно' : `Тариф: ${format(zone.deliveryPrice)}`,
+        zone.minOrderAmount !== null ? `Минимальный заказ: ${format(zone.minOrderAmount)}` : 'Без минимальной суммы заказа',
+        zone.freeDeliveryFrom !== null ? `Бесплатно от ${format(zone.freeDeliveryFrom)} после скидок` : 'Бесплатный порог не предусмотрен',
+      ]));
+      if (!zoneRoot.childElementCount) zoneRoot.append(createCard('Уточните доступность', ['Курьерская доставка пока не настроена. Самовывоз доступен отдельно.']));
+    }
+    if (pickupRoot) {
+      pickupRoot.replaceChildren();
+      for (const point of data.pickupPoints || []) pickupRoot.append(createCard(point.name, [point.address, point.workingHours || 'Время выдачи согласуется при оформлении']));
+      if (!pickupRoot.childElementCount) pickupRoot.append(createCard('Выдача по согласованию', ['Точную точку выдачи подтвердим после оформления заказа.']));
+    }
+  } catch {
+    if (zoneRoot) zoneRoot.textContent = 'Не удалось загрузить тарифы. Обновите страницу.';
+    if (pickupRoot) pickupRoot.textContent = 'Не удалось загрузить пункты выдачи.';
+  }
+}
+document.addEventListener('DOMContentLoaded', () => { void hydratePublicDelivery(); });

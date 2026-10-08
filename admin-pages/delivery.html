@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Доставка — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="delivery">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/"><span class="admin-brand__mark" aria-hidden="true">▲</span><span><strong>Сибирские</strong><strong>Деликатесы</strong></span></a>
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+          <a class="admin-nav__link" href="/admin/subscriptions" data-admin-nav="subscriptions"><span>Подписки</span></a>
+          <a class="admin-nav__link" href="/admin/delivery" data-admin-nav="delivery"><span>Доставка</span></a>
+        </nav>
+        <div class="admin-sidebar__roadmap"><span>Commerce</span><strong>Регулярные доставки · Заказы · Склад</strong></div>
+        <div class="admin-sidebar__user"><span class="admin-sidebar__role" data-admin-user-role>...</span><strong data-admin-user-name>Загрузка...</strong><span data-admin-user-email></span><button class="admin-link-button" type="button" data-admin-logout>Выйти</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header"><div><p class="admin-eyebrow">Commerce · Delivery</p><h1>Доставка</h1><p class="admin-header__lead">Настройки населённых пунктов, тарифов, бесплатной доставки, пунктов самовывоза и временных интервалов. Все изменения применяются только к новым заказам.</p></div></header>
+        <p class="admin-form-note" style="margin-bottom:20px">Стоимость доставки рассчитывается с суммы товаров <strong>после применения скидок</strong>. Для каждой активной зоны обязателен населённый пункт. Незаполненные зоны не участвуют в оформлении.</p>
+        <section class="admin-panel" style="margin-bottom:18px">
+          <div class="admin-panel__head"><div><span>География</span><h2>Курьерская доставка</h2></div></div>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Зона</th><th>Населённый пункт</th><th>Стоимость</th><th>Мин. заказ</th><th>Бесплатно от</th><th>Статус</th><th></th></tr></thead><tbody data-delivery-list="zones"></tbody></table></div>
+        </section>
+        <section class="admin-panel" data-delivery-editor="zones" style="margin-bottom:22px">
+          <div class="admin-panel__head"><div><span>Тариф</span><h2 data-delivery-title="zones">Добавить зону</h2></div></div>
+          <form data-delivery-form="zones" class="admin-category-form"><input type="hidden" name="id" />
+            <div class="admin-form-grid">
+              <label class="admin-field"><span>Название зоны</span><input name="name" maxlength="150" required placeholder="Доставка по Абакану" /></label>
+              <label class="admin-field"><span>Населённый пункт (один на зону)</span><input name="locality" maxlength="120" required placeholder="Абакан" /></label>
+              <label class="admin-field"><span>Тариф, ₽</span><input name="deliveryPrice" type="number" min="0" max="1000000000" step="0.01" value="0" required /></label>
+              <label class="admin-field"><span>Мин. сумма заказа, ₽ (пусто = без минимума)</span><input name="minOrderAmount" type="number" min="0" max="1000000000" step="0.01" /></label>
+              <label class="admin-field"><span>Бесплатная доставка от, ₽ (пусто = нет)</span><input name="freeDeliveryFrom" type="number" min="0" max="1000000000" step="0.01" /></label>
+              <label class="admin-field"><span>Порядок</span><input name="sortOrder" type="number" min="0" max="10000" value="0" required /></label>
+              <label class="admin-field admin-field--wide"><span>Описание</span><textarea name="description" maxlength="2000" placeholder="Территория обслуживания"></textarea></label>
+            </div>
+            <label class="admin-check"><input name="isActive" type="checkbox" checked /> Активна</label>
+            <div class="admin-header__actions"><button class="admin-button" type="submit">Сохранить</button><button class="admin-button admin-button--secondary" type="button" data-delivery-reset="zones">Очистить</button></div>
+          </form>
+        </section>
+        <section class="admin-panel" style="margin-bottom:18px"><div class="admin-panel__head"><div><span>Получение</span><h2>Пункты самовывоза</h2></div></div>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Название</th><th>Адрес</th><th>График</th><th>Статус</th><th></th></tr></thead><tbody data-delivery-list="pickup-points"></tbody></table></div>
+        </section>
+        <section class="admin-panel" data-delivery-editor="pickup-points" style="margin-bottom:22px"><div class="admin-panel__head"><div><span>Самовывоз</span><h2 data-delivery-title="pickup-points">Добавить пункт</h2></div></div>
+          <form data-delivery-form="pickup-points" class="admin-category-form"><input type="hidden" name="id" /><div class="admin-form-grid">
+            <label class="admin-field"><span>Название</span><input name="name" maxlength="150" required /></label>
+            <label class="admin-field"><span>Адрес</span><input name="address" maxlength="300" required minlength="5" /></label>
+            <label class="admin-field"><span>Телефон</span><input name="phone" maxlength="32" /></label>
+            <label class="admin-field"><span>График</span><input name="workingHours" maxlength="500" /></label>
+            <label class="admin-field"><span>Порядок</span><input name="sortOrder" type="number" min="0" max="10000" value="0" required /></label>
+          </div><label class="admin-check"><input name="isActive" type="checkbox" checked /> Активен</label>
+          <div class="admin-header__actions"><button class="admin-button" type="submit">Сохранить</button><button class="admin-button admin-button--secondary" type="button" data-delivery-reset="pickup-points">Очистить</button></div></form>
+        </section>
+        <section class="admin-panel" style="margin-bottom:18px"><div class="admin-panel__head"><div><span>Расписание</span><h2>Интервалы получения</h2></div></div>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Дата</th><th>Время</th><th>Вместимость</th><th>Активность</th><th></th></tr></thead><tbody data-delivery-list="slots"></tbody></table></div>
+        </section>
+        <section class="admin-panel" data-delivery-editor="slots" style="margin-bottom:22px"><div class="admin-panel__head"><div><span>Время</span><h2 data-delivery-title="slots">Добавить интервал</h2></div></div>
+          <form data-delivery-form="slots" class="admin-category-form"><input type="hidden" name="id" /><div class="admin-form-grid">
+            <label class="admin-field"><span>Дата</span><input name="date" type="date" required /></label>
+            <label class="admin-field"><span>Начало</span><input name="startTime" type="time" required /></label>
+            <label class="admin-field"><span>Конец</span><input name="endTime" type="time" required /></label>
+            <label class="admin-field"><span>Макс. заказов (пусто = без ограничений)</span><input name="capacity" type="number" min="1" max="100000" /></label>
+          </div><label class="admin-check"><input name="isActive" type="checkbox" checked /> Активен</label>
+          <div class="admin-header__actions"><button class="admin-button" type="submit">Сохранить</button><button class="admin-button admin-button--secondary" type="button" data-delivery-reset="slots">Очистить</button></div></form>
+        </section>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

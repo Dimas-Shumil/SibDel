@@ -34,6 +34,7 @@ const checkoutBodySchema = z
     phone: phoneSchema,
     email: z.string().trim().email("Введите корректный email.").max(191).transform((value) => value.toLowerCase()),
     receiveMethod: z.enum(["delivery", "pickup"]),
+    deliveryZoneId: z.number().int().positive().nullable().optional().default(null),
     address: z.string().trim().max(240).optional().default(""),
     entrance: z.string().trim().max(20).optional().default(""),
     floor: z.string().trim().max(20).optional().default(""),
@@ -46,6 +47,15 @@ const checkoutBodySchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
+    if (value.receiveMethod === "delivery" && !value.deliveryZoneId) {
+      ctx.addIssue({ code: "custom", path: ["deliveryZoneId"], message: "Выберите населённый пункт доставки." });
+    }
+    if (value.receiveMethod === "delivery" && value.pickupPointId !== null) {
+      ctx.addIssue({ code: "custom", path: ["pickupPointId"], message: "Точка самовывоза не применяется к доставке." });
+    }
+    if (value.receiveMethod === "pickup" && value.deliveryZoneId !== null) {
+      ctx.addIssue({ code: "custom", path: ["deliveryZoneId"], message: "Зона доставки не применяется к самовывозу." });
+    }
     if (value.receiveMethod === "delivery" && value.address.length < 5) {
       ctx.addIssue({
         code: "custom",
@@ -76,6 +86,9 @@ router.get(
     query: z
       .object({
         date: dateSchema.optional(),
+        receiveMethod: z.enum(["delivery", "pickup"]).optional(),
+        deliveryZoneId: z.coerce.number().int().positive().optional(),
+        pickupPointId: z.coerce.number().int().positive().optional(),
       })
       .strict(),
   }),

@@ -169,9 +169,16 @@ try {
   });
   subscriptionId = created.id;
 
-  if (created.status !== "ACTIVE" || created.items.length !== 1 || Number(created.summary.total) !== 1800) {
-    throw new Error("Subscription creation or promotion-aware server pricing is invalid.");
-  }
+ if (
+  created.status !== "ACTIVE" ||
+  created.items.length !== 1 ||
+  Number(created.summary.total) !== 2100
+) {
+  console.error("Subscription pricing mismatch:", created.summary);
+  throw new Error(
+    "Subscription creation or promotion-aware server pricing is invalid."
+  );
+}
 
   const generated = await generateSubscriptionOrder({ subscriptionId, scheduledFor, source: "SYSTEM" });
   if (!generated.created || !generated.delivery?.order?.id) throw new Error("Scheduled order was not generated.");
@@ -184,7 +191,7 @@ try {
   if (!order || order.paymentMethod !== "ON_RECEIPT" || order.paymentStatus !== "PENDING") {
     throw new Error("Subscription order payment state is invalid.");
   }
-  if (Number(order.total) !== 1800 || Number(order.items[0]?.unitPrice) !== 900) {
+  if (Number(order.total) !== 1800 + Number(order.deliveryPrice) || Number(order.items[0]?.unitPrice) !== 900 || !order.deliveryPriceConfirmed || order.deliveryTermsSnapshot?.method !== "DELIVERY") {
     throw new Error("Subscription order did not snapshot the current promoted server price.");
   }
   if (order.inventoryReservations.length !== 1 || Number(order.inventoryReservations[0].quantity) !== 2) {

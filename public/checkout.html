@@ -153,12 +153,19 @@
               <div class="checkout-method-panel" data-checkout-delivery-panel>
                 <div class="checkout-method-panel__head">
                   <h3 class="checkout-method-panel__title">Адрес доставки</h3>
-                  <p class="checkout-method-panel__text">Тариф и доступность доставки будут рассчитаны сервером по адресу.</p>
+                  <p class="checkout-method-panel__text">Выберите населённый пункт: тариф рассчитывается сервером после скидок. В адресе укажите этот же город.</p>
                 </div>
 
                 <div class="checkout-fields">
                   <div class="checkout-field checkout-field--wide">
-                    <label class="checkout-field__label" for="checkout-address">Адрес</label>
+                    <label class="checkout-field__label" for="checkout-delivery-zone">Населённый пункт доставки</label>
+                    <select class="checkout-field__control checkout-field__control--select" id="checkout-delivery-zone" name="deliveryZoneId" data-checkout-field="deliveryZoneId" required>
+                      <option value="">Выберите город доставки</option>
+                    </select>
+                    <p class="checkout-field__error" data-checkout-error="deliveryZoneId" aria-live="polite"></p>
+                  </div>
+                  <div class="checkout-field checkout-field--wide">
+                    <label class="checkout-field__label" for="checkout-address">Адрес (с указанием выбранного города)</label>
                     <input
                       class="checkout-field__control"
                       id="checkout-address"

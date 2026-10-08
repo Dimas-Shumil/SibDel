@@ -115,6 +115,10 @@ try {
     throw new Error("Checkout did not receive the guest cart.");
   }
 
+  const zones = (await request("/api/delivery/zones")).zones;
+  const deliveryZone = zones[0];
+  if (!deliveryZone) throw new Error("Configure an active DeliveryZone.locality before running this smoke test.");
+
   const created = await request("/api/checkout", {
     method: "POST",
     body: {
@@ -123,7 +127,8 @@ try {
       phone: "+79990000000",
       email: "smoke-test@example.com",
       receiveMethod: "delivery",
-      address: "Тестовый адрес, дом 1",
+      deliveryZoneId: deliveryZone.id,
+      address: `${deliveryZone.locality}, Тестовая улица, дом 1`,
       entrance: "",
       floor: "",
       receiveDate: tomorrowIso(),

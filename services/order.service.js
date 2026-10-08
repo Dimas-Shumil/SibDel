@@ -117,6 +117,7 @@ function serializeOrder(order) {
     customerPhone: order.customerPhone,
     customerEmail: order.customerEmail,
     deliveryAddressSnapshot: order.deliveryAddressSnapshot,
+    deliveryTermsSnapshot: order.deliveryTermsSnapshot,
     requestedReceiveDate: order.requestedReceiveDate,
     requestedTimeWindow: order.requestedTimeWindow,
     comment: order.comment,
