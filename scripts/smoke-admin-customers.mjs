@@ -1,3 +1,5 @@
+import { env } from "../config/env.js";
+import { assertTestEnvironment } from "../utils/test-environment.js";
 import { randomUUID } from "node:crypto";
 
 import { connectDatabase, disconnectDatabase, prisma } from "../lib/prisma.js";
@@ -23,6 +25,8 @@ async function cleanup() {
   await prisma.adminActivity.deleteMany({ where: { entityType: "User", entityId: String(customerId) } });
   await prisma.user.deleteMany({ where: { id: customerId, role: "CUSTOMER" } });
 }
+
+await assertTestEnvironment(env, prisma, { http: false });
 
 try {
   await connectDatabase();

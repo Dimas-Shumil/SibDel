@@ -1,3 +1,4 @@
+import { isValidDateOnly } from "../utils/dates.js";
 import { Router } from "express";
 import { z } from "zod";
 
@@ -16,7 +17,7 @@ import { requireRoles } from "../middleware/roles.js";
 import { validate } from "../middleware/validate.js";
 
 const router = Router();
-const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Используйте формат даты ГГГГ-ММ-ДД.");
+const dateOnly = z.string().refine(isValidDateOnly, "Укажите существующую дату в формате ГГГГ-ММ-ДД.");
 const item = z.object({
   productId: z.coerce.number().int().positive(),
   quantity: z.coerce.number().positive().max(999999),

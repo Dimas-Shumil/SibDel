@@ -1,4 +1,5 @@
 import express from "express";
+import { testDatabaseFingerprint } from "./utils/test-environment.js";
 import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 
@@ -103,6 +104,7 @@ app.get("/api/health", async (_req, res) => {
       ok: true,
       service: "siberian-delicacies",
       database: "ok",
+      ...(env.NODE_ENV === "test" ? { testEnvironment: { databaseFingerprint: testDatabaseFingerprint(env.DATABASE_URL) } } : {}),
     });
   } catch (error) {
     logger.error(

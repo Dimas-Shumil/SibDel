@@ -1,3 +1,4 @@
+import { businessDateKey, isValidDateOnly } from "../utils/dates.js";
 import { createHash, randomBytes } from "node:crypto";
 
 import { prisma } from "../lib/prisma.js";
@@ -13,7 +14,6 @@ import { quoteDelivery, moneyToKopecks, kopecksToRubles } from "./delivery.servi
 
 const ALLOWED_INTERVAL_DAYS = new Set([7, 14, 30]);
 const MAX_SUBSCRIPTION_ITEMS = 30;
-const BUSINESS_TIME_ZONE = "Asia/Krasnoyarsk";
 
 const SUBSCRIPTION_INCLUDE = Object.freeze({
   plan: {
@@ -176,21 +176,12 @@ function buildLinePricing(product, quantity) {
 }
 
 function businessDateToday(now = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: BUSINESS_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const values = Object.fromEntries(
-    parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]),
-  );
-  return new Date(`${values.year}-${values.month}-${values.day}T00:00:00.000Z`);
+  return new Date(`${businessDateKey(now)}T00:00:00.000Z`);
 }
 
 function parseDateOnly(value, fieldName = "Дата") {
   const date = value instanceof Date ? new Date(value) : new Date(`${String(value)}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime()) || (!(value instanceof Date) && !isValidDateOnly(value))) {
     throw subscriptionError(`${fieldName} указана некорректно.`, 400, "SUBSCRIPTION_INVALID_DATE");
   }
   date.setUTCHours(0, 0, 0, 0);

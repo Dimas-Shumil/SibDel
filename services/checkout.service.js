@@ -1,4 +1,5 @@
-import { randomBytes } from "node:crypto";
+import { businessDateKey, isValidDateOnly } from "../utils/dates.js";
+import { createHash, randomBytes } from "node:crypto";
 
 import { prisma } from "../lib/prisma.js";
 import {
@@ -242,7 +243,7 @@ function formatAddressSnapshot({ address, entrance, floor }) {
 function parseReceiveDate(value) {
   const date = new Date(`${value}T00:00:00.000Z`);
 
-  if (Number.isNaN(date.getTime())) {
+  if (!isValidDateOnly(value) || value < businessDateKey()) {
     throw createCheckoutError(
       "Некорректная дата получения.",
       400,
@@ -268,6 +269,7 @@ const ORDER_RESULT_SELECT = Object.freeze({
   id: true,
   number: true,
   userId: true,
+  checkoutOwnerHash: true,
   status: true,
   paymentStatus: true,
   deliveryStatus: true,
@@ -290,8 +292,9 @@ function serializeOrderResult(order) {
     return null;
   }
 
+  const { checkoutOwnerHash: _privateOwnerHash, ...publicOrder } = order;
   return {
-    ...order,
+    ...publicOrder,
     subtotal: decimalToNumber(order.subtotal) ?? 0,
     discountTotal: decimalToNumber(order.discountTotal) ?? 0,
     deliveryPrice: decimalToNumber(order.deliveryPrice) ?? 0,
@@ -453,7 +456,26 @@ async function resolveDeliverySelection(transaction, input, merchandiseTotal) {
   };
 }
 
+function checkoutOwnerHash(owner, userId) {
+  let identity;
+  if (owner?.type === "user" && Number.isInteger(userId) && userId > 0 && owner.userId === userId) {
+    identity = `user:${userId}`;
+  } else if (owner?.type === "guest" && userId === null && typeof owner.sessionId === "string" && owner.sessionId.length > 0) {
+    identity = `guest:${owner.sessionId}`;
+  } else {
+    throw createCheckoutError("Сессия магазина истекла. Обновите страницу.", 409, "CHECKOUT_OWNER_REQUIRED");
+  }
+  return createHash("sha256").update(identity).digest("hex");
+}
+
+function assertCheckoutOwner(order, ownerHash, userId) {
+  if (!order.checkoutOwnerHash || order.checkoutOwnerHash !== ownerHash || order.userId !== userId) {
+    throw createCheckoutError("Ключ оформления уже использован. Обновите страницу оформления.", 409, "CHECKOUT_KEY_CONFLICT");
+  }
+}
+
 export async function createCheckoutOrder({ owner, userId = null, input }) {
+  const ownerHash = checkoutOwnerHash(owner, userId);
   const existing = await prisma.order.findUnique({
     where: {
       checkoutKey: input.idempotencyKey,
@@ -462,26 +484,12 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
   });
 
   if (existing) {
-    if (userId && existing.userId !== userId) {
-      throw createCheckoutError(
-        "Ключ оформления уже был использован другим заказом.",
-        409,
-        "CHECKOUT_KEY_CONFLICT",
-      );
-    }
+    assertCheckoutOwner(existing, ownerHash, userId);
 
     return {
       order: serializeOrderResult(existing),
       created: false,
     };
-  }
-
-  if (!owner) {
-    throw createCheckoutError(
-      "Корзина пуста или сессия магазина истекла.",
-      409,
-      "CART_EMPTY",
-    );
   }
 
   if (input.paymentMethod === "online") {
@@ -527,6 +535,7 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
           data: {
             number: createOrderNumber(),
             checkoutKey: input.idempotencyKey,
+            checkoutOwnerHash: ownerHash,
             userId,
             status: "NEW",
             paymentStatus: "PENDING",
@@ -599,6 +608,7 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
       });
 
       if (duplicate) {
+        assertCheckoutOwner(duplicate, ownerHash, userId);
         return {
           order: serializeOrderResult(duplicate),
           created: false,

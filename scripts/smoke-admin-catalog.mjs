@@ -1,3 +1,5 @@
+import { env } from "../config/env.js";
+import { assertTestEnvironment } from "../utils/test-environment.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -57,6 +59,8 @@ async function cleanup() {
     await prisma.category.deleteMany({ where: { id: categoryId } });
   }
 }
+
+await assertTestEnvironment(env, prisma, { http: false });
 
 try {
   await connectDatabase();

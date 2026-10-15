@@ -1,3 +1,4 @@
+import { businessDateKey, isValidDateOnly } from "../utils/dates.js";
 import { Router } from "express";
 import { z } from "zod";
 
@@ -15,8 +16,7 @@ const dateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Некорректная дата.")
   .refine((value) => {
-    const date = new Date(`${value}T00:00:00.000Z`);
-    return !Number.isNaN(date.getTime());
+    return isValidDateOnly(value);
   }, "Некорректная дата.");
 
 const phoneSchema = z
@@ -64,12 +64,7 @@ const checkoutBodySchema = z
       });
     }
 
-    const today = new Date();
-    const todayIso = [
-      today.getFullYear(),
-      String(today.getMonth() + 1).padStart(2, "0"),
-      String(today.getDate()).padStart(2, "0"),
-    ].join("-");
+    const todayIso = businessDateKey();
 
     if (value.receiveDate < todayIso) {
       ctx.addIssue({

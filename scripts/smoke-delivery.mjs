@@ -1,3 +1,4 @@
+import { assertTestEnvironment } from "../utils/test-environment.js";
 /**
  * End-to-end delivery smoke, against a running development server and an
  * isolated TEST database. Creates and removes a guest order and reservations.
@@ -5,7 +6,7 @@
  * with a locality, an available SMOKE_PRODUCT_SLUG, a running APP_URL.
  */
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { env } from "../config/env.js";
 import { commerceConfig } from "../config/commerce.js";
 import { connectDatabase, disconnectDatabase, prisma } from "../lib/prisma.js";
@@ -78,6 +79,8 @@ async function cleanup() {
   }
 }
 
+await assertTestEnvironment(env, prisma, { http: true });
+
 try {
   const health = await ok("/api/health");
   assert.equal(health.database, "ok", "database unavailable");
@@ -130,6 +133,9 @@ try {
   assert.equal(invalidZone.status, 409, "unconfigured zone must be rejected");
   console.log("PASS: unconfigured delivery zone rejected");
 
+  const invalidDate = await request("/api/checkout", { method: "POST", body: { ...body, receiveDate: "2099-02-31" } });
+  assert.equal(invalidDate.status, 400, "impossible calendar date must be rejected");
+
   const created = await ok("/api/checkout", { method: "POST", body });
   createdOrderId = created.order?.id || null;
   assert.ok(createdOrderId, "order not created");
@@ -142,8 +148,11 @@ try {
   await connectDatabase();
   const persisted = await prisma.order.findUnique({
     where: { id: createdOrderId },
-    select: { deliveryPrice: true, total: true, deliveryZoneId: true, deliveryTermsSnapshot: true },
+    select: { deliveryPrice: true, total: true, deliveryZoneId: true, deliveryTermsSnapshot: true, checkoutOwnerHash: true },
   });
+  assert.equal(typeof persisted.checkoutOwnerHash, "string");
+  assert.equal(persisted.checkoutOwnerHash.length, 64);
+  assert.equal("checkoutOwnerHash" in created.order, false);
   assert.equal(persisted.deliveryZoneId, zone.id);
   assert.equal(persisted.deliveryTermsSnapshot?.price, quote.deliveryPrice);
   assert.equal(Math.round(Number(persisted.total) * 100), expectedTotal);
@@ -156,6 +165,18 @@ try {
   assert.equal(after.cart?.items?.length, 0);
   console.log("PASS: checkout replay idempotent; cart cleared");
 
+  for (const Cookie of [null, `${commerceConfig.guestCookieName}=${randomBytes(48).toString("base64url")}`]) {
+    const response = await fetch(`${baseUrl}/api/checkout`, {
+      method: "POST", redirect: "error",
+      headers: { Origin: origin, "Content-Type": "application/json", ...(Cookie ? { Cookie } : {}) },
+      body: JSON.stringify(body),
+    });
+    assert.equal(response.status, 409, "foreign/missing guest owner cannot replay an order");
+    const denied = await response.json();
+    assert.equal(denied.order, undefined);
+    assert.equal(denied.error?.code, Cookie ? "CHECKOUT_KEY_CONFLICT" : "CHECKOUT_OWNER_REQUIRED");
+  }
+  console.log("PASS: missing/foreign guest replay denied; owner binding persisted and private");
   console.log("PASS: delivery smoke test complete");
 } catch (error) {
   console.error(`FAIL: ${error.stack || error.message}`);

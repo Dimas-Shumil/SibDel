@@ -406,6 +406,7 @@ model Order {
 
   number      String  @unique @db.VarChar(50)
   checkoutKey String? @unique @db.VarChar(64)
+  checkoutOwnerHash String? @db.VarChar(64)
 
   userId Int?
 

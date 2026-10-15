@@ -1,3 +1,5 @@
+import { businessDateKey } from "../utils/dates.js";
+import { assertTestEnvironment } from "../utils/test-environment.js";
 import { randomUUID } from "node:crypto";
 
 import { env } from "../config/env.js";
@@ -19,13 +21,7 @@ let guestToken = null;
 let createdOrderId = null;
 
 function tomorrowIso() {
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0"),
-  ].join("-");
+  return businessDateKey(new Date(Date.now() + 86400000));
 }
 
 async function request(path, options = {}) {
@@ -97,6 +93,8 @@ async function cleanup() {
     await disconnectDatabase();
   }
 }
+
+await assertTestEnvironment(env, prisma, { http: true });
 
 try {
   const health = await request("/api/health");

@@ -1,3 +1,6 @@
+import { businessDateKey } from "../utils/dates.js";
+import { env } from "../config/env.js";
+import { assertTestEnvironment } from "../utils/test-environment.js";
 import { randomUUID } from "node:crypto";
 
 import { connectDatabase, disconnectDatabase, prisma } from "../lib/prisma.js";
@@ -47,6 +50,8 @@ async function cleanup() {
     await prisma.category.deleteMany({ where: { id: categoryId } });
   }
 }
+
+await assertTestEnvironment(env, prisma, { http: false });
 
 try {
   await connectDatabase();
@@ -204,8 +209,7 @@ try {
   }
 
   const pickupPoint = await prisma.pickupPoint.findFirst({ where: { isActive: true }, select: { id: true } });
-  const today = new Date();
-  const receiveDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const receiveDate = businessDateKey();
   const checkout = await createCheckoutOrder({
     owner,
     input: {

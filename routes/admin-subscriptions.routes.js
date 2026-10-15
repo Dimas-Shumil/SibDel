@@ -1,3 +1,4 @@
+import { isValidDateOnly } from "../utils/dates.js";
 import { Router } from "express";
 import { z } from "zod";
 
@@ -23,7 +24,7 @@ const listQuery = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(30),
 }).strict();
 const params = z.object({ subscriptionId: z.coerce.number().int().positive() }).strict();
-const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional();
+const dateOnly = z.string().refine(isValidDateOnly, "Некорректная дата.").optional();
 const resumeBody = z.object({ nextDeliveryDate: dateOnly }).strict();
 const emptyBody = z.object({}).strict();
 const generateDueBody = z.object({ limit: z.coerce.number().int().min(1).max(500).optional().default(100) }).strict();
