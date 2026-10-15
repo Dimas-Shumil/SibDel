@@ -91,20 +91,44 @@
         </div>
       </nav>
 
-      <section class="hero">
+      <section class="hero hero--illustrated">
         <div class="hero__container">
+          <picture class="hero__picture">
+            <source
+              media="(max-width: 767px)"
+              srcset="/site/images/hero/taiga-blank-768.webp"
+            />
+            <img
+              class="hero__image"
+              src="/site/images/hero/taiga-blank-1280.webp"
+              alt="Сибирские Деликатесы: мясные изделия, деревенское хозяйство и надпись «Сделано в Таштыпе!»"
+              width="1280"
+              height="720"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </picture>
+          <svg class="hero__burn" viewBox="0 0 1280 720" aria-hidden="true" focusable="false">
+            <defs>
+              <clipPath id="hero-burn-reveal" clipPathUnits="userSpaceOnUse">
+                <rect class="hero__burn-reveal" x="110" y="210" width="580" height="170" />
+              </clipPath>
+              <clipPath id="hero-burn-ember" clipPathUnits="userSpaceOnUse">
+                <rect class="hero__burn-ember-window" x="96" y="210" width="28" height="170" />
+              </clipPath>
+              <filter id="hero-burn-glow" x="-20%" y="-50%" width="140%" height="200%">
+                <feGaussianBlur stdDeviation="2" />
+              </filter>
+            </defs>
+            <g clip-path="url(#hero-burn-reveal)">
+              <text class="hero__burn-title" x="130" y="310" textLength="525" lengthAdjust="spacingAndGlyphs" transform="rotate(4 130 310)">Сибирские Деликатесы</text>
+            </g>
+            <g class="hero__burn-ember" clip-path="url(#hero-burn-ember)">
+              <text class="hero__burn-title hero__burn-title--ember" x="130" y="310" textLength="525" lengthAdjust="spacingAndGlyphs" transform="rotate(4 130 310)" filter="url(#hero-burn-glow)">Сибирские Деликатесы</text>
+            </g>
+          </svg>
           <div class="hero__content">
-            <h1 class="hero__title">
-              НАСТОЯЩИЕ СИБИРСКИЕ
-              <span class="hero__title-line">ДЕЛИКАТЕСЫ</span>
-            </h1>
-
-            <p class="hero__description">
-              Выбирайте продукты в каталоге
-              <span class="hero__description-line">
-                и оформляйте заказ онлайн
-              </span>
-            </p>
+            <h1 class="hero__title">Настоящие сибирские деликатесы</h1>
 
             <div class="hero__actions">
               <a
@@ -123,42 +147,7 @@
             </div>
           </div>
 
-          <picture class="hero__picture">
-            <source
-              media="(min-width: 3000px)"
-              srcset="/site/images/hero/hero-3880.webp"
-            />
 
-            <source
-              media="(min-width: 2200px)"
-              srcset="/site/images/hero/hero-2560.webp"
-            />
-
-            <source
-              media="(min-width: 1600px)"
-              srcset="/site/images/hero/hero-1920.webp"
-            />
-
-            <source
-              media="(min-width: 1100px)"
-              srcset="/site/images/hero/hero-1366.webp"
-            />
-
-            <source
-              media="(min-width: 600px)"
-              srcset="/site/images/hero/hero-768.webp"
-            />
-
-            <img
-              class="hero__image"
-              src="/site/images/hero/hero-480.webp"
-              alt="Сибирские мясные деликатесы на фоне гор и тайги"
-              width="1920"
-              height="760"
-              fetchpriority="high"
-              decoding="async"
-            />
-          </picture>
         </div>
       </section>
 
@@ -957,5 +946,6 @@
 
     <script src="/site/js/swiper-bundle.min.js"></script>
     <script src="/site/js/main.js"></script>
+    <script src="/site/js/hero-burn.js"></script>
   </body>
 </html>
