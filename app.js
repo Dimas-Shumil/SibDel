@@ -162,10 +162,6 @@ app.get(
   },
 );
 
-app.get("/subscription.html", (_req, res) => {
-  return res.redirect(302, "/account/subscription");
-});
-
 app.use(
   express.static(publicPath, {
     dotfiles: "deny",

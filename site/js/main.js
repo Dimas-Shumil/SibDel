@@ -1614,7 +1614,7 @@ async function hydratePublicDelivery() {
     }
     if (pickupRoot) {
       pickupRoot.replaceChildren();
-      for (const point of data.pickupPoints || []) pickupRoot.append(createCard(point.name, [point.address, point.workingHours || 'Время выдачи согласуется при оформлении']));
+      for (const point of data.pickupPoints || []) pickupRoot.append(createCard(point.name, [point.address, point.workingHours || 'График выдачи не указан', ...(point.phone ? [`Телефон: ${point.phone}`] : [])]));
       if (!pickupRoot.childElementCount) pickupRoot.append(createCard('Выдача по согласованию', ['Точную точку выдачи подтвердим после оформления заказа.']));
     }
   } catch {
