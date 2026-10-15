@@ -390,7 +390,7 @@ async function hydrateProductPage() {
       available: ['В наличии', 'Доступно для заказа'],
       low: [
         'Осталось мало',
-        product.stockQuantity ? `Осталось: ${product.stockQuantity}` : 'Количество ограничено',
+        product.availableQuantity ? `Осталось: ${product.availableQuantity}` : 'Количество ограничено',
       ],
       out: ['Нет в наличии', 'Сейчас недоступно для заказа'],
     };
@@ -426,11 +426,9 @@ async function hydrateProductPage() {
     const quantityInput = document.querySelector('[data-quantity-input]');
     const min = Number(product.minQuantity) || 1;
     const step = Number(product.step) || 1;
-    const stock = Number(product.stockQuantity);
-    const max =
-      Number.isFinite(stock) && stock > 0
-        ? Math.max(min, stock)
-        : 99;
+    const stock = product.availableQuantity === null ? 999 : Number(product.availableQuantity);
+    const max = stock < min ? stock
+      : Number((min + Math.floor((stock - min + 1e-9) / step) * step).toFixed(3));
 
     if (quantityControl) {
       quantityControl.dataset.min = String(min);
@@ -808,7 +806,7 @@ function initProductQuantity() {
   const min = Number(control.dataset.min ?? input.min) || 1;
   const max = Number(control.dataset.max ?? input.max) || Number.MAX_SAFE_INTEGER;
   const step = Number(control.dataset.step ?? input.step) || 1;
-  const precision = getStepPrecision(step);
+  const precision = Math.max(getStepPrecision(step), getStepPrecision(min));
 
   const normalizeValue = (value) => {
     const clampedValue = clampNumber(value, min, max);

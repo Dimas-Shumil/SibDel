@@ -390,7 +390,7 @@ function renderCategoryOptions(categories) {
 }
 
 function renderCatalogCard(product) {
-  const image = product.primaryImage?.url || "/site/images/placeholder.webp";
+  const image = product.primaryImage?.url || "/site/images/kol-taezh.webp";
   const imageAlt = product.primaryImage?.alt || product.name;
   const badge = product.badge
     ? `<span class="catalog-product-card__badge catalog-product-card__badge--${escapeHtml(product.badge.type)}">${escapeHtml(product.badge.label)}</span>`
@@ -404,11 +404,11 @@ function renderCatalogCard(product) {
   const ratingValue = product.rating?.count
     ? `${escapeHtml(product.rating.average)} · `
     : "";
-  const stock = Number(product.stockQuantity);
-  const maxQuantity =
-    Number.isFinite(stock) && stock > 0
-      ? Math.max(Number(product.minQuantity) || 1, Math.floor(stock))
-      : 99;
+  const stock = product.availableQuantity === null ? 999 : Number(product.availableQuantity);
+  const min = Number(product.minQuantity) || 1;
+  const step = Number(product.step) || 1;
+  const maxQuantity = stock < min ? stock
+    : Number((min + Math.floor((stock - min + 1e-9) / step) * step).toFixed(3));
 
   return `
     <article

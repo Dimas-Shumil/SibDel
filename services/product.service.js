@@ -24,7 +24,7 @@ function getDiscountPercent(price, oldPrice) {
   const current = decimalToNumber(price);
   const previous = decimalToNumber(oldPrice);
 
-  if (!current || !previous || previous <= current) {
+  if (current === null || !previous || previous <= current) {
     return null;
   }
 
@@ -34,9 +34,9 @@ function getDiscountPercent(price, oldPrice) {
 function getStockState(product) {
   const stock = decimalToNumber(product.stockQuantity);
   const reserved = Math.max(0, decimalToNumber(product.reservedQuantity) ?? 0);
-  const availableStock = stock === null ? null : Math.max(0, stock - reserved);
+  const availableStock = stock === null ? null : Number(Math.max(0, stock - reserved).toFixed(3));
 
-  if (!product.isAvailable || (availableStock !== null && availableStock <= 0)) {
+  if (!product.isAvailable || (availableStock !== null && availableStock < (decimalToNumber(product.minQuantity) ?? 1))) {
     return "out";
   }
 
@@ -180,11 +180,11 @@ export function serializeProductSummary(product, reviewStats = null) {
       product.stockQuantity === null
         ? null
         : decimalToString(
-            Math.max(
+            Number(Math.max(
               0,
               (decimalToNumber(product.stockQuantity) ?? 0) -
                 (decimalToNumber(product.reservedQuantity) ?? 0),
-            ),
+            ).toFixed(3)),
           ),
     isAvailable: product.isAvailable && stockState !== "out",
     stockState,

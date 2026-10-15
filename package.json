@@ -32,6 +32,7 @@
     "subscriptions:generate-due": "node scripts/generate-subscription-orders.mjs",
     "test:subscriptions-smoke": "node scripts/smoke-subscriptions.mjs",
     "test:checkout-security": "node --experimental-vm-modules --test tests/checkout-security.test.mjs tests/checkout-route.test.mjs tests/test-environment.test.mjs",
+    "test:trade-unit": "node --experimental-vm-modules --test tests/trade-consistency.test.mjs",
     "test:delivery-unit": "node --test tests/delivery-pricing.test.mjs",
     "test:delivery-smoke": "node scripts/smoke-delivery.mjs"
   },

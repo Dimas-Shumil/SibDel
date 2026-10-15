@@ -1,3 +1,4 @@
+import { applyActivePromotionsToProducts } from "./promotion.service.js";
 import { prisma } from "../lib/prisma.js";
 import {
   findPurchasableProductBySlug,
@@ -5,9 +6,10 @@ import {
   serializeCommerceItem,
 } from "./commerce.service.js";
 
-function serializeFavorites(rows) {
+async function serializeFavorites(rows) {
+  const products = await applyActivePromotionsToProducts((rows || []).map((row) => row.product));
   return {
-    items: (rows || []).map((row) => serializeCommerceItem(row.product, 1)),
+    items: products.map((product) => serializeCommerceItem(product, product.minQuantity)),
   };
 }
 

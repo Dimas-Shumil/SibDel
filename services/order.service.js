@@ -1,3 +1,4 @@
+import { runSerializable } from "../utils/transactions.js";
 import { prisma } from "../lib/prisma.js";
 import {
   commitInventoryForOrder,
@@ -248,7 +249,7 @@ export async function getAdminOrder(orderKey) {
 }
 
 export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason = null }) {
-  return prisma.$transaction(
+  return runSerializable(prisma,
     async (transaction) => {
       const order = await transaction.order.findFirst({
         where: { OR: createOrderLookup(orderKey) },
@@ -375,6 +376,5 @@ export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason 
 
       return serializeOrder(updated);
     },
-    { isolationLevel: "Serializable" },
   );
 }

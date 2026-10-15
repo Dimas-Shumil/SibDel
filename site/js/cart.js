@@ -18,7 +18,7 @@ function normalizeCommerceQuantity(value, item) {
   const min = Number(item.min) || 1;
   const max = Number(item.max) || 999;
   const step = Number(item.step) || 1;
-  const precision = getCommerceStepPrecision(step);
+  const precision = Math.max(getCommerceStepPrecision(step), getCommerceStepPrecision(min));
   const clamped = clampCommerceNumber(value, min, max);
   const stepsFromMin = Math.round((clamped - min) / step);
   const normalized = min + stepsFromMin * step;
@@ -73,7 +73,7 @@ function escapeCommerceHtml(value) {
 function sanitizeCommerceImage(value) {
   const image = String(value || '').trim();
 
-  if (/^\/site\/images\/[a-zA-Z0-9_./%()\-]+$/.test(image)) {
+  if (/^\/(?:site\/images|uploads\/products)\/[a-zA-Z0-9_./%()\-]+$/.test(image) && !image.includes('..')) {
     return image;
   }
 
@@ -622,7 +622,7 @@ function initFavoritesPage() {
     if (cartButton && item.available !== false) {
       dispatchCommerceEvent('sibdel:add-to-cart-request', {
         ...item,
-        quantity: 1,
+        quantity: item.min || 1,
       });
       cartButton.classList.add('is-added');
       window.setTimeout(() => cartButton.classList.remove('is-added'), 1200);
@@ -662,7 +662,7 @@ function initFavoritesPage() {
     availableItems.forEach((item) =>
       dispatchCommerceEvent('sibdel:add-to-cart-request', {
         ...item,
-        quantity: 1,
+        quantity: item.min || 1,
         suppressMiniCart: true,
       }),
     );

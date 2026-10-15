@@ -82,7 +82,7 @@ function getDiscountBadge(product) {
     return "Новинка";
   }
 
-  if (price && oldPrice && oldPrice > price) {
+  if (price !== null && oldPrice && oldPrice > price) {
     const percent = Math.round(((oldPrice - price) / oldPrice) * 100);
     return `-${percent}%`;
   }
@@ -96,8 +96,11 @@ export function getProductCommerceLimits(product) {
   const stock = decimalToNumber(product.stockQuantity);
   const reserved = Math.max(0, decimalToNumber(product.reservedQuantity) ?? 0);
   const availableStock =
-    stock === null ? null : Math.max(0, stock - reserved);
-  const max = availableStock === null ? 999 : availableStock;
+    stock === null ? null : roundQuantity(Math.max(0, stock - reserved));
+  // The upper bound must itself be reachable on the min + n * step grid.
+  const rawMax = availableStock === null ? 999 : availableStock;
+  const max = rawMax < min ? rawMax
+    : roundQuantity(min + Math.floor((rawMax - min + 1e-9) / step) * step);
   const available =
     product.isActive === true &&
     product.category?.isActive !== false &&

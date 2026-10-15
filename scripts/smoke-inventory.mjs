@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { receiveInventory } from "../services/inventory.service.js";
 import { businessDateKey } from "../utils/dates.js";
 import { assertTestEnvironment } from "../utils/test-environment.js";
 import { randomUUID } from "node:crypto";
@@ -16,6 +18,7 @@ const baseUrl = env.APP_URL.replace(/\/$/, "");
 const origin = new URL(baseUrl).origin;
 const productSlug = process.env.SMOKE_PRODUCT_SLUG || "kolbasa-taezhnaya";
 
+let retryProductId = null;
 let cookieHeader = "";
 let guestToken = null;
 let createdOrderId = null;
@@ -66,6 +69,7 @@ async function productBalance() {
     select: {
       id: true,
       name: true,
+      categoryId: true,
       stockQuantity: true,
       reservedQuantity: true,
     },
@@ -75,6 +79,11 @@ async function productBalance() {
 async function cleanup() {
   await connectDatabase();
   try {
+    if (retryProductId) {
+      await prisma.inventoryMovement.deleteMany({ where: { productId: retryProductId } });
+      await prisma.adminActivity.deleteMany({ where: { entityType: "Product", entityId: String(retryProductId) } });
+      await prisma.product.deleteMany({ where: { id: retryProductId } });
+    }
     if (createdOrderId) {
       await prisma.inventoryMovement.deleteMany({ where: { orderId: createdOrderId } });
       await prisma.adminActivity.deleteMany({
@@ -159,12 +168,14 @@ try {
     throw new Error("Reserved quantity did not increase by 1.");
   }
 
-  await updateOrderStatus({
+  await Promise.all([1, 2].map(() => updateOrderStatus({
     orderKey: createdOrderNumber,
     nextStatus: "CANCELLED",
     actorId: null,
-    reason: "Inventory smoke-test cancellation",
-  });
+    reason: "Inventory smoke-test concurrent cancellation",
+  })));
+  assert.equal(await prisma.inventoryMovement.count({ where: { orderId: createdOrderId, type: "RELEASE" } }), 1);
+  assert.equal(await prisma.adminActivity.count({ where: { entityType: "Order", entityId: String(createdOrderId), action: "ORDER_STATUS_CHANGED" } }), 1);
 
   const released = await productBalance();
   const afterReleaseStock = decimalNumber(released.stockQuantity);
@@ -177,9 +188,26 @@ try {
     throw new Error("Reserved quantity was not restored after cancellation.");
   }
 
+  const retryProduct = await prisma.product.create({ data: {
+    categoryId: before.categoryId, name: "Serializable smoke", slug: `retry-${randomUUID()}`,
+    sku: `RETRY-${randomUUID()}`, unit: "PIECE", unitLabel: "шт.",
+    price: "100.00", stockQuantity: "10.000", reservedQuantity: "0.000",
+    minQuantity: "1.000", step: "1.000", isActive: true, isAvailable: true,
+  } });
+  retryProductId = retryProduct.id;
+  await Promise.all([1, 2].map((quantity) => receiveInventory({
+    productId: retryProductId, actorId: null, quantity, reason: "Concurrent receipt smoke",
+  })));
+  const afterReceipts = await prisma.product.findUnique({ where: { id: retryProductId } });
+  assert.equal(decimalNumber(afterReceipts.stockQuantity), 13, "Concurrent receipts must add exactly 3 to stock");
+  assert.equal(await prisma.inventoryMovement.count({ where: { productId: retryProductId, type: "RECEIPT" } }), 2, "Two receipts must create exactly two inventory movements");
+  // These service calls have actorId=null. Inventory deliberately records
+  // movements but omits administrator activity when there is no actor.
+  assert.equal(await prisma.adminActivity.count({ where: { entityType: "Product", entityId: String(retryProductId), action: "INVENTORY_RECEIPT" } }), 0, "Actorless receipts must not create administrator activity");
+
   await disconnectDatabase();
   console.log(
-    `PASS: ${createdOrderNumber} reserved 1 unit, cancellation released it, physical stock stayed ${beforeStock}.`,
+    `PASS: ${createdOrderNumber} reserved 1 unit, cancellation released it, physical stock stayed ${beforeStock}; concurrent receipts added 3 with exactly 2 movements.`,
   );
 } catch (error) {
   console.error(`FAIL: ${error.message}`);

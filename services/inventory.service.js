@@ -1,3 +1,4 @@
+import { runSerializable } from "../utils/transactions.js";
 import { prisma } from "../lib/prisma.js";
 
 const EPSILON = 0.0005;
@@ -523,7 +524,7 @@ async function mutateOnHandStock({
   reason,
   type,
 }) {
-  return prisma.$transaction(
+  return runSerializable(prisma,
     async (transaction) => {
       const product = await getLockedProduct(transaction, productId);
 
@@ -598,7 +599,6 @@ async function mutateOnHandStock({
 
       return serializeInventoryProduct(updated);
     },
-    { isolationLevel: "Serializable" },
   );
 }
 
@@ -653,7 +653,7 @@ export async function adjustInventory({ productId, actorId, stockQuantity, reaso
     );
   }
 
-  return prisma.$transaction(
+  return runSerializable(prisma,
     async (transaction) => {
       const product = await getLockedProduct(transaction, productId);
 
@@ -721,7 +721,6 @@ export async function adjustInventory({ productId, actorId, stockQuantity, reaso
 
       return serializeInventoryProduct(updated);
     },
-    { isolationLevel: "Serializable" },
   );
 }
 

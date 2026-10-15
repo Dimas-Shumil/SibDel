@@ -299,6 +299,64 @@ function initPromotionsSlider() {
   });
 }
 
+async function hydratePopularProducts() {
+  const wrapper = document.querySelector('.popular-products__wrapper');
+  if (!wrapper) return;
+  const section = wrapper.closest('.popular-products');
+  const escape = escapeHomeReviewHtml;
+  try {
+    const payload = await requestCommerceApi('/api/catalog?hit=1&available=1&sort=popular&limit=12');
+    const products = Array.isArray(payload.products) ? payload.products : [];
+    wrapper.innerHTML = products.map((product) => {
+      const href = `/product.html?slug=${encodeURIComponent(product.slug)}`;
+      const image = sanitizeCommerceImage(product.primaryImage?.url);
+      const min = Number(product.minQuantity) || 1;
+      const step = Number(product.step) || 1;
+      const stock = product.availableQuantity === null ? 999 : Number(product.availableQuantity);
+      const max = Number((min + Math.floor((stock - min + 1e-9) / step) * step).toFixed(3));
+      const item = {
+        productId: product.id, slug: product.slug, title: product.name,
+        image, measure: product.unitLabel || '', unitPrice: Number(product.price),
+        oldUnitPrice: Number(product.oldPrice ?? product.price),
+        min, step, max, quantity: min, available: product.isAvailable && max >= min,
+      };
+      return `<article class="popular-products__slide swiper-slide">
+        <div class="popular-products__card" data-commerce-item="${escape(JSON.stringify(item))}">
+          <div class="popular-products__image-wrapper">
+            <a class="popular-products__image-link" href="${escape(href)}" aria-label="${escape(product.name)}">
+              <img class="popular-products__image" src="${escape(image)}" alt="${escape(product.primaryImage?.alt || product.name)}" loading="lazy" decoding="async" width="1254" height="1254" />
+            </a>
+            ${product.badge ? `<span class="popular-products__badge${product.badge.type === 'discount' ? ' popular-products__badge--sale' : ''}">${escape(product.badge.label)}</span>` : ''}
+            <button class="popular-products__favorite" type="button" aria-label="Добавить в избранное" aria-pressed="false">♡</button>
+          </div>
+          <div class="popular-products__content">
+            <a class="popular-products__name" href="${escape(href)}">${escape(product.name)}</a>
+            <span class="popular-products__weight">${escape(product.unitLabel || '')}</span>
+            <div class="popular-products__bottom">
+              <div class="popular-products__price">
+                <span class="popular-products__price-current">${formatCommerceMoney(product.price)}</span>
+                ${Number(product.oldPrice) > Number(product.price) ? `<span class="popular-products__price-old">${formatCommerceMoney(product.oldPrice)}</span>` : ''}
+              </div>
+              <button class="popular-products__cart" type="button" aria-label="Добавить товар в корзину" ${item.available ? '' : 'disabled'}>🛒</button>
+            </div>
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+    wrapper.querySelectorAll('img').forEach((image) => {
+      image.addEventListener('error', () => { image.src = '/site/images/kol-taezh.webp'; }, { once: true });
+    });
+    if (section) section.hidden = products.length === 0;
+    document.dispatchEvent(new CustomEvent('sibdel:commerce-ui-updated'));
+  } catch {
+    wrapper.replaceChildren();
+    const message = document.createElement('p');
+    message.setAttribute('role', 'status');
+    message.textContent = 'Не удалось загрузить товары. Обновите страницу или откройте каталог.';
+    wrapper.append(message);
+  }
+}
+
 function initPopularProductsSlider() {
   const slider = document.querySelector(
     '.popular-products__slider',
@@ -1016,7 +1074,7 @@ function getCommerceProductKey(item) {
 function sanitizeCommerceImage(value) {
   const image = String(value || '').trim();
 
-  if (/^\/site\/images\/[a-zA-Z0-9_./%()\-]+$/.test(image)) {
+  if (/^\/(?:site\/images|uploads\/products)\/[a-zA-Z0-9_./%()\-]+$/.test(image) && !image.includes('..')) {
     return image;
   }
 
@@ -1478,31 +1536,10 @@ function initGlobalCommerce() {
         return;
       }
 
-      const link = card.querySelector('.popular-products__name');
-      const image = card.querySelector('.popular-products__image');
-      const measure = card.querySelector('.popular-products__weight');
-      const price = card.querySelector('.popular-products__price-current');
-      const oldPrice = card.querySelector('.popular-products__price-old');
-      const slug = new URL(link?.href || window.location.href).searchParams.get('slug') ||
-        (link?.textContent || '').trim().toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-');
-
-      document.dispatchEvent(
-        new CustomEvent('sibdel:add-to-cart-request', {
-          detail: {
-            productId: slug,
-            slug,
-            title: link?.textContent?.trim() || 'Товар',
-            image: image?.getAttribute('src') || '',
-            measure: measure?.textContent?.trim() || '',
-            unitPrice: Number((price?.textContent || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
-            oldUnitPrice: Number((oldPrice?.textContent || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
-            quantity: 1,
-            min: 1,
-            max: 99,
-            step: 1,
-          },
-        }),
-      );
+      if (cartButton.disabled || !card.dataset.commerceItem) return;
+      const item = JSON.parse(card.dataset.commerceItem);
+      if (!item.available) return;
+      document.dispatchEvent(new CustomEvent('sibdel:add-to-cart-request', { detail: item }));
 
       cartButton.classList.add('is-added');
       window.setTimeout(() => cartButton.classList.remove('is-added'), 1200);
@@ -1512,43 +1549,12 @@ function initGlobalCommerce() {
 
     if (favoriteButton) {
       const card = favoriteButton.closest('.popular-products__card');
-      const link = card?.querySelector('.popular-products__name');
-      const image = card?.querySelector('.popular-products__image');
-      const measure = card?.querySelector('.popular-products__weight');
-      const price = card?.querySelector('.popular-products__price-current');
-      const oldPrice = card?.querySelector('.popular-products__price-old');
-
-      if (!card || !link) {
-        return;
-      }
-
-      const slug = new URL(link.href, window.location.origin).searchParams.get('slug') ||
-        link.textContent.trim().toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-');
-      const shouldFavorite = !favoriteButton.classList.contains('is-active');
-
-      favoriteButton.classList.toggle('is-active', shouldFavorite);
-      favoriteButton.setAttribute('aria-pressed', String(shouldFavorite));
-      favoriteButton.textContent = shouldFavorite ? '♥' : '♡';
-      favoriteButton.setAttribute(
-        'aria-label',
-        `${shouldFavorite ? 'Убрать' : 'Добавить'} ${link.textContent.trim()} ${shouldFavorite ? 'из' : 'в'} избранное`,
-      );
-
-      document.dispatchEvent(
-        new CustomEvent('sibdel:favorite-toggle-request', {
-          detail: {
-            productId: slug,
-            slug,
-            title: link.textContent.trim(),
-            image: image?.getAttribute('src') || '',
-            measure: measure?.textContent?.trim() || '',
-            unitPrice: Number((price?.textContent || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
-            oldUnitPrice: Number((oldPrice?.textContent || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
-            available: true,
-            isFavorite: shouldFavorite,
-          },
-        }),
-      );
+      if (!card?.dataset.commerceItem) return;
+      const item = JSON.parse(card.dataset.commerceItem);
+      const shouldFavorite = !commerce.isFavorite(item.slug);
+      document.dispatchEvent(new CustomEvent('sibdel:favorite-toggle-request', {
+        detail: { ...item, isFavorite: shouldFavorite },
+      }));
     }
   });
 
@@ -1566,6 +1572,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (document.querySelector('[data-home-page]')) {
     initPromotionsSlider();
+    await hydratePopularProducts();
     initPopularProductsSlider();
     await hydrateFeaturedReviews();
     initReviewsSlider();

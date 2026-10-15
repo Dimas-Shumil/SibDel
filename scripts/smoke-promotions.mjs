@@ -1,3 +1,7 @@
+import assert from "node:assert/strict";
+import { getPublicCatalog } from "../services/catalog.service.js";
+import { getPublicProductBySlug } from "../services/product.service.js";
+import { addFavorite, getFavorites } from "../services/favorite.service.js";
 import { businessDateKey } from "../utils/dates.js";
 import { env } from "../config/env.js";
 import { assertTestEnvironment } from "../utils/test-environment.js";
@@ -28,6 +32,7 @@ function number(value) {
 }
 
 async function cleanup() {
+  await prisma.guestFavorite.deleteMany({ where: { sessionId } });
   if (productId) {
     await prisma.inventoryMovement.deleteMany({ where: { productId } });
   }
@@ -82,6 +87,7 @@ try {
       reservedQuantity: "0.000",
       isActive: true,
       isAvailable: true,
+      isPopular: true,
     },
     include: {
       category: { select: { id: true, name: true, slug: true, isActive: true } },
@@ -208,6 +214,21 @@ try {
     throw new Error(`Cart promotion pricing failed: ${JSON.stringify(serializedCart.summary)}.`);
   }
 
+  const catalogQuery = { category: category.slug, page: 1, limit: 1, sort: "price-asc" };
+  const filtered = await getPublicCatalog({ ...catalogQuery, priceFrom: 750, priceTo: 750, discount: true });
+  assert.equal(filtered.pagination.total, 1);
+  assert.equal(filtered.products[0].id, productId);
+  assert.equal(number(filtered.products[0].price), 750);
+  assert.equal((await getPublicCatalog({ ...catalogQuery, priceTo: 749.99 })).pagination.total, 0);
+  assert.equal((await getPublicCatalog({ ...catalogQuery, page: 2 })).products.length, 0);
+  const popular = await getPublicCatalog({ ...catalogQuery, hit: true, available: true, sort: "popular" });
+  assert.equal(popular.products[0].id, productId);
+  assert.equal(number(popular.products[0].price), 750);
+  const detail = await getPublicProductBySlug(product.slug);
+  assert.equal(number(detail.price), 750);
+  await addFavorite(owner, product.slug);
+  assert.equal((await getFavorites(owner)).items[0].unitPrice, 750);
+
   const pickupPoint = await prisma.pickupPoint.findFirst({ where: { isActive: true }, select: { id: true } });
   const receiveDate = businessDateKey();
   const checkout = await createCheckoutOrder({
@@ -245,6 +266,24 @@ try {
   if (savedOrder.inventoryReservations.length !== 1 || number(savedOrder.inventoryReservations[0].quantity) !== 2) {
     throw new Error("Inventory reservation was not created for promoted checkout.");
   }
+
+  // The order reserved two units. Less than one remaining is not purchasable.
+  await prisma.product.update({ where: { id: productId }, data: { stockQuantity: "2.500" } });
+  assert.equal((await getPublicCatalog({ ...catalogQuery, available: true })).pagination.total, 0);
+  assert.equal((await getPublicCatalog({ ...catalogQuery, lowStock: true })).pagination.total, 0);
+  assert.equal((await getPublicCatalog({ ...catalogQuery, outOfStock: true })).pagination.total, 1);
+  assert.equal((await getPublicCatalog({ ...catalogQuery, lowStock: true, outOfStock: true })).pagination.total, 1);
+  assert.equal((await getPublicProductBySlug(product.slug)).isAvailable, false);
+  assert.equal((await getFavorites(owner)).items[0].available, false);
+  await prisma.product.update({ where: { id: productId }, data: { stockQuantity: "10.000", isActive: false } });
+  assert.equal((await getPublicCatalog(catalogQuery)).pagination.total, 0);
+  assert.equal(await getPublicProductBySlug(product.slug), null);
+  await prisma.product.update({ where: { id: productId }, data: { isActive: true } });
+  await prisma.category.update({ where: { id: categoryId }, data: { isActive: false } });
+  assert.equal((await getPublicCatalog(catalogQuery)).pagination.total, 0);
+  assert.equal(await getPublicProductBySlug(product.slug), null);
+  assert.equal((await getFavorites(owner)).items[0].available, false);
+  console.log("PASS: effective catalog filters, popular query, product, favorites, cart, checkout and availability agree.");
 
   console.log(`PASS: promotion #${productPromotion.id} won overlap, cart total 1500, order snapshot kept 900 discount and inventory reservation.`);
 } catch (error) {
