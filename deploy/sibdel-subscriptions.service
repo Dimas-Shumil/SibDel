@@ -1,0 +1,16 @@
+[Unit]
+Description=Siberian Delicacies due subscription orders
+Wants=network-online.target
+After=network-online.target postgresql.service
+
+[Service]
+Type=oneshot
+User=sibdel
+Group=sibdel
+WorkingDirectory=/var/www/sibdel
+Environment=NODE_ENV=production
+Environment=DOTENV_CONFIG_PATH=/var/www/sibdel/.env
+ExecStart=/usr/bin/node /var/www/sibdel/scripts/generate-subscription-orders.mjs 100
+TimeoutStartSec=15min
+UMask=0077
+NoNewPrivileges=true

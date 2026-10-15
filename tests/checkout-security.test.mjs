@@ -13,6 +13,7 @@ const order = (identity = "guest:session-a", userId = null) => ({
 
 async function loadService(prisma, overrides = {}) {
   const modules = {
+    "./order-notification.service.js": { notifyOrderCreated: async () => { assert.fail("Replay must not notify"); } },
     "node:crypto": { createHash, randomBytes },
     "../utils/dates.js": { businessDateKey, isValidDateOnly },
     "../lib/prisma.js": { prisma },
@@ -89,6 +90,8 @@ async function creation(receiveDate = businessDateKey()) {
   let data;
   let reserved = false;
   let cleared = false;
+  let committed = false;
+  let notified = 0;
   const product = { id: 1, slug: "test", name: "Test", sku: "TEST", unit: "PIECE", price: 100 };
   const transaction = {
     cart: { findFirst: async () => ({ id: 1, items: [{ productId: 1, product, quantity: 1 }] }) },
@@ -99,9 +102,12 @@ async function creation(receiveDate = businessDateKey()) {
     order: { findUnique: async () => null },
     $transaction: async (work, options) => {
       assert.equal(options.isolationLevel, "Serializable");
-      return work(transaction);
+      const result = await work(transaction);
+      committed = true;
+      return result;
     },
   }, {
+    "./order-notification.service.js": { notifyOrderCreated: async (id) => { assert.equal(committed, true); assert.equal(id, 66); notified++; } },
     "./commerce.service.js": {
       buildCommerceOwnerWhere: () => ({ sessionId: guest.sessionId }),
       getCommerceProductSelect: () => ({}),
@@ -119,11 +125,12 @@ async function creation(receiveDate = businessDateKey()) {
     },
   });
   const result = await service.createCheckoutOrder({ owner: guest, input: { idempotencyKey: "new-key", receiveMethod: "pickup", receiveDate, paymentMethod: "on-receipt" } });
-  return { result, data, reserved, cleared };
+  return { result, data, reserved, cleared, notified };
 }
 
 test("new order persists owner binding and retains reserve/clear transaction", async () => {
-  const { result, data, reserved, cleared } = await creation();
+  const { result, data, reserved, cleared, notified } = await creation();
+  assert.equal(notified, 1);
   assert.equal(data.checkoutOwnerHash, hash("guest:session-a"));
   assert.equal(data.checkoutKey, "new-key");
   assert.equal(result.created, true);

@@ -1,3 +1,4 @@
+import { notifyOrderCreated } from "./order-notification.service.js";
 import { businessDateKey, isValidDateOnly } from "../utils/dates.js";
 import { createHash, randomBytes } from "node:crypto";
 
@@ -593,6 +594,8 @@ export async function createCheckoutOrder({ owner, userId = null, input }) {
         isolationLevel: "Serializable",
       },
     );
+
+    await notifyOrderCreated(order.id);
 
     return {
       order: serializeOrderResult(order),

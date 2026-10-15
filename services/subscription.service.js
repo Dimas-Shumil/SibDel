@@ -1,3 +1,5 @@
+import { runSerializable as transactionRetry, isSerializationConflict } from "../utils/transactions.js";
+import { notifyOrderCreated } from "./order-notification.service.js";
 import { businessDateKey, isValidDateOnly } from "../utils/dates.js";
 import { createHash, randomBytes } from "node:crypto";
 
@@ -118,17 +120,8 @@ function subscriptionError(message, statusCode, code, details) {
   return error;
 }
 
-async function runSerializable(work, maxAttempts = 3) {
-  let lastError;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      return await prisma.$transaction(work, { isolationLevel: "Serializable" });
-    } catch (error) {
-      lastError = error;
-      if (error?.code !== "P2034" || attempt === maxAttempts) throw error;
-    }
-  }
-  throw lastError;
+function runSerializable(work, maxAttempts = 3) {
+  return transactionRetry(prisma, work, maxAttempts);
 }
 
 function decimalToNumber(value) {
@@ -1333,6 +1326,8 @@ export async function generateSubscriptionOrder({ subscriptionId, scheduledFor =
       return { created: true, delivery, nextDeliveryAt: next };
     });
 
+    if (result.created) await notifyOrderCreated(result.delivery.order.id);
+
     return {
       created: result.created,
       delivery: serializeDelivery(result.delivery),
@@ -1356,7 +1351,9 @@ export async function generateSubscriptionOrder({ subscriptionId, scheduledFor =
       "SUBSCRIPTION_DELIVERY_DATE_CONFLICT",
       "P2034",
     ]);
-    if (targetDate && !noFailureRecordCodes.has(error?.code)) {
+    // Infrastructure failures leave the date due for the next run. Only a
+    // confirmed business rejection consumes this occurrence.
+    if (targetDate && error?.expose === true && !isSerializationConflict(error) && !noFailureRecordCodes.has(error?.code)) {
       await recordGenerationFailure({ subscriptionId, scheduledFor: targetDate, error, actorId, source, now });
     }
     throw error;

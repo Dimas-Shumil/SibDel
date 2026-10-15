@@ -135,6 +135,15 @@ function serializeOrder(order) {
     cancelledAt: order.cancelledAt,
     allowedStatuses: [...(ORDER_STATUS_TRANSITIONS[order.status] ?? [])],
     user: order.user ?? null,
+    subscriptionDelivery: order.subscriptionDelivery ? {
+      subscriptionId: order.subscriptionDelivery.subscriptionId,
+      scheduledFor: order.subscriptionDelivery.scheduledFor,
+    } : null,
+    history: (order.history || []).map((event) => ({
+      id: event.id, createdAt: event.createdAt, description: event.description,
+      actorName: [event.actor?.firstName, event.actor?.lastName].filter(Boolean).join(" ") || event.actor?.email || (event.actorId ? `Оператор #${event.actorId}` : "Система"),
+      reason: event.metadata?.reason || null,
+    })),
     items: order.items?.map((item) => ({
       id: item.id,
       productId: item.productId,
@@ -224,6 +233,7 @@ export async function getAdminOrder(orderKey) {
   const order = await prisma.order.findFirst({
     where: { OR: createOrderLookup(orderKey) },
     include: {
+      subscriptionDelivery: { select: { subscriptionId: true, scheduledFor: true } },
       user: {
         select: {
           id: true,
@@ -245,7 +255,17 @@ export async function getAdminOrder(orderKey) {
     },
   });
 
-  return order ? serializeOrder(order) : null;
+  if (!order) return null;
+  order.history = await prisma.adminActivity.findMany({
+    where: { entityType: "Order", entityId: String(order.id) },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 100,
+    select: {
+      id: true, actorId: true, createdAt: true, description: true, metadata: true,
+      actor: { select: { firstName: true, lastName: true, email: true } },
+    },
+  });
+  return serializeOrder(order);
 }
 
 export async function updateOrderStatus({ orderKey, nextStatus, actorId, reason = null }) {

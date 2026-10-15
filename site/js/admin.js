@@ -94,6 +94,7 @@ function formatAdminDate(value, withTime = true) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "Asia/Krasnoyarsk",
     ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
   }).format(date);
 }
@@ -502,6 +503,9 @@ function renderAdminOrder(order) {
         ? `${order.deliveryTermsSnapshot.zoneName} · ${formatAdminMoney(order.deliveryTermsSnapshot.tariff)}${order.deliveryTermsSnapshot.freeDeliveryApplied ? " · бесплатно от порога" : ""}`
         : (order.deliveryTermsSnapshot?.method === "PICKUP" ? "Самовывоз бесплатно" : "Не указан"))),
       adminDetailRow("Комментарий", escapeAdminHtml(order.comment || "—")),
+      adminDetailRow("Источник", order.subscriptionDelivery
+        ? `<a class="admin-text-link" href="/admin/subscriptions?id=${encodeURIComponent(order.subscriptionDelivery.subscriptionId)}">Подписка #${escapeAdminHtml(String(order.subscriptionDelivery.subscriptionId))}</a> · ${escapeAdminHtml(formatAdminDate(order.subscriptionDelivery.scheduledFor, false))}`
+        : "Оформление корзины"),
     ].join("");
   }
 
@@ -545,6 +549,11 @@ function renderAdminOrder(order) {
         `).join("")}</div>`
       : '<p class="admin-muted">Для этого заказа активных или завершённых резервов нет.</p>';
   }
+
+  const history = document.querySelector("[data-order-history]");
+  if (history) history.innerHTML = (order.history || []).map((event) => `
+    <div class="admin-timeline__item"><div class="admin-timeline__meta"><strong>${escapeAdminHtml(event.actorName)}</strong><span>${escapeAdminHtml(formatAdminDate(event.createdAt))}</span></div><p>${escapeAdminHtml(event.description || "—")}</p>${event.reason ? `<small>${escapeAdminHtml(event.reason)}</small>` : ""}</div>
+  `).join("") || '<p class="admin-muted">Изменений статуса пока нет.</p>';
 
   const select = document.querySelector("[data-order-status-select]");
   const submit = document.querySelector("[data-order-status-submit]");
@@ -616,8 +625,7 @@ async function initAdminOrder() {
         method: "PATCH",
         body: JSON.stringify({ status: nextStatus, reason: reason || null }),
       });
-      currentOrder = payload.order;
-      renderAdminOrder(currentOrder);
+      currentOrder = await loadAdminOrder(orderKey);
       form.reset();
       showAdminToast("Статус заказа обновлён.");
     } catch (error) {
@@ -2501,6 +2509,10 @@ async function openAdminSubscription(subscriptionId) {
 
 async function initAdminSubscriptions() {
   if (document.body.dataset.adminPage !== "subscriptions") return;
+  const initialId = Number(new URLSearchParams(window.location.search).get("id"));
+  if (Number.isSafeInteger(initialId) && initialId > 0) {
+    try { await openAdminSubscription(initialId); } catch (error) { showAdminToast(error.message, "error"); }
+  }
   const dueButton = document.querySelector("[data-subscriptions-generate-due]");
   if (dueButton && currentAdminUser?.role === "OWNER") dueButton.hidden = false;
 

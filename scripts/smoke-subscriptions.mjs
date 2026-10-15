@@ -184,7 +184,16 @@ try {
   );
 }
 
-  const generated = await generateSubscriptionOrder({ subscriptionId, scheduledFor, source: "SYSTEM" });
+  const settled = await Promise.allSettled([
+    generateSubscriptionOrder({ subscriptionId, scheduledFor, source: "SYSTEM" }),
+    generateSubscriptionOrder({ subscriptionId, scheduledFor, source: "SYSTEM" }),
+  ]);
+  const parallel = settled.filter((result) => result.status === "fulfilled").map((result) => result.value);
+  orderId = parallel.find((result) => result.delivery?.order?.id)?.delivery.order.id || null;
+  const rejected = settled.find((result) => result.status === "rejected");
+  if (rejected) throw rejected.reason;
+  if (parallel.filter((result) => result.created).length !== 1) throw new Error("Concurrent generation must create exactly one order.");
+  const generated = parallel.find((result) => result.created);
   if (!generated.created || !generated.delivery?.order?.id) throw new Error("Scheduled order was not generated.");
   orderId = generated.delivery.order.id;
 
@@ -209,6 +218,10 @@ try {
   if (duplicate.created) throw new Error("Idempotency failed: duplicate scheduled order was created.");
   const orderCount = await prisma.order.count({ where: { checkoutKey: order.checkoutKey } });
   if (orderCount !== 1) throw new Error("Idempotency checkout key is not unique.");
+  const deliveryCount = await prisma.subscriptionDelivery.count({ where: { subscriptionId, scheduledFor: new Date(`${scheduledFor}T00:00:00.000Z`) } });
+  if (deliveryCount !== 1) throw new Error("Concurrent generation created duplicate deliveries.");
+  const stockAfterReplay = await prisma.product.findUnique({ where: { id: productId }, select: { reservedQuantity: true } });
+  if (Number(stockAfterReplay.reservedQuantity) !== 2) throw new Error("Replay reserved inventory twice.");
 
   let futureGenerationRejected = false;
   try {

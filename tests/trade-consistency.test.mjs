@@ -8,6 +8,7 @@ import { runSerializable } from '../utils/transactions.js';
 async function services(prisma, replacements = {}) {
   const cache = new Map();
   const mocks = {
+    'services/order-notification.service.js': { notifyOrderCreated: async () => {} },
     'lib/prisma.js': { prisma },
     'config/commerce.js': { commerceConfig: {}, getClearGuestCommerceCookieOptions() {}, getGuestCommerceCookieOptions() {} },
     'utils/tokens.js': { generateOpaqueToken() {}, hashOpaqueToken() {} },

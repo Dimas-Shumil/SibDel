@@ -1,3 +1,4 @@
+import { closeMailConnection } from "../config/mail.js";
 import { connectDatabase, disconnectDatabase } from "../lib/prisma.js";
 import { generateDueSubscriptionOrders } from "../services/subscription.service.js";
 
@@ -13,5 +14,6 @@ try {
   console.error(error?.stack || error?.message || error);
   process.exitCode = 1;
 } finally {
+  closeMailConnection();
   try { await disconnectDatabase(); } catch {}
 }
