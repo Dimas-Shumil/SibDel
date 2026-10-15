@@ -1,0 +1,39 @@
+# NOT INSTALLABLE unchanged. Replace DOMAIN, CERT, KEY, APP_PORT, LOG_DIR.
+# One local Nginx hop, no CDN. Do not overwrite another site's server/default block.
+server {
+    listen 80;
+    server_name DOMAIN;
+    location ^~ /.well-known/acme-challenge/ { root /var/lib/letsencrypt; }
+    location / { return 301 https://DOMAIN$request_uri; }
+}
+server {
+    listen 443 ssl;
+    server_name DOMAIN;
+    ssl_certificate CERT;
+    ssl_certificate_key KEY;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    server_tokens off;
+    # No query strings: password-reset tokens must not enter access logs.
+    access_log off;
+    error_log LOG_DIR/sibdel-error.log warn;
+    client_max_body_size 85m;
+    client_body_timeout 30s;
+    # No filesystem root/alias/try_files: all public output passes Express middleware.
+    location ~ (^|/)\. { return 404; }
+    location ~* ^/(?:prisma|generated|node_modules|deploy|scripts|tests|config|lib|middleware|services|utils|routes|controllers|logs|backups|data)(?:/|$) { return 404; }
+    location ~* \.(?:env|sql|dump|bak|zip|tar|gz|log|map|scss|cjs|mjs)$ { return 404; }
+    location / {
+        proxy_pass http://127.0.0.1:APP_PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Host DOMAIN;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host DOMAIN;
+        proxy_set_header Connection "";
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 75s;
+        proxy_send_timeout 75s;
+        proxy_cache off;
+    }
+}

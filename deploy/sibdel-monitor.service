@@ -1,0 +1,11 @@
+[Unit]
+Description=SibDel operational checks (no external alert channel configured)
+After=network-online.target
+[Service]
+Type=oneshot
+User=MONITOR_USER
+Group=MONITOR_GROUP
+ExecStart=/bin/bash APP_DIR/scripts/check-operations.sh https://DOMAIN BACKUP_DIR APP_DIR
+UMask=0077
+NoNewPrivileges=true
+TimeoutStartSec=60

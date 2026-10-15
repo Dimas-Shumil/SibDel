@@ -1,3 +1,4 @@
+import { createHealthHandler } from "./middleware/health.js";
 import express from "express";
 import { testDatabaseFingerprint } from "./utils/test-environment.js";
 import cookieParser from "cookie-parser";
@@ -74,6 +75,10 @@ function isValidRequestId(value) {
 
 const httpLogger = pinoHttp({
   logger,
+  serializers: {
+    req(req) { return { id: req.id, method: req.method, url: (req.url || "").split("?")[0] }; },
+    res(res) { return { statusCode: res.statusCode }; },
+  },
 
   genReqId(req, res) {
     const incomingRequestId =
@@ -113,31 +118,11 @@ app.use(seoMiddleware({
   }),
 }));
 
-app.get("/api/health", async (_req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-
-    return res.status(200).json({
-      ok: true,
-      service: "siberian-delicacies",
-      database: "ok",
-      ...(env.NODE_ENV === "test" ? { testEnvironment: { databaseFingerprint: testDatabaseFingerprint(env.DATABASE_URL) } } : {}),
-    });
-  } catch (error) {
-    logger.error(
-      {
-        err: error,
-      },
-      "Health check failed",
-    );
-
-    return res.status(503).json({
-      ok: false,
-      service: "siberian-delicacies",
-      database: "unavailable",
-    });
-  }
-});
+app.get("/api/health", createHealthHandler({
+  probe: () => prisma.$queryRaw`SELECT 1`,
+  isTest: env.NODE_ENV === "test",
+  fingerprint: () => testDatabaseFingerprint(env.DATABASE_URL),
+}));
 
 app.use(
   "/site",

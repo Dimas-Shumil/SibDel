@@ -1,0 +1,13 @@
+# Replace APP_DIR and APP_USER/APP_GROUP; install under /etc/logrotate.d/.
+APP_DIR/logs/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    su APP_USER APP_GROUP
+    copytruncate
+}
+# copytruncate has a small loss window; never log passwords/query tokens.
+# Distribution nginx logrotate handles its own error logs; verify actual LOG_DIR.

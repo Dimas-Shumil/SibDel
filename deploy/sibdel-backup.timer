@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily SibDel backup (UTC)
+[Timer]
+OnCalendar=*-*-* 02:30:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+Unit=sibdel-backup.service
+[Install]
+WantedBy=timers.target

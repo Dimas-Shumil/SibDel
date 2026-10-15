@@ -109,6 +109,10 @@ const envSchema = z
       return;
     }
 
+    if (env.HOST !== "127.0.0.1") {
+      ctx.addIssue({ code: "custom", path: ["HOST"], message: "HOST must be 127.0.0.1 in production behind local Nginx" });
+    }
+
     let appUrl;
 
     try {

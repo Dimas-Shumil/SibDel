@@ -1,0 +1,11 @@
+[Unit]
+Description=SibDel database and uploads backup
+After=network-online.target
+[Service]
+Type=oneshot
+User=BACKUP_USER
+Group=BACKUP_GROUP
+ExecStart=/bin/bash APP_DIR/scripts/backup.sh /etc/sibdel/backup.env
+UMask=0077
+NoNewPrivileges=true
+TimeoutStartSec=2h

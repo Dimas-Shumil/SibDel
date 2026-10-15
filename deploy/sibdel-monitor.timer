@@ -1,0 +1,8 @@
+[Unit]
+Description=SibDel operational checks every 5 minutes
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Unit=sibdel-monitor.service
+[Install]
+WantedBy=timers.target
