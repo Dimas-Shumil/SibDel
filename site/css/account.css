@@ -181,7 +181,7 @@ main {
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #8b7258;
+  color: #786047;
 }
 
 .mini-cart__quantity {
@@ -240,7 +240,7 @@ main {
   margin-top: 3px;
   font-size: 10px;
   white-space: nowrap;
-  color: #8b7258;
+  color: #786047;
 }
 
 .mini-cart__link {
@@ -433,7 +433,7 @@ main {
   line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #8b7258;
+  color: #786047;
 }
 
 .favorite-feedback__link {
@@ -460,7 +460,7 @@ main {
   height: 30px;
   padding: 0;
   border-radius: 50%;
-  color: #8b7258;
+  color: #786047;
   background: transparent;
   cursor: pointer;
 }
@@ -671,7 +671,7 @@ main {
   transition: border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .header__search-input::placeholder {
-  color: #8b7258;
+  color: #786047;
   opacity: 0.85;
 }
 .header__search-input:focus {
@@ -727,7 +727,7 @@ main {
 .header__phone-time {
   font-size: clamp(11px, 0.34vw, 13px);
   font-weight: 400;
-  color: #8b7258;
+  color: #786047;
 }
 .header__actions {
   display: flex;
@@ -1101,7 +1101,7 @@ main {
     transition: border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .header__mobile-search-input::placeholder {
-    color: #8b7258;
+    color: #786047;
   }
   .header__mobile-search-input:focus {
     border-color: #4f5b24;
@@ -1187,7 +1187,7 @@ main {
   }
   .header__mobile-phone span {
     font-size: 10px;
-    color: #8b7258;
+    color: #786047;
   }
   .quick-nav {
     display: none;
@@ -1522,7 +1522,7 @@ main {
   margin: 0;
   font-size: clamp(11px, 0.35vw, 13px);
   line-height: 1.4;
-  color: #8b7258;
+  color: #786047;
 }
 .footer__legal {
   display: flex;
@@ -1533,7 +1533,7 @@ main {
   position: relative;
   font-size: clamp(11px, 0.35vw, 13px);
   line-height: 1.4;
-  color: #8b7258;
+  color: #786047;
   transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .footer__legal-link::after {
@@ -2224,7 +2224,7 @@ main {
 
 .account-quick-card__copy small {
   font-size: 11px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-quick-card__value {
@@ -2442,7 +2442,7 @@ main {
 .account-order-card__date,
 .account-order-card__items {
   font-size: 12px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-status {
@@ -2499,7 +2499,7 @@ main {
 
 .account-order-info dt {
   font-size: 11px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-order-info dd {
@@ -2524,7 +2524,7 @@ main {
 
 .account-order-product span {
   font-size: 12px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-order-total {
@@ -2649,7 +2649,7 @@ main {
 .account-favorite-card__measure {
   min-height: 18px;
   font-size: 11px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-favorite-card__bottom {
@@ -2782,7 +2782,7 @@ main {
 
 .account-address-card > span {
   font-size: 12px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-address-card__actions {
@@ -2828,7 +2828,7 @@ main {
 .account-settings__panel--logout p {
   margin-top: 7px;
   font-size: 13px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-panel__shield {
@@ -2900,7 +2900,7 @@ main {
 .account-field-hint {
   font-size: 11px;
   line-height: 1.5;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-form-status {
@@ -2942,7 +2942,7 @@ main {
 
 .account-session-card > div span {
   font-size: 12px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-service-note {
@@ -3025,7 +3025,7 @@ main {
 
 .account-subscription-card__details dt {
   font-size: 12px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-subscription-card__details dd {
@@ -3061,7 +3061,7 @@ main {
 .account-benefits p {
   font-size: 12px;
   line-height: 1.6;
-  color: #8b7258;
+  color: #786047;
 }
 
 .account-inline-status {
@@ -3672,7 +3672,7 @@ body.account-menu-open {
 }
 .account-subscription-item span,
 .account-subscription-item small {
-  color: #8b7258;
+  color: #786047;
   font-size: 11px;
 }
 .account-subscription-item > span {
@@ -3712,7 +3712,7 @@ body.account-menu-open {
   border-bottom: 1px solid rgba(111, 84, 57, 0.1);
 }
 .account-subscription-history__item span {
-  color: #8b7258;
+  color: #786047;
   font-size: 10px;
 }
 .account-subscription-history__item p {
@@ -3742,7 +3742,7 @@ body.account-menu-open {
   font-size: 13px;
 }
 .account-subscription-picker__head span {
-  color: #8b7258;
+  color: #786047;
   font-size: 10px;
 }
 
@@ -3781,7 +3781,7 @@ body.account-menu-open {
   font-size: 12px;
 }
 .account-subscription-product__copy small {
-  color: #8b7258;
+  color: #786047;
   font-size: 10px;
 }
 
@@ -3800,7 +3800,7 @@ body.account-menu-open {
 
 .account-subscription-picker__empty {
   margin: 0;
-  color: #8b7258;
+  color: #786047;
   font-size: 11px;
   line-height: 1.5;
 }
@@ -3830,5 +3830,35 @@ body.account-menu-open {
   }
   .account-subscription-actions .account-button {
     width: 100%;
+  }
+}
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #916a32;
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 12px 18px;
+  background: #243c2b;
+  color: #fff;
+  transform: translateY(-180%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  html body [class], html body [class]::before, html body [class]::after {
+    animation-duration: 0s;
+    animation-delay: 0s;
+    transition-duration: 0s;
+    transition-delay: 0s;
   }
 }

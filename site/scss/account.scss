@@ -1,3 +1,4 @@
+@use "accessibility";
 @use 'variables' as *;
 @use 'base';
 @use 'header';
@@ -2211,3 +2212,5 @@ body.account-menu-open {
     width: 100%;
   }
 }
+
+@include accessibility.shared;

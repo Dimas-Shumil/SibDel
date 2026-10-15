@@ -14,9 +14,10 @@
   </head>
 
   <body>
+<a class="skip-link" href="#main-content">Перейти к содержимому</a>
     <div data-component="header"></div>
 
-    <main class="cart-page" data-cart-page>
+    <main class="cart-page" data-cart-page id="main-content" tabindex="-1">
       <section class="commerce-intro" aria-labelledby="cart-title">
         <div class="commerce-intro__container">
           <nav class="commerce-breadcrumbs" aria-label="Хлебные крошки">
@@ -84,7 +85,7 @@
                 data-step="1"
               >
                 <a class="cart-item__media" href="/product.html?slug=kolbasa-taezhnaya">
-                  <img
+                  <img loading="lazy" decoding="async"
                     class="cart-item__image"
                     src="/site/images/kol-taezh.webp"
                     alt="Колбаса Таёжная сырокопчёная"
@@ -146,7 +147,7 @@
                 data-step="1"
               >
                 <a class="cart-item__media" href="/product.html?slug=syr-altayskiy">
-                  <img
+                  <img loading="lazy" decoding="async"
                     class="cart-item__image"
                     src="/site/images/altay-cheese.webp"
                     alt="Сыр Алтайский выдержанный"
@@ -195,7 +196,7 @@
                 data-step="1"
               >
                 <a class="cart-item__media" href="/product.html?slug=pelmeni-domashnie">
-                  <img
+                  <img loading="lazy" decoding="async"
                     class="cart-item__image"
                     src="/site/images/prlmeni.webp"
                     alt="Пельмени Домашние ручной лепки"

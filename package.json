@@ -35,7 +35,8 @@
     "test:operator-unit": "node --experimental-vm-modules --test tests/operator-workflow.test.mjs",
     "test:trade-unit": "node --experimental-vm-modules --test tests/trade-consistency.test.mjs",
     "test:delivery-unit": "node --test tests/delivery-pricing.test.mjs",
-    "test:delivery-smoke": "node scripts/smoke-delivery.mjs"
+    "test:delivery-smoke": "node scripts/smoke-delivery.mjs",
+    "test:seo": "node --test tests/seo.test.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

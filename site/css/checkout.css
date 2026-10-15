@@ -181,7 +181,7 @@ main {
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #8b7258;
+  color: #786047;
 }
 
 .mini-cart__quantity {
@@ -240,7 +240,7 @@ main {
   margin-top: 3px;
   font-size: 10px;
   white-space: nowrap;
-  color: #8b7258;
+  color: #786047;
 }
 
 .mini-cart__link {
@@ -433,7 +433,7 @@ main {
   line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #8b7258;
+  color: #786047;
 }
 
 .favorite-feedback__link {
@@ -460,7 +460,7 @@ main {
   height: 30px;
   padding: 0;
   border-radius: 50%;
-  color: #8b7258;
+  color: #786047;
   background: transparent;
   cursor: pointer;
 }
@@ -671,7 +671,7 @@ main {
   transition: border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .header__search-input::placeholder {
-  color: #8b7258;
+  color: #786047;
   opacity: 0.85;
 }
 .header__search-input:focus {
@@ -727,7 +727,7 @@ main {
 .header__phone-time {
   font-size: clamp(11px, 0.34vw, 13px);
   font-weight: 400;
-  color: #8b7258;
+  color: #786047;
 }
 .header__actions {
   display: flex;
@@ -1101,7 +1101,7 @@ main {
     transition: border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .header__mobile-search-input::placeholder {
-    color: #8b7258;
+    color: #786047;
   }
   .header__mobile-search-input:focus {
     border-color: #4f5b24;
@@ -1187,7 +1187,7 @@ main {
   }
   .header__mobile-phone span {
     font-size: 10px;
-    color: #8b7258;
+    color: #786047;
   }
   .quick-nav {
     display: none;
@@ -1522,7 +1522,7 @@ main {
   margin: 0;
   font-size: clamp(11px, 0.35vw, 13px);
   line-height: 1.4;
-  color: #8b7258;
+  color: #786047;
 }
 .footer__legal {
   display: flex;
@@ -1533,7 +1533,7 @@ main {
   position: relative;
   font-size: clamp(11px, 0.35vw, 13px);
   line-height: 1.4;
-  color: #8b7258;
+  color: #786047;
   transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .footer__legal-link::after {
@@ -1757,7 +1757,7 @@ main {
   gap: 8px;
   margin-bottom: 28px;
   font-size: 13px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-breadcrumbs__link {
@@ -1918,7 +1918,7 @@ main {
   margin-top: 7px;
   font-size: 13px;
   line-height: 1.6;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-fields {
@@ -1986,7 +1986,7 @@ main {
 .checkout-field__control--select {
   appearance: none;
   padding-right: 46px;
-  background-image: linear-gradient(45deg, transparent 50%, #8b7258 50%), linear-gradient(135deg, #8b7258 50%, transparent 50%);
+  background-image: linear-gradient(45deg, transparent 50%, #786047 50%), linear-gradient(135deg, #786047 50%, transparent 50%);
   background-position: calc(100% - 20px) 23px, calc(100% - 14px) 23px;
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
@@ -1997,7 +1997,7 @@ main {
   margin-top: 7px;
   font-size: 11px;
   line-height: 1.55;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-field__meta {
@@ -2105,7 +2105,7 @@ main {
   margin-top: 3px;
   font-size: 11px;
   line-height: 1.45;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-choice-card__mark,
@@ -2160,7 +2160,7 @@ main {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.55;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-method-panel--notice {
@@ -2358,7 +2358,7 @@ main {
   margin-top: 5px;
   font-size: 10px;
   line-height: 1.4;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-summary-item__price {
@@ -2373,7 +2373,7 @@ main {
 }
 .checkout-summary-item__price del {
   font-size: 10px;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-summary__divider {
@@ -2472,7 +2472,7 @@ main {
   margin-top: 2px;
   font-size: 9px;
   line-height: 1.45;
-  color: #8b7258;
+  color: #786047;
 }
 .checkout-summary__total strong {
   font-family: "Bodoni Moda", Georgia, serif;
@@ -2548,7 +2548,7 @@ main {
   margin-top: 12px;
   font-size: 9px;
   line-height: 1.55;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-summary__trust {
@@ -2595,7 +2595,7 @@ main {
   margin-top: 2px;
   font-size: 9px;
   line-height: 1.45;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-empty {
@@ -2642,7 +2642,7 @@ main {
   margin-top: 10px;
   font-size: 13px;
   line-height: 1.65;
-  color: #8b7258;
+  color: #786047;
 }
 
 .checkout-empty__button {
@@ -2948,7 +2948,7 @@ main {
   }
   .checkout-mobile-bar__total span {
     font-size: 9px;
-    color: #8b7258;
+    color: #786047;
   }
   .checkout-mobile-bar__total strong {
     margin-top: 1px;
@@ -3039,4 +3039,35 @@ main {
 }
 .checkout-page [hidden] {
   display: none;
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #916a32;
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 12px 18px;
+  background: #243c2b;
+  color: #fff;
+  transform: translateY(-180%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  html body [class], html body [class]::before, html body [class]::after {
+    animation-duration: 0s;
+    animation-delay: 0s;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
 }

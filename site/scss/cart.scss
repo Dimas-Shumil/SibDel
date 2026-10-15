@@ -1,3 +1,4 @@
+@use "accessibility";
 @use 'variables' as *;
 @use 'base';
 @use 'header';
@@ -1603,3 +1604,5 @@
     padding-left: 12px;
   }
 }
+
+@include accessibility.shared;

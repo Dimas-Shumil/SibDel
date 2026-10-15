@@ -20,6 +20,10 @@ import authRouter from "./routes/auth.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import accountRouter from "./routes/account.routes.js";
 import catalogRouter from "./routes/catalog.routes.js";
+import { parsePublicCatalogQuery } from "./utils/catalog-query.js";
+import { seoMiddleware } from "./middleware/seo.js";
+import { getPublicProductBySlug } from "./services/product.service.js";
+import { getPublicCatalog } from "./services/catalog.service.js";
 import categoriesRouter from "./routes/categories.routes.js";
 import productsRouter from "./routes/products.routes.js";
 import cartRouter from "./routes/cart.routes.js";
@@ -95,6 +99,19 @@ const httpLogger = pinoHttp({
 
 app.use(securityMiddleware);
 app.use(httpLogger);
+
+const publicProductWhere = { isActive: true, category: { isActive: true } };
+app.use(seoMiddleware({
+  publicPath,
+  siteUrl: env.SEO_SITE_URL,
+  getProduct: getPublicProductBySlug,
+  getCatalog: getPublicCatalog,
+  parseCatalog: parsePublicCatalogQuery,
+  countProducts: () => prisma.product.count({ where: publicProductWhere }),
+  listProducts: (skip,take) => prisma.product.findMany({
+    where: publicProductWhere, orderBy: { id: 'asc' }, skip, take, select: { slug: true },
+  }),
+}));
 
 app.get("/api/health", async (_req, res) => {
   try {

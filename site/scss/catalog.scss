@@ -1,3 +1,4 @@
+@use "accessibility";
 @use 'variables' as *;
 @use 'base';
 @use 'header';
@@ -2111,3 +2112,5 @@
     display: none;
   }
 }
+
+@include accessibility.shared;

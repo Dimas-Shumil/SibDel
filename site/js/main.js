@@ -135,12 +135,15 @@ function initMobileHeader() {
 
     if (openActions) {
       openActions.setAttribute('aria-hidden', String(!isOpen));
+      openActions.inert = !isOpen;
     }
 
     if (!isOpen && restoreFocus) {
       toggle.focus();
     }
   };
+
+  if (openActions) openActions.inert = true;
 
   const closeMenu = (options) => {
     setMenuState(false, options);
@@ -242,7 +245,7 @@ function initPromotionsSlider() {
   }
 
   new Swiper(slider, {
-    speed: 650,
+    speed: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 650,
 
     slidesPerView: 1.15,
     spaceBetween: 10,
@@ -367,7 +370,7 @@ function initPopularProductsSlider() {
   }
 
   new Swiper(slider, {
-    speed: 650,
+    speed: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 650,
 
     slidesPerView: 'auto',
     spaceBetween: 12,
@@ -472,7 +475,7 @@ function initReviewsSlider() {
   }
 
   new Swiper(slider, {
-    speed: 650,
+    speed: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 650,
 
     slidesPerView: 1.08,
     spaceBetween: 10,
@@ -1078,7 +1081,7 @@ function sanitizeCommerceImage(value) {
     return image;
   }
 
-  return '/site/images/kol-taezh.webp';
+  return '/site/images/product-placeholder.svg';
 }
 
 function updateGlobalHeaderCartCount() {

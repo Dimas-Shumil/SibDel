@@ -1,3 +1,4 @@
+@use "accessibility";
 @use 'variables' as *;
 @use 'base';
 @use 'header';
@@ -1876,4 +1877,13 @@ body {
   .product-review-rating span { min-width: 38px; height: 36px; }
   .product-review-form__actions { align-items: stretch; flex-direction: column; }
   .product-review-form__submit, .product-review-form__delete { width: 100%; }
+}
+
+@include accessibility.shared;
+
+// Component display rules must respect the hidden state set by hydration.
+.product-summary__discount[hidden],
+.product-summary__old-price[hidden],
+.product-gallery__badge[hidden] {
+  display: none;
 }

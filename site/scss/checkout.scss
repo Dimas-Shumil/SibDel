@@ -1,3 +1,4 @@
+@use "accessibility";
 @use 'variables' as *;
 @use 'base';
 @use 'header';
@@ -1416,3 +1417,5 @@
 .checkout-page [hidden] {
   display: none;
 }
+
+@include accessibility.shared;

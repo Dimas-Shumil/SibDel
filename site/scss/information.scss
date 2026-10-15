@@ -1,3 +1,4 @@
+@use "accessibility";
 @use 'variables' as *;
 .info-page { color: $color-text; padding: 36px 28px 80px; }
 .info-page__container { max-width: $container-main; margin: 0 auto; }
@@ -17,3 +18,5 @@
 .info-page__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 18px; margin-top: 24px; }
 .info-page .delivery-info__card { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .info-page { padding: 24px 16px 48px; } .info-page__button { width: 100%; text-align: center; } }
+
+@include accessibility.shared;

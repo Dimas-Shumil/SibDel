@@ -106,7 +106,11 @@ function closeCatalogFilterDrawer() {
   const overlay = document.querySelector(".catalog-filter-overlay");
   const openButton = document.querySelector("[data-filter-open]");
 
+  const wasOpen = filter?.classList.contains("is-open");
   filter?.classList.remove("is-open");
+  if (filter) filter.inert = !window.matchMedia("(min-width: 1024px)").matches;
+  if (overlay) overlay.inert = true;
+  if (wasOpen) openButton?.focus();
   overlay?.classList.remove("is-active");
   openButton?.setAttribute("aria-expanded", "false");
   document.body.classList.remove("is-lock");
@@ -123,12 +127,18 @@ function initCatalogFilterDrawer() {
   }
 
   const setFilterState = (isOpen) => {
+    const wasOpen = filter.classList.contains("is-open");
+    filter.inert = !isOpen && !window.matchMedia("(min-width: 1024px)").matches;
+    overlay.inert = !isOpen;
     filter.classList.toggle("is-open", isOpen);
     overlay.classList.toggle("is-active", isOpen);
     openButton.setAttribute("aria-expanded", String(isOpen));
     document.body.classList.toggle("is-lock", isOpen);
+    if (isOpen) filter.querySelector("button, input, a, select")?.focus();
+    else if (wasOpen) openButton.focus();
   };
 
+  setFilterState(false);
   openButton.addEventListener("click", () => setFilterState(true));
   closeButtons.forEach((button) => {
     button.addEventListener("click", () => setFilterState(false));
@@ -143,9 +153,7 @@ function initCatalogFilterDrawer() {
 
   const desktopMedia = window.matchMedia("(min-width: 1024px)");
   desktopMedia.addEventListener("change", (event) => {
-    if (event.matches) {
-      setFilterState(false);
-    }
+    setFilterState(false);
   });
 }
 
@@ -160,7 +168,7 @@ function initCatalogPriceRange() {
   const params = new URLSearchParams(window.location.search);
   const priceTo = Number(params.get("priceTo"));
 
-  if (Number.isFinite(priceTo) && priceTo >= Number(range.min)) {
+  if (params.has("priceTo") && params.get("priceTo").trim() !== "" && Number.isFinite(priceTo) && priceTo >= Number(range.min)) {
     range.value = String(Math.min(priceTo, Number(range.max)));
     output.value = String(priceTo);
   }
@@ -390,7 +398,7 @@ function renderCategoryOptions(categories) {
 }
 
 function renderCatalogCard(product) {
-  const image = product.primaryImage?.url || "/site/images/kol-taezh.webp";
+  const image = product.primaryImage?.url || "/site/images/product-placeholder.svg";
   const imageAlt = product.primaryImage?.alt || product.name;
   const badge = product.badge
     ? `<span class="catalog-product-card__badge catalog-product-card__badge--${escapeHtml(product.badge.type)}">${escapeHtml(product.badge.label)}</span>`
@@ -455,7 +463,7 @@ function renderCatalogCard(product) {
         </a>
         <span class="catalog-product-card__measure">${escapeHtml(product.unitLabel || product.unit || "")}</span>
         <div class="catalog-product-card__rating" aria-label="${escapeHtml(ratingLabel)}">
-          <span class="catalog-product-card__stars" aria-hidden="true">★★★★★</span>
+          <span class="catalog-product-card__stars" aria-hidden="true">${product.rating?.count ? "★".repeat(Math.max(0, Math.min(5, Math.round(Number(product.rating.average) || 0)))) : ""}</span>
           <span class="catalog-product-card__reviews">${ratingValue}${Number(product.rating?.count || 0)}</span>
         </div>
         <div class="catalog-product-card__bottom">
@@ -959,7 +967,7 @@ function initCatalogPagination() {
       const payload = await loadCatalogPage(page);
       updateCatalogHeading(payload, catalogCategoriesCache);
       document.querySelector(".catalog-products")?.scrollIntoView({
-        behavior: "smooth",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         block: "start",
       });
     } catch (error) {
@@ -1020,7 +1028,7 @@ function initCatalogCategoryLinks() {
     try {
       await applyCatalogUrl(url);
       document.querySelector(".catalog-products")?.scrollIntoView({
-        behavior: "smooth",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         block: "start",
       });
     } catch (error) {

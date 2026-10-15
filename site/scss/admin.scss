@@ -1,3 +1,4 @@
+@use "accessibility";
 * { box-sizing: border-box; }
 html { min-width: 320px; background: #f5ead4; }
 body { margin: 0; }
@@ -497,3 +498,5 @@ button { border: 0; }
   .admin-toolbar--subscriptions .admin-select-wrap { min-width: 0; width: 100%; }
   .admin-subscription-actions .admin-button { width: 100%; }
 }
+
+@include accessibility.shared;

@@ -26,6 +26,8 @@ const envSchema = z
         "DATABASE_URL must be a PostgreSQL connection string",
       ),
 
+    SEO_SITE_URL: z.string().trim().default(""),
+
     APP_NAME: z.string().trim().min(1).default("Siberian Delicacies"),
 
     APP_URL: z

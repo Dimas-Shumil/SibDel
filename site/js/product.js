@@ -79,6 +79,9 @@ function renderProductGallery(product) {
       : [];
 
   if (!images.length) {
+    mainImage.src = '/site/images/product-placeholder.svg';
+    mainImage.alt = 'Фотография товара уточняется';
+    thumbs.replaceChildren();
     return;
   }
 
@@ -194,6 +197,10 @@ function renderProductReviews(product) {
   const reviewCount = Number(product.rating?.count || 0);
   const average = product.rating?.average;
 
+  document.querySelectorAll('.product-summary__stars, .product-reviews__stars').forEach(stars => {
+    stars.textContent = reviewCount ? '★'.repeat(Math.max(0, Math.min(5, Math.round(average || 0)))) : '';
+  });
+
   if (score) {
     score.textContent = average ?? '—';
   }
@@ -257,7 +264,7 @@ function renderRelatedProducts(products) {
 
   container.innerHTML = products
     .map((product) => {
-      const image = product.primaryImage?.url || '';
+      const image = product.primaryImage?.url || '/site/images/product-placeholder.svg';
       const badge = product.badge
         ? `<span class="related-product-card__badge related-product-card__badge--${escapeProductHtml(product.badge.type)}">${escapeProductHtml(product.badge.label)}</span>`
         : '';
@@ -271,7 +278,7 @@ function renderRelatedProducts(products) {
           <div class="related-product-card__body">
             <a class="related-product-card__title" href="/product.html?slug=${encodeURIComponent(product.slug)}">${escapeProductHtml(product.name)}</a>
             <span class="related-product-card__measure">${escapeProductHtml(product.unitLabel || product.unit || '')}</span>
-            <div class="related-product-card__rating"><span aria-hidden="true">★★★★★</span><small>${Number(product.rating?.count || 0)}</small></div>
+            <div class="related-product-card__rating"><span aria-hidden="true">${product.rating?.count ? "★".repeat(Math.max(0, Math.min(5, Math.round(Number(product.rating.average) || 0)))) : ""}</span><small>${Number(product.rating?.count || 0)}</small></div>
             <div class="related-product-card__bottom"><strong>${formatProductMoney(product.price)}</strong></div>
           </div>
         </article>
@@ -677,6 +684,11 @@ function initProductLightbox() {
   });
 
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab' && !lightbox.hidden) {
+      const closeButton = lightbox.querySelector('.product-lightbox__close');
+      event.preventDefault();
+      closeButton?.focus();
+    }
     if (event.key === 'Escape' && !lightbox.hidden) {
       closeLightbox();
     }
@@ -921,7 +933,7 @@ function initProductTabs() {
 
       document
         .querySelector('.product-details')
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        ?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     });
   });
 }
