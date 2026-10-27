@@ -1,7 +1,8 @@
+import { structuredPage } from "../utils/seo-structured-data.js";
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-export const PUBLIC_PAGES = ['/', '/catalog.html', '/about.html', '/business.html', '/contacts.html', '/production.html', '/promotions.html', '/subscription.html', '/how-to-order.html', '/delivery.html', '/delivery-terms.html', '/reviews.html'];
+export const PUBLIC_PAGES = ['/', '/catalog.html', '/about.html', '/business.html', '/contacts.html', '/production.html', '/promotions.html', '/subscription.html', '/how-to-order.html', '/delivery.html', '/delivery-terms.html', '/reviews.html', '/faq.html'];
 const PRIVATE = /^\/(?:api|admin|account|components)(?:\/|$)|^\/(?:login|register|forgot-password|reset-password|cart|checkout|favorites|privacy-policy|offer|personal-data-consent)(?:\.html)?\/?$/i;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -48,13 +49,13 @@ export function renderProduct(template, p) {
   values.related = cards(p.relatedProducts || [], 'related-product-card');
   return substitute(template, values);
 }
-function metadata(html, {title,description,url}) {
+function metadata(html, {title,description,url,structuredData='',type='website'}) {
   html = html.replace(/<title>[\s\S]*?<\/title>/i, () => `<title>${escapeHtml(title)}</title>`)
     .replace(/<meta\b(?=[^>]*name=["']description["'])[^>]*>/ig, '')
     .replace(/<link\b(?=[^>]*rel=["']canonical["'])[^>]*>/ig, '')
     .replace(/<meta\b(?=[^>]*property=["']og:[^"']*["'])[^>]*>/ig, '');
-  const tags = `<meta name="description" content="${escapeHtml(description)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="website"><meta property="og:locale" content="ru_RU">` + (url ? `<link rel="canonical" href="${escapeHtml(url)}"><meta property="og:url" content="${escapeHtml(url)}">` : '');
-  return html.replace('</head>', `${tags}</head>`);
+  const tags = `<meta name="description" content="${escapeHtml(description)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="${escapeHtml(type)}"><meta property="og:locale" content="ru_RU"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="${escapeHtml(title)}"><meta name="twitter:description" content="${escapeHtml(description)}">` + (url ? `<link rel="canonical" href="${escapeHtml(url)}"><meta property="og:url" content="${escapeHtml(url)}">` : '');
+  return html.replace('</head>', `${tags}${structuredData}</head>`);
 }
 function errorPage(res, status, text) {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
@@ -62,7 +63,7 @@ function errorPage(res, status, text) {
 }
 
 // Dependencies are injected so HTTP behavior can be tested without PostgreSQL or SMTP.
-export function seoMiddleware({ publicPath, siteUrl, getProduct, getCatalog, parseCatalog, listProducts, countProducts }) {
+export function seoMiddleware({ publicPath, siteUrl, getProduct, getCatalog, parseCatalog, listProducts, countProducts, listCategories, getCategory }) {
   const origin = siteOrigin(siteUrl);
   return async (req,res,next) => {
     let pathname;
@@ -78,7 +79,7 @@ export function seoMiddleware({ publicPath, siteUrl, getProduct, getCatalog, par
         let body;
         if (pathname === '/sitemap.xml') {
           // Static URLs live in their own sitemap so product batches remain bounded.
-          body = `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>${escapeHtml(origin)}/sitemap-pages.xml</loc></sitemap>${Array.from({length:chunks},(_,i)=>`<sitemap><loc>${escapeHtml(origin)}/sitemap-products-${i+1}.xml</loc></sitemap>`).join('')}</sitemapindex>`;
+          body = `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>${escapeHtml(origin)}/sitemap-pages.xml</loc></sitemap>${listCategories ? `<sitemap><loc>${escapeHtml(origin)}/sitemap-categories.xml</loc></sitemap>` : ''}${Array.from({length:chunks},(_,i)=>`<sitemap><loc>${escapeHtml(origin)}/sitemap-products-${i+1}.xml</loc></sitemap>`).join('')}</sitemapindex>`;
         } else {
           const batch = Number(pathname.match(/-(\d+)\.xml$/)[1]);
           if (!Number.isSafeInteger(batch) || batch<1 || batch>chunks) return errorPage(res,404,'Карта не найдена');
@@ -86,6 +87,12 @@ export function seoMiddleware({ publicPath, siteUrl, getProduct, getCatalog, par
           body = urlset(products.map(p=>origin+productLink(p)));
         }
         return res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>${body}`);
+      }
+      if (pathname === '/sitemap-categories.xml' && listCategories) {
+        if (!origin) return errorPage(res,503,'Публичный адрес ещё не настроен');
+        const categories = await listCategories();
+        const urls = categories.filter(c => SLUG.test(c.slug)).map(c => `${origin}/catalog.html?category=${encodeURIComponent(c.slug)}`);
+        return res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>${urlset(urls)}`);
       }
       if (pathname === '/sitemap-pages.xml') {
         if (!origin) return errorPage(res,503,'Публичный адрес ещё не настроен');
@@ -103,11 +110,14 @@ export function seoMiddleware({ publicPath, siteUrl, getProduct, getCatalog, par
       let title = template.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || 'Сибирские Деликатесы';
       let description = template.match(/<meta\b[^>]*name=["']description["'][^>]*content=["']([^"']*)/i)?.[1] || 'Сибирские Деликатесы — каталог продуктов, доставка и самовывоз.';
       let canonical = pathname;
+      let productData = null;
+      let categoryData = null;
       if (file === '/product.html') {
         const slug = req.query.slug;
         if (typeof slug !== 'string' || slug.length>191 || !SLUG.test(slug)) return errorPage(res,404,'Товар не найден');
         const product = await getProduct(slug);
         if (!product) return errorPage(res,404,'Товар не найден');
+        productData = product;
         template = renderProduct(template,product);
         title = product.seo?.title || `${product.name} — Сибирские Деликатесы`;
         description = product.seo?.description || product.shortDescription || `Описание и актуальная цена: ${product.name}.`;
@@ -121,14 +131,31 @@ export function seoMiddleware({ publicPath, siteUrl, getProduct, getCatalog, par
           const params = new URLSearchParams(Object.entries(req.query).filter(([,v])=>typeof v==='string')); params.set('page',String(n));
           return `<a class="catalog-pagination__link" href="/catalog.html?${escapeHtml(params.toString())}"${n===query.page?' aria-current="page"':''}>${n}</a>`;
         }).join('')});
-        const filtered = Object.keys(req.query).some(k=>!['page','utm_source','utm_medium','utm_campaign','utm_content','utm_term'].includes(k));
-        if (filtered) { res.setHeader('X-Robots-Tag','noindex, follow'); canonical=null; }
-        else canonical = '/catalog.html'+(query.page>1?`?page=${query.page}`:'');
-        if(query.page>1) title = `Каталог — страница ${query.page} — Сибирские Деликатесы`;
+        const keys = Object.keys(req.query).filter(k => !['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].includes(k));
+        const categoryOnly = !!query.category && query.category !== 'all' && keys.every(k=>['category','page'].includes(k));
+        if (categoryOnly && getCategory && SLUG.test(query.category)) {
+          categoryData = await getCategory(query.category);
+          if (!categoryData) return errorPage(res,404,'Категория не найдена');
+          canonical = `/catalog.html?category=${encodeURIComponent(query.category)}`+(query.page>1?`&page=${query.page}`:'');
+          title = `${categoryData.name} — каталог продуктов | Сибирские Деликатесы`;
+          description = categoryData.description?.trim() || `${categoryData.name}: актуальные товары и цены в каталоге Сибирских Деликатесов.`;
+          // A category landing page must describe the same category in visible HTML.
+          template = template.replace(/(<h1 class="catalog-intro__title" id="catalog-title">)[\s\S]*?(<\/h1>)/, (_, start, end) => `${start}${escapeHtml(categoryData.name)}${end}`);
+          template = template.replace(/(<p class="catalog-intro__description">)[\s\S]*?(<\/p>)/, (_, start, end) => `${start}${escapeHtml(description)}${end}`);
+        } else if (keys.some(k=>k!=='page')) {
+          res.setHeader('X-Robots-Tag','noindex, follow'); canonical=null;
+        } else canonical = '/catalog.html'+(query.page>1?`?page=${query.page}`:'');
+        if(query.page>1) title = `${title.replace(/ — страница \d+/, '')} — страница ${query.page}`;
+
       }
       const [header,footer] = await Promise.all(['header.html','footer.html'].map(name => readFile(path.join(publicPath,'..','components',name),'utf8')));
       template = template.replace(/<div data-component="header"><\/div>/,()=>`<div data-component="header">${header}</div>`).replace(/<div data-component="footer"><\/div>/,()=>`<div data-component="footer">${footer}</div>`);
-      template = metadata(template, {title,description,url:origin && canonical && !PRIVATE.test(pathname) ? origin+canonical : null});
+      const publicUrl = origin && canonical && !PRIVATE.test(pathname) ? origin + canonical : null;
+      template = metadata(template, {
+        title, description, url: publicUrl,
+        type: productData ? 'product' : 'website',
+        structuredData: publicUrl ? structuredPage({origin, path:canonical, title, description, product:productData, category:categoryData}) : '',
+      });
       return res.type('html').send(template);
     } catch(error) {
       // Do not issue an indexable 200 with demonstration content on database errors.

@@ -1987,3 +1987,26 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     transition-delay: 0s;
   }
 }
+
+/* Employees · OWNER-only administration */
+.admin-metrics--staff { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.admin-table--staff { min-width: 920px; }
+.admin-table--staff-log { min-width: 750px; }
+.admin-table--staff td:last-child { min-width: 260px; }
+.admin-table--staff td small { overflow-wrap: anywhere; }
+.admin-staff-form, .admin-staff-reset-form { display: grid; gap: 16px; }
+.admin-staff-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.admin-staff-field { display: grid; gap: 6px; min-width: 0; color: #6e5842; font-size: 12px; font-weight: 700; }
+.admin-staff-field input { width: 100%; height: 44px; padding: 0 12px; border: 1px solid rgba(100, 70, 40, 0.22); border-radius: 12px; outline: none; background: #fffcf6; color: #3d2c1e; }
+.admin-staff-field input:focus { border-color: #4f5b24; box-shadow: 0 0 0 3px rgba(79, 91, 36, 0.12); }
+.admin-staff-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-staff-reset-form { max-width: 520px; }
+.admin-staff-reset-form .admin-button { justify-self: start; }
+.admin-toolbar--staff { flex-wrap: wrap; }
+@media (max-width: 680px) {
+  .admin-metrics--staff { grid-template-columns: 1fr; }
+  .admin-staff-fields { grid-template-columns: 1fr; }
+  .admin-staff-actions .admin-button { flex: 1; }
+  .admin-toolbar--staff .admin-search { min-width: 100%; }
+  .admin-toolbar--staff .admin-select-wrap { flex: 1; min-width: 120px; }
+}

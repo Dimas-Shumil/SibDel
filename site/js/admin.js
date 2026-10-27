@@ -2708,9 +2708,185 @@ async function initAdminApplication() {
     initAdminReviews(),
     initAdminSubscriptions(),
     initAdminDelivery(),
+    initAdminStaff(),
   ]);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   void initAdminApplication();
 });
+
+// OWNER-only employee management. API is the authority for every permission.
+async function initAdminStaff() {
+  if (document.body.dataset.adminPage !== "employees") return;
+  if (currentAdminUser?.role !== "OWNER") {
+    window.location.replace("/admin/");
+    return;
+  }
+
+  let employees = [];
+  let editId = null;
+  let passwordId = null;
+  const editor = document.querySelector("[data-staff-editor-panel]");
+  const editForm = document.querySelector("[data-staff-form]");
+  const passwordPanel = document.querySelector("[data-staff-reset-panel]");
+  const passwordForm = document.querySelector("[data-staff-reset-form]");
+  const listBody = document.querySelector("[data-staff-list]");
+  const activityBody = document.querySelector("[data-staff-activity]");
+  const filters = document.querySelector("[data-staff-filter]");
+  const employeeById = (id) => employees.find((item) => item.id === Number(id));
+  const nameOf = (employee) => [employee?.firstName, employee?.lastName].filter(Boolean).join(" ") || employee?.email || "Сотрудник";
+
+  function closeEditor() {
+    editor.hidden = true;
+    editForm.reset();
+    editForm.elements.password.required = false;
+    editId = null;
+  }
+  function closeReset() {
+    passwordPanel.hidden = true;
+    passwordForm.reset();
+    passwordId = null;
+  }
+  function openEditor(employee = null) {
+    closeReset();
+    editForm.reset();
+    editId = employee?.id ?? null;
+    editForm.elements.firstName.value = employee?.firstName || "";
+    editForm.elements.lastName.value = employee?.lastName || "";
+    editForm.elements.email.value = employee?.email || "";
+    const createMode = !employee;
+    editForm.elements.password.required = createMode;
+    document.querySelector("[data-staff-password-field]").hidden = !createMode;
+    document.querySelector("[data-staff-password-note]").hidden = !createMode;
+    document.querySelector("[data-staff-editor-title]").textContent = createMode ? "Новый сотрудник" : `Редактировать: ${nameOf(employee)}`;
+    document.querySelector("[data-staff-save]").textContent = createMode ? "Создать сотрудника" : "Сохранить изменения";
+    editor.hidden = false;
+    editor.scrollIntoView({ block: "start", behavior: "smooth" });
+    editForm.elements.firstName.focus({ preventScroll: true });
+  }
+  function openReset(employee) {
+    closeEditor();
+    closeReset();
+    passwordId = employee.id;
+    document.querySelector("[data-staff-reset-title]").textContent = `Сменить пароль: ${nameOf(employee)}`;
+    passwordPanel.hidden = false;
+    passwordPanel.scrollIntoView({ block: "start", behavior: "smooth" });
+    passwordForm.elements.password.focus({ preventScroll: true });
+  }
+  function renderStaff() {
+    document.querySelector("[data-staff-total]").textContent = employees.length;
+    document.querySelector("[data-staff-active]").textContent = employees.filter((user) => user.isActive).length;
+    document.querySelector("[data-staff-disabled]").textContent = employees.filter((user) => !user.isActive).length;
+    listBody.innerHTML = employees.map((user) => `
+      <tr>
+        <td><strong>${escapeAdminHtml(nameOf(user))}</strong><small>${escapeAdminHtml(user.email || "—")}</small></td>
+        <td>Сотрудник</td>
+        <td><span class="admin-status ${user.isActive ? "is-completed" : "is-cancelled"}">${user.isActive ? "Активен" : "Отключён"}</span></td>
+        <td>${escapeAdminHtml(formatAdminDate(user.lastLoginAt))}</td>
+        <td>${escapeAdminHtml(formatAdminDate(user.createdAt, false))}</td>
+        <td><div class="admin-table-actions">
+          <button class="admin-icon-button" data-staff-edit="${user.id}" type="button">Изменить</button>
+          <button class="admin-icon-button" data-staff-password="${user.id}" type="button">Пароль</button>
+          <button class="admin-icon-button ${user.isActive ? "admin-icon-button--danger" : ""}" data-staff-toggle="${user.id}" type="button">${user.isActive ? "Отключить" : "Включить"}</button>
+        </div></td>
+      </tr>`).join("") || '<tr><td colspan="6" class="admin-table__empty">Сотрудников не найдено.</td></tr>';
+  }
+  async function reloadStaff() {
+    const params = new URLSearchParams(new FormData(filters));
+    const payload = await adminFetch(`/api/admin/employees?${params.toString()}`);
+    employees = payload.employees || [];
+    renderStaff();
+  }
+  async function reloadActivity() {
+    const payload = await adminFetch("/api/admin/employees/activity");
+    const activity = payload.activity || [];
+    activityBody.innerHTML = activity.map((item) => `
+      <tr><td>${escapeAdminHtml(formatAdminDate(item.createdAt))}</td>
+      <td><strong>${escapeAdminHtml(nameOf(item.actor))}</strong><small>${escapeAdminHtml(item.actor?.role === "OWNER" ? "Владелец" : "Сотрудник")}</small></td>
+      <td>${escapeAdminHtml(item.action)}</td><td>${escapeAdminHtml(item.description || "—")}</td></tr>`).join("")
+      || '<tr><td colspan="4" class="admin-table__empty">Действий пока нет.</td></tr>';
+  }
+
+  document.querySelector("[data-staff-create]")?.addEventListener("click", () => openEditor());
+  for (const selector of ["[data-staff-close]", "[data-staff-cancel]"]) {
+    document.querySelector(selector)?.addEventListener("click", closeEditor);
+  }
+  document.querySelector("[data-staff-reset-close]")?.addEventListener("click", closeReset);
+  document.querySelector("[data-staff-activity-refresh]")?.addEventListener("click", async () => {
+    try { await reloadActivity(); } catch (error) { showAdminToast(error.message, "error"); }
+  });
+  filters.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try { await reloadStaff(); } catch (error) { showAdminToast(error.message, "error"); }
+  });
+  document.querySelector("[data-staff-filter-reset]")?.addEventListener("click", async () => {
+    filters.reset();
+    try { await reloadStaff(); } catch (error) { showAdminToast(error.message, "error"); }
+  });
+
+  editForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!editForm.reportValidity()) return;
+    const values = Object.fromEntries(new FormData(editForm));
+    const body = {
+      firstName: String(values.firstName).trim(),
+      lastName: String(values.lastName).trim(),
+      email: String(values.email).trim().toLowerCase(),
+      ...(!editId ? { password: String(values.password) } : {}),
+    };
+    const button = editForm.querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+      await adminFetch(editId ? `/api/admin/employees/${editId}` : "/api/admin/employees", {
+        method: editId ? "PATCH" : "POST", body: JSON.stringify(body),
+      });
+      showAdminToast(editId ? "Данные сотрудника сохранены." : "Сотрудник создан.");
+      closeEditor();
+      await Promise.all([reloadStaff(), reloadActivity()]);
+    } catch (error) { showAdminToast(error.message, "error"); }
+    finally { button.disabled = false; }
+  });
+
+  listBody.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-staff-edit],button[data-staff-password],button[data-staff-toggle]");
+    if (!button) return;
+    const id = Number(button.dataset.staffEdit || button.dataset.staffPassword || button.dataset.staffToggle);
+    const employee = employeeById(id);
+    if (!employee) return;
+    if (button.hasAttribute("data-staff-edit")) { openEditor(employee); return; }
+    if (button.hasAttribute("data-staff-password")) { openReset(employee); return; }
+    const nextActive = !employee.isActive;
+    const warning = nextActive
+      ? `Включить доступ для «${nameOf(employee)}»?`
+      : `Отключить «${nameOf(employee)}»? Все действующие сеансы сотрудника будут завершены.`;
+    if (!window.confirm(warning)) return;
+    button.disabled = true;
+    try {
+      await adminFetch(`/api/admin/employees/${id}/status`, { method: "PATCH", body: JSON.stringify({ isActive: nextActive }) });
+      showAdminToast(nextActive ? "Доступ сотрудника включён." : "Сотрудник отключён, сеансы завершены.");
+      await Promise.all([reloadStaff(), reloadActivity()]);
+    } catch (error) { showAdminToast(error.message, "error"); }
+    finally { button.disabled = false; }
+  });
+
+  passwordForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!passwordId || !passwordForm.reportValidity()) return;
+    if (!window.confirm("Сменить пароль сотрудника и завершить все его сеансы?")) return;
+    const button = passwordForm.querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+      await adminFetch(`/api/admin/employees/${passwordId}/password`, {
+        method: "POST", body: JSON.stringify({ password: passwordForm.elements.password.value }),
+      });
+      showAdminToast("Пароль изменён. Все входы сотрудника завершены.");
+      closeReset();
+      await Promise.all([reloadStaff(), reloadActivity()]);
+    } catch (error) { showAdminToast(error.message, "error"); }
+    finally { button.disabled = false; }
+  });
+
+  try { await Promise.all([reloadStaff(), reloadActivity()]); }
+  catch (error) { showAdminToast(error.message, "error"); }
+}

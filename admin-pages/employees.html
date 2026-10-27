@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>Сотрудники — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="employees">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/">
+          <span class="admin-brand__mark" aria-hidden="true">▲</span>
+          <span>
+            <strong>Сибирские</strong>
+            <strong>Деликатесы</strong>
+          </span>
+        </a>
+
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/employees" data-admin-nav="employees" data-owner-only><span>Сотрудники</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+          <a class="admin-nav__link" href="/admin/subscriptions" data-admin-nav="subscriptions"><span>Подписки</span></a>
+          <a class="admin-nav__link" href="/admin/delivery" data-admin-nav="delivery"><span>Доставка</span></a>
+        </nav>
+
+        <div class="admin-sidebar__roadmap">
+          <span>Следующий этап</span>
+          <strong>Персонал · Права · Аудит</strong>
+        </div>
+
+        <div class="admin-sidebar__user">
+          <span class="admin-sidebar__role" data-admin-user-role>...</span>
+          <strong data-admin-user-name>Загрузка...</strong>
+          <span data-admin-user-email></span>
+          <button class="admin-link-button" type="button" data-admin-logout>Выйти</button>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div><p class="admin-eyebrow">Безопасность · Персонал</p><h1>Сотрудники</h1>
+            <p class="admin-header__lead">Доступ персонала к заказам, складу и каталогу. Управлять сотрудниками может только владелец.</p></div>
+          <div class="admin-header__actions"><button class="admin-button" type="button" data-staff-create>Добавить сотрудника</button></div>
+        </header>
+
+        <section class="admin-metrics admin-metrics--staff" aria-label="Сотрудники">
+          <article class="admin-metric"><span>Всего сотрудников</span><strong data-staff-total>—</strong><small>учётные записи STAFF</small></article>
+          <article class="admin-metric admin-metric--accent"><span>Активные</span><strong data-staff-active>—</strong><small>могут входить в панель</small></article>
+          <article class="admin-metric"><span>Отключённые</span><strong data-staff-disabled>—</strong><small>доступ прекращён</small></article>
+        </section>
+
+        <section class="admin-panel" data-staff-editor-panel hidden>
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Доступ персонала</p><h2 data-staff-editor-title>Новый сотрудник</h2></div><button class="admin-icon-button" type="button" data-staff-close>Закрыть</button></div>
+          <form class="admin-staff-form" data-staff-form>
+            <div class="admin-staff-fields">
+              <label class="admin-staff-field">Имя <input name="firstName" required maxlength="100" autocomplete="off" /></label>
+              <label class="admin-staff-field">Фамилия <input name="lastName" maxlength="100" autocomplete="off" /></label>
+              <label class="admin-staff-field">Электронная почта <input type="email" name="email" required maxlength="191" autocomplete="off" /></label>
+              <label class="admin-staff-field" data-staff-password-field>Временный пароль <input type="password" name="password" minlength="12" maxlength="128" autocomplete="new-password" /></label>
+            </div>
+            <p class="admin-form-note" data-staff-password-note>Не менее 12 символов: прописная и строчная латиница, цифра и спецсимвол. Передайте пароль сотруднику безопасным способом.</p>
+            <div class="admin-staff-actions"><button class="admin-button" type="submit" data-staff-save>Создать сотрудника</button><button class="admin-button admin-button--secondary" type="button" data-staff-cancel>Отмена</button></div>
+          </form>
+        </section>
+
+        <section class="admin-panel" data-staff-reset-panel hidden>
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Защита аккаунта</p><h2 data-staff-reset-title>Смена пароля</h2></div><button class="admin-icon-button" type="button" data-staff-reset-close>Закрыть</button></div>
+          <form class="admin-staff-reset-form" data-staff-reset-form>
+            <label class="admin-staff-field">Новый пароль <input type="password" name="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label>
+            <p class="admin-form-note">После смены пароля все сеансы сотрудника (включая активные) будут завершены.</p>
+            <button class="admin-button admin-button--danger" type="submit">Сменить пароль и завершить сеансы</button>
+          </form>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Доступы</p><h2>Список сотрудников</h2></div></div>
+          <form class="admin-toolbar admin-toolbar--staff" data-staff-filter>
+            <label class="admin-search admin-search--grow"><span class="sr-only">Поиск сотрудников</span><input type="search" name="q" placeholder="Имя, фамилия или email" maxlength="120" autocomplete="off" /></label>
+            <label class="admin-select-wrap"><span class="sr-only">Статус</span><select name="status"><option value="all">Все статусы</option><option value="active">Активные</option><option value="inactive">Отключённые</option></select></label>
+            <button class="admin-button" type="submit">Найти</button>
+            <button class="admin-button admin-button--secondary" data-staff-filter-reset type="button">Сбросить</button>
+          </form>
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-table--staff"><thead><tr><th>Сотрудник</th><th>Роль</th><th>Статус</th><th>Последний вход</th><th>Добавлен</th><th>Действия</th></tr></thead>
+              <tbody data-staff-list><tr><td colspan="6" class="admin-table__empty">Загружаем сотрудников...</td></tr></tbody></table>
+          </div>
+          <p class="admin-form-note admin-page-note">Владельцы управляются отдельно. Существующие аккаунты покупателей невозможно преобразовать в сотрудников через этот раздел.</p>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Разграничение доступа</p><h2>Права сотрудников</h2></div></div>
+          <div class="admin-table-wrap"><table class="admin-table admin-table--permissions">
+            <thead><tr><th>Действие</th><th>Владелец</th><th>Сотрудник</th></tr></thead>
+            <tbody>
+              <tr><td>Обработка заказов и работа с клиентами</td><td>Да</td><td>Да</td></tr>
+              <tr><td>Редактирование товаров, складской учёт</td><td>Да</td><td>Да, в рамках действующих ограничений</td></tr>
+              <tr><td>Настройка доставки и управление персоналом</td><td>Да</td><td>Нет</td></tr>
+              <tr><td>Удаление товаров и другие защищённые операции</td><td>Да</td><td>Нет</td></tr>
+              <tr><td>Просмотр журнала действий администраторов</td><td>Да</td><td>Нет</td></tr>
+            </tbody>
+          </table></div>
+          <p class="admin-form-note admin-page-note">Доступ к каждому защищённому API проверяется сервером. Список основан на существующих маршрутах платформы.</p>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-panel__head"><div><p class="admin-panel__eyebrow">Аудит</p><h2>Последние действия администраторов</h2></div><button class="admin-button admin-button--secondary" data-staff-activity-refresh type="button">Обновить</button></div>
+          <div class="admin-table-wrap"><table class="admin-table admin-table--staff-log"><thead><tr><th>Дата</th><th>Кто</th><th>Действие</th><th>Описание</th></tr></thead><tbody data-staff-activity><tr><td colspan="4" class="admin-table__empty">Загружаем журнал...</td></tr></tbody></table></div>
+          <p class="admin-form-note admin-page-note">Отображаются последние 50 уже записанных событий. Новые события изменений сотрудников фиксируются автоматически.</p>
+        </section>
+        <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+  </body>
+</html>

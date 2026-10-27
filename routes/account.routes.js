@@ -9,6 +9,9 @@ import {
   getOrder,
   getOrders,
   getProfile,
+  getSessions,
+  deleteSession,
+  deleteOtherSessions,
   getSubscription,
   repeatOrder,
   updateAddress,
@@ -112,6 +115,10 @@ const addressParamsSchema = z
   })
   .strict();
 
+const sessionParamsSchema = z.object({
+  sessionId: z.coerce.number().int().positive(),
+}).strict();
+
 const orderParamsSchema = z
   .object({
     orderKey: z.string().trim().min(1).max(50),
@@ -132,6 +139,15 @@ router.patch(
   sensitiveRateLimiter,
   validate({ body: passwordBodySchema }),
   changePassword,
+);
+
+router.get("/sessions", getSessions);
+router.delete("/sessions/others", sensitiveRateLimiter, deleteOtherSessions);
+router.delete(
+  "/sessions/:sessionId",
+  sensitiveRateLimiter,
+  validate({ params: sessionParamsSchema }),
+  deleteSession,
 );
 
 router.get("/addresses", getAddresses);

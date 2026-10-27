@@ -1,0 +1,7 @@
+warning: in the working copy of 'controllers/account.controller.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'public/account/index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'routes/account.routes.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/account.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/account.min.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/js/account.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/scss/account.scss', LF will be replaced by CRLF the next time Git touches it

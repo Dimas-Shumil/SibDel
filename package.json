@@ -36,7 +36,9 @@
     "test:trade-unit": "node --experimental-vm-modules --test tests/trade-consistency.test.mjs",
     "test:delivery-unit": "node --test tests/delivery-pricing.test.mjs",
     "test:delivery-smoke": "node scripts/smoke-delivery.mjs",
-    "test:seo": "node --test tests/seo.test.mjs"
+    "test:staff-unit": "node --experimental-vm-modules --test tests/admin-staff.test.mjs",
+    "test:seo": "node --test tests/seo.test.mjs tests/seo-stage10.test.mjs",
+    "seo:live-check": "node scripts/seo-live-check.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

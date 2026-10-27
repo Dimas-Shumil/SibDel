@@ -3,6 +3,11 @@ import {
   getSessionCookieOptions,
 } from "../config/auth.js";
 import { createSession } from "../services/auth.service.js";
+import {
+  listAccountSessions,
+  revokeAccountSession,
+  revokeOtherAccountSessions,
+} from "../services/account-session.service.js";
 
 import {
   changeAccountPassword,
@@ -95,6 +100,43 @@ export async function changePassword(req, res, next) {
         expiresAt: session.expiresAt,
       },
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getSessions(req, res, next) {
+  try {
+    const sessions = await listAccountSessions({
+      userId: req.user.id,
+      currentSessionId: req.auth.session.id,
+    });
+    return res.status(200).json({ ok: true, sessions });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function deleteSession(req, res, next) {
+  try {
+    await revokeAccountSession({
+      userId: req.user.id,
+      currentSessionId: req.auth.session.id,
+      sessionId: req.validated.params.sessionId,
+    });
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function deleteOtherSessions(req, res, next) {
+  try {
+    const revokedCount = await revokeOtherAccountSessions({
+      userId: req.user.id,
+      currentSessionId: req.auth.session.id,
+    });
+    return res.status(200).json({ ok: true, revokedCount });
   } catch (error) {
     return next(error);
   }

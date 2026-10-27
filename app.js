@@ -35,6 +35,7 @@ import inventoryRouter from "./routes/inventory.routes.js";
 import adminCatalogRouter from "./routes/admin-catalog.routes.js";
 import ordersRouter from "./routes/orders.routes.js";
 import adminCustomersRouter from "./routes/admin-customers.routes.js";
+import adminStaffRouter from "./routes/admin-staff.routes.js";
 import promotionsRouter from "./routes/promotions.routes.js";
 import reviewsRouter from "./routes/reviews.routes.js";
 import adminReviewsRouter from "./routes/admin-reviews.routes.js";
@@ -113,6 +114,15 @@ app.use(seoMiddleware({
   getCatalog: getPublicCatalog,
   parseCatalog: parsePublicCatalogQuery,
   countProducts: () => prisma.product.count({ where: publicProductWhere }),
+  listCategories: () => prisma.category.findMany({
+    where: { isActive: true, products: { some: { isActive: true } } },
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+    select: { slug: true, name: true, description: true },
+  }),
+  getCategory: (slug) => prisma.category.findFirst({
+    where: { slug, isActive: true, products: { some: { isActive: true } } },
+    select: { slug: true, name: true, description: true },
+  }),
   listProducts: (skip,take) => prisma.product.findMany({
     where: publicProductWhere, orderBy: { id: 'asc' }, skip, take, select: { slug: true },
   }),
@@ -222,6 +232,7 @@ app.use("/api/admin/inventory", inventoryRouter);
 app.use("/api/admin/catalog", adminCatalogRouter);
 app.use("/api/admin/orders", ordersRouter);
 app.use("/api/admin/customers", adminCustomersRouter);
+app.use("/api/admin/employees", adminStaffRouter);
 app.use("/api/admin/promotions", promotionsRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/admin/reviews", adminReviewsRouter);
@@ -256,6 +267,13 @@ app.use(
   "/admin",
   adminSessionContext,
   requireAdminPage,
+  (req, res, next) => {
+    // Do not serve the staff-management HTML to STAFF accounts.
+    if ((req.path === "/employees" || req.path === "/employees.html") && req.adminUser?.role !== "OWNER") {
+      return res.status(403).send("Недостаточно прав для управления сотрудниками.");
+    }
+    return next();
+  },
   express.static(adminPagesPath, {
     dotfiles: "deny",
     extensions: ["html"],

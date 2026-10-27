@@ -736,42 +736,19 @@
         <section aria-labelledby="sessions-title" class="account-panel account-settings__panel">
          <div class="account-panel__head">
           <div>
-           <span class="account-panel__eyebrow">
-            Контроль доступа
-           </span>
-           <h2 class="account-panel__title" id="sessions-title">
-            Активные сессии
-           </h2>
+           <span class="account-panel__eyebrow">Безопасность аккаунта</span>
+           <h2 class="account-panel__title" id="sessions-title">Ваши устройства</h2>
           </div>
          </div>
-         <div class="account-session-card">
-          <span class="account-session-card__icon">
-           <svg aria-hidden="true" viewBox="0 0 24 24">
-            <rect height="14" rx="2" width="18" x="3" y="4">
-            </rect>
-            <path d="M8 21h8M12 18v3">
-            </path>
-           </svg>
-          </span>
-          <div>
-           <strong>
-            Текущий браузер
-           </strong>
-           <span>
-            Эта сессия активна сейчас
-           </span>
-          </div>
-          <span class="account-session-card__badge">
-           Текущая
-          </span>
+         <p class="account-sessions__intro">Здесь показаны устройства, с которых выполнен вход в ваш аккаунт. Незнакомое устройство можно отключить.</p>
+         <p class="account-form-status" data-account-sessions-status aria-live="polite" role="status">Загружаем устройства…</p>
+         <div class="account-sessions__list" data-account-sessions-list hidden></div>
+         <div class="account-sessions__actions" data-account-sessions-actions hidden>
+          <button class="account-button account-button--secondary" data-account-sessions-revoke-others type="button">Выйти на других устройствах</button>
          </div>
-         <div class="account-service-note account-service-note--inline" data-account-unavailable="">
-          <strong>
-           Список других сессий пока недоступен
-          </strong>
-          <span>
-           Для управления всеми устройствами требуется серверный API.
-          </span>
+         <div class="account-sessions__error" data-account-sessions-error hidden role="alert">
+          <span>Не удалось загрузить устройства.</span>
+          <button class="account-button account-button--soft" type="button" data-account-sessions-retry>Повторить</button>
          </div>
         </section>
         <section aria-labelledby="logout-title" class="account-panel account-settings__panel account-settings__panel--logout">

@@ -1178,10 +1178,104 @@ function initSettingsForms() {
 
       passwordForm.reset();
       if (status) status.textContent = 'Пароль изменён. Остальные активные сессии завершены.';
+      await refreshAccountSessions();
     } catch (error) {
       if (status) status.textContent = error instanceof Error ? error.message : 'Не удалось изменить пароль.';
     } finally {
       if (submitButton) submitButton.disabled = false;
+    }
+  });
+}
+
+function formatSessionActivity(value) {
+  if (!value) return 'Недавно';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Недавно';
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  }).format(date);
+}
+
+function renderAccountSessions(sessions) {
+  const root = getAccountView('settings');
+  if (!root) return;
+  const list = root.querySelector('[data-account-sessions-list]');
+  const actions = root.querySelector('[data-account-sessions-actions]');
+  const status = root.querySelector('[data-account-sessions-status]');
+  const error = root.querySelector('[data-account-sessions-error]');
+  if (!list || !actions || !status || !error) return;
+
+  const devices = Array.isArray(sessions) ? sessions : [];
+  const others = devices.filter((session) => !session.current);
+  list.innerHTML = devices.map((session) => `
+    <article class="account-session-card">
+      <span class="account-session-card__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"></rect><path d="M8 21h8M12 18v3"></path></svg>
+      </span>
+      <div class="account-session-card__details">
+        <strong>${escapeAccountHtml(session.device || 'Браузер · Устройство')}</strong>
+        <span>${session.current ? 'Вы используете это устройство' : `Последняя активность: ${escapeAccountHtml(formatSessionActivity(session.lastUsedAt))}`}</span>
+      </div>
+      ${session.current
+        ? '<span class="account-session-card__badge">Текущее</span>'
+        : `<button class="account-session-card__revoke" type="button" data-account-session-revoke="${Number(session.id)}" aria-label="Завершить вход: ${escapeAccountHtml(session.device || 'Другое устройство')}">Завершить</button>`}
+    </article>
+  `).join('');
+  list.hidden = devices.length === 0;
+  actions.hidden = others.length === 0;
+  error.hidden = true;
+  status.textContent = devices.length === 0 ? 'Активных устройств не найдено.' : others.length === 0 ? 'Других активных устройств нет.' : `Других устройств: ${others.length}.`;
+}
+
+async function refreshAccountSessions() {
+  const root = getAccountView('settings');
+  if (!root) return;
+  const status = root.querySelector('[data-account-sessions-status]');
+  const error = root.querySelector('[data-account-sessions-error]');
+  if (status) status.textContent = 'Обновляем устройства…';
+  if (error) error.hidden = true;
+  try {
+    const payload = await requestAccountJson('/api/account/sessions');
+    renderAccountSessions(payload.sessions);
+  } catch (loadError) {
+    if (status) status.textContent = '';
+    if (error) {
+      error.hidden = false;
+      const copy = error.querySelector('span');
+      if (copy) copy.textContent = loadError instanceof Error ? loadError.message : 'Не удалось загрузить устройства.';
+    }
+  }
+}
+
+function initAccountSessions() {
+  const root = getAccountView('settings');
+  if (!root) return;
+  root.addEventListener('click', async (event) => {
+    const retry = event.target.closest('[data-account-sessions-retry]');
+    if (retry) {
+      await refreshAccountSessions();
+      return;
+    }
+    const single = event.target.closest('[data-account-session-revoke]');
+    const others = event.target.closest('[data-account-sessions-revoke-others]');
+    if (!single && !others) return;
+    const message = single
+      ? 'Завершить вход на этом устройстве?'
+      : 'Завершить вход на всех остальных устройствах?';
+    if (!window.confirm(message)) return;
+    const button = single || others;
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+      await requestAccountJson(single
+        ? `/api/account/sessions/${encodeURIComponent(single.dataset.accountSessionRevoke)}`
+        : '/api/account/sessions/others', { method: 'DELETE' });
+      await refreshAccountSessions();
+    } catch (actionError) {
+      const status = root.querySelector('[data-account-sessions-status]');
+      if (status) status.textContent = actionError instanceof Error ? actionError.message : 'Не удалось завершить вход.';
+    } finally {
+      button.disabled = false;
     }
   });
 }
@@ -1300,6 +1394,7 @@ async function initAccountPageData(type = getAccountRoute()?.view || 'dashboard'
 
   if (type === 'settings') {
     revealSettings();
+    await refreshAccountSessions();
     return;
   }
 
@@ -1395,6 +1490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initFavoritesActions();
     initAddressModal();
     initSettingsForms();
+    initAccountSessions();
     initSubscriptionControls();
     initLogout();
     initRepeatOrder();
