@@ -22,6 +22,7 @@ import { customerPushRouter, adminPushRouter } from "./routes/push.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import accountRouter from "./routes/account.routes.js";
+import accountNotificationRouter from "./routes/account-notification.routes.js";
 import catalogRouter from "./routes/catalog.routes.js";
 import { parsePublicCatalogQuery } from "./utils/catalog-query.js";
 import { seoMiddleware } from "./middleware/seo.js";
@@ -170,6 +171,7 @@ app.get(
     "/account/favorites",
     "/account/addresses",
     "/account/settings",
+    "/account/notifications",
     "/account/subscription",
   ],
   (_req, res) => {
@@ -211,6 +213,8 @@ app.use(
   "/api/auth",
   authRouter,
 );
+
+app.use("/api/account/notifications", accountNotificationRouter);
 
 app.use(
   "/api/account",

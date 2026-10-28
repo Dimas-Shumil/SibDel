@@ -45,7 +45,9 @@
     "push:process": "node scripts/process-push.mjs 100",
     "push:keys": "web-push generate-vapid-keys --json",
     "test:push": "node --experimental-vm-modules --test tests/push-*.test.mjs",
-    "test:push-browser": "node scripts/smoke-push.mjs"
+    "test:push-browser": "node scripts/smoke-push.mjs",
+    "test:inbox": "node --experimental-vm-modules --test tests/account-notifications.test.mjs",
+    "test:inbox-browser": "node scripts/smoke-inbox.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

@@ -2338,3 +2338,35 @@ body.account-menu-open {
 }
 
 .push-settings [hidden] { display: none; }
+
+.account-inbox {
+  &__intro { margin: 14px 0 22px; max-width: 680px; color: $color-text-muted; font-size: 14px; line-height: 1.6; }
+  &__filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-bottom: 16px; }
+  &__filters > label { display: grid; gap: 7px; font-size: 13px; }
+  &__filters select { min-height: 44px; width: 100%; }
+  &__filters &__check { display: flex; align-items: center; min-height: 44px; gap: 8px; }
+  &__check input { width: 18px; height: 18px; accent-color: $color-forest; }
+  &__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 14px 0; }
+  &__list { display: grid; gap: 14px; margin: 18px 0; padding: 0; list-style: none; }
+  &__item { min-width: 0; padding: 20px; border: 1px solid $color-border; border-radius: 12px; background: rgba($bgr-page, 0.5); overflow-wrap: anywhere; }
+  &__item--unread { border-left: 4px solid $color-forest; background: rgba($color-forest, 0.055); }
+  &__meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: $color-text-muted; font-size: 12px; }
+  &__title { margin: 12px 0 8px; font-family: $font-title; font-size: 24px; font-weight: 500; }
+  &__item p { font-size: 14px; line-height: 1.65; }
+  &__image { display: block; width: min(100%, 420px); max-height: 240px; object-fit: cover; margin-top: 14px; border-radius: 8px; }
+  &__empty { padding: 28px 0; color: $color-text-muted; line-height: 1.6; }
+  [hidden] { display: none; }
+  button:disabled { opacity: 0.6; cursor: default; }
+}
+
+.pwa-has-nav .account-toast { bottom: calc(var(--pwa-nav-offset) + 14px); }
+
+@media (max-width: 479px) {
+  .account-inbox {
+    &__filters { align-items: stretch; flex-direction: column; gap: 10px; }
+    &__item { padding: 16px; }
+    &__title { font-size: 23px; }
+    &__actions { gap: 10px; }
+    &__actions .account-button { max-width: 100%; white-space: normal; }
+  }
+}

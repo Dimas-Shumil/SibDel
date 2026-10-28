@@ -1,0 +1,251 @@
+{
+  "stage": "11C",
+  "baseline": "bc8dec0 / Stage 11B",
+  "files": [
+    {
+      "path": "STAGE11C-README.md",
+      "before": null,
+      "after": "bf86b1c07576b88fc15a1492c4af1532b3c5fddf74f6bd7c4b6e1aefbb5547b3"
+    },
+    {
+      "path": "STAGE11C-TEST-RESULTS.txt",
+      "before": null,
+      "after": "ea310efc0c780b508bece71fc535864bcc18cbf2e8cfcf5711e86b242d2cb3ef"
+    },
+    {
+      "path": "app.js",
+      "before": "462eb71af441c2d35d1b7fa5d05afc680b8e20c782fe204a851be93ef1fa0a92",
+      "after": "979e3c688538339988ace95178a9c0c45929d05d9d847be0acb900f4ee29f408"
+    },
+    {
+      "path": "components/account-navigation.html",
+      "before": "0c2cb04c000a573c267b2e729893c940656e0a1a712040c4ec7ef2c1763f1bc1",
+      "after": "20df65841713694d44d19541e9c630e8a96f0c521c26999fe2c2640474c7e5d2"
+    },
+    {
+      "path": "package.json",
+      "before": "504c64e6e1ffded8dcb99301b75e783dac95e1777f1da21b3e49acb80dfb057e",
+      "after": "c1f5d189ba789fc81c15cae2e33da69f1447352324411590972673b0ff3e3dd1"
+    },
+    {
+      "path": "public/about.html",
+      "before": "4bc32f030c9dec3f2c9d40e0a5ec3726126c1a01dba086c961a40d1f4e39bf59",
+      "after": "7abcdeff8b2d8eb9e661e04d2ff2699879e78c03b5ece06954c917d29258b7d7"
+    },
+    {
+      "path": "public/account/index.html",
+      "before": "7fda7bc807ed0f40f2c11ebebc7e35ce4b61570abfb6259d6c6cd14112faf5da",
+      "after": "4bf6b8dc9474348b55b8874b4970b4e24282da7f5245681b8a7a13a34796a700"
+    },
+    {
+      "path": "public/business.html",
+      "before": "dae34e1799c7e4df2aade09fe19aac2d057e90b164620d85dfff22853b76ff19",
+      "after": "25cb02bd33913f1e151ffc91a0862841498d7402bcddb168d82a8bf314c58b21"
+    },
+    {
+      "path": "public/cart.html",
+      "before": "a3606a5f240e00a295ccdf28cc97b050c0deec688068ee9ae4ed194942bd3eff",
+      "after": "17cf78ccd63191d5b84ec88d86b7d967956f123a5649c527a848b59f2d3f6ea1"
+    },
+    {
+      "path": "public/catalog.html",
+      "before": "546d1d7a0d1e0d5ec524c3267e1f02f95d1dc71817c0aff4d07578bb5b3739ff",
+      "after": "32a30169cf5b650723915ed58543b510b83612b65dfab4f094b809de4db43b01"
+    },
+    {
+      "path": "public/checkout.html",
+      "before": "c078994b327237041cfeaeeb176e6bcf5992516180247207a770742f5bcccbae",
+      "after": "e2da0618167a75c2f792a728e1b080dda1d945ed3c1b8b680c7db59585245ba3"
+    },
+    {
+      "path": "public/contacts.html",
+      "before": "7af2b380ce9cf16786b1816b67870d653982177ae5f1f22fd7e77abcb8f7bfb8",
+      "after": "52fe3e09d05cf0c75e4975a7dec740a370e9e870870970d22348d6e545503d42"
+    },
+    {
+      "path": "public/delivery-terms.html",
+      "before": "fe54ba8fec258b5abcb6eb5246d3f0335bef38124f74f96a3b64d3c6b1c27162",
+      "after": "1d89d42986bd3e76e3f92838a15c07b85497631ee5f1eb2067be5c707c4fbc2b"
+    },
+    {
+      "path": "public/delivery.html",
+      "before": "da9b380258de0accaa646d2312a1d1fd36a67673a1abd5b2ae00dd528a5f13bc",
+      "after": "8a40b47e451bb3ae74715c154642008ed7fadd40ebc1cb87512cc635c37488e4"
+    },
+    {
+      "path": "public/faq.html",
+      "before": "67ed2f6469a1ca006b809f983f0b412fa4ee1d2e3b88540217c3ec5754e71071",
+      "after": "1d7b94f936bb77d48837b51032d474e82ee49627b2ba3414f82c73667591ce54"
+    },
+    {
+      "path": "public/favorites.html",
+      "before": "ebff83feddfe5ce6bdfd1a6ce0c696509f0bb7d4e39cff4e32a83bc944babb81",
+      "after": "b6fadb1716c93a477d4f5f8fd3c7721d9359eb29497775c9cf45c86493950567"
+    },
+    {
+      "path": "public/forgot-password.html",
+      "before": "58aad7b6db15d3436bd8d1e849781d71eadb43fc1bb48937a6c69aa09bc25425",
+      "after": "c10576b41d6352d71cd2f4f95732c1585941097de0ae978db2e29ddaef071b54"
+    },
+    {
+      "path": "public/how-to-order.html",
+      "before": "336b829756ce950d922ac7e6c37ab3c30d7a34c92fa4216b79f0497123a5021b",
+      "after": "974bebe75b7537ff8756b6f017f2a52e313f7f5f31fd365c38e4438eb1db59a0"
+    },
+    {
+      "path": "public/index.html",
+      "before": "1e08606fab8c8df7b3d33c6b6bf673bd302c382aef09d987750498993f038275",
+      "after": "cebab3fea543a3fe09d327e7441790a01f30cf29da39fb2b6f1f17285d42a05e"
+    },
+    {
+      "path": "public/login.html",
+      "before": "2bbbbcd13873f9922accb43ec791db5108d2f617e8542c8d7df8e9362b203340",
+      "after": "9f1af9cd5d1092d47c863cbab87ce6623d23542ab2cbb4ea37bd46960ef9668e"
+    },
+    {
+      "path": "public/offer.html",
+      "before": "5d591853202b6be5f865e52524d1917d8e5075d6c2aee87e55ff93d838a6bbd1",
+      "after": "ed20417a09cb2a43eb75047eab40b394b4e079b724a38ee954cdf33dcdef9bd2"
+    },
+    {
+      "path": "public/personal-data-consent.html",
+      "before": "16565a4c4d5540f230d07894d5df605d6f318590eb26d2f0ee412bb4c12cf80a",
+      "after": "19e9c11445aa8f160cc8f2df968b458a0e0a04979ddf4388b72983b3a34be132"
+    },
+    {
+      "path": "public/privacy-policy.html",
+      "before": "ccfa6271339642073dc9da9761c71d6aaa265dae9ddadcde4022dcdce4130cb4",
+      "after": "2905e801d98b5fe588c83a69d4a018017538dc443fa6e571b25e8162a3b7195d"
+    },
+    {
+      "path": "public/product.html",
+      "before": "7662f5602cee872c2be43d4ec36e919d9c3be25b0a90156402a0d2846363ded5",
+      "after": "df5c35bc521468b0c4809333a0bb27ed13adf3370ecdd1fc874c9a2550ef5dfe"
+    },
+    {
+      "path": "public/production.html",
+      "before": "4b3c5267a5586e32867559232b54eab7702dfeef26f4d3628d1de6f27eb0f840",
+      "after": "9d044d39078d3e80f9b935fe870496598fa028dab2d1ecbd81b0bfc957f68ebd"
+    },
+    {
+      "path": "public/promotions.html",
+      "before": "2e337d3c997caa590196d64649c2e77cb6b7e5dc0ddee20c0b7127f7074bb778",
+      "after": "016dba34d1569ecf3d833661437846250dd36df6955ead1f7135ba3c7d51c028"
+    },
+    {
+      "path": "public/register.html",
+      "before": "ed7942c82ff224ce50fdee34880a6a2cfe764b11754ad941d58f203f85808c19",
+      "after": "b9fb301c41ab13caba6dd665039ae0b5b15d473d02e5154e2db8d288b1687724"
+    },
+    {
+      "path": "public/reset-password.html",
+      "before": "a5940be84ad6e7192eb665c834ecdd19cc71c621d5d20b3f808119a2e5153b69",
+      "after": "8a8c22f806369bcbe6324a1c1483adfb4c37c6a196f9c3af6a2ad9ff4e1f0b96"
+    },
+    {
+      "path": "public/reviews.html",
+      "before": "a797b561560c543dadc76236f696ece11b7a91d2dabf5d5e0830f31d16f4da67",
+      "after": "afbe5d2995e86a32f221ee5bb81e1a5326339a2f1c90e41049e08a4d4ba0f0ed"
+    },
+    {
+      "path": "public/subscription.html",
+      "before": "3ff6471478007d8452dda4c71c9f4f1538ee341ddfd15d9661149670182ec5cf",
+      "after": "5ee01e897f20122d9eefba03875e0bdb495cb0bf519b57eeab4dcd42b6d5312f"
+    },
+    {
+      "path": "public/sw.js",
+      "before": "b9d72c2fca9953e091c615473e127a96053b389b96e5f69412ca71e2c63ac596",
+      "after": "95e2b27a36a284a4e29ebc223f72dfa187aa6fc8e59710d607e7b7af58293900"
+    },
+    {
+      "path": "routes/account-notification.routes.js",
+      "before": null,
+      "after": "b8dfdfbd9ad17514daf6095dae3914a9cba3c3dabc27435692cd9684bf84fa77"
+    },
+    {
+      "path": "scripts/smoke-inbox.mjs",
+      "before": null,
+      "after": "18e49131da0aaaaa2760098d9e30d9e8e8bcfe3bc96353aa50375034b4d7c053"
+    },
+    {
+      "path": "scripts/stage11c-patch.mjs",
+      "before": null,
+      "after": "9b6fddcbbac7309b0885f61fae6d52db7445f9272ec01508229f9419c4c69a6d"
+    },
+    {
+      "path": "services/account-notification.service.js",
+      "before": null,
+      "after": "bab85ba6276c80f2436c1cf9eafa0556afaf8d07ca0163bd0dcebfff010c7981"
+    },
+    {
+      "path": "site/css/account.css",
+      "before": "0e9c73dcfd722c1da1ce77cb388797b71ea73d66d0cabced111b8b792b2f4887",
+      "after": "ec2cf427387fa666b275df52720beb8252d53ad44564298910dad4c046662c4c"
+    },
+    {
+      "path": "site/css/account.min.css",
+      "before": "a7f50fa8bcb7fe06b69f51303dc99eec90bb0416418251c8b17e1e7714f994f6",
+      "after": "e0a0b4ee99def1236cf62ee66ed7f7b0b127cd5df5ca534cdfa4058954a05974"
+    },
+    {
+      "path": "site/css/cart.css",
+      "before": "e92a8657c87813fac02f6207c88cc382ce9f3ad25b3d484b661e6fe10ecd2ac1",
+      "after": "8b7cc0fa021324b8941716dedb90afe6c80402b1213d40ad20f541160570be3d"
+    },
+    {
+      "path": "site/css/cart.min.css",
+      "before": "147251f90f7f8205fd15433fb55e562b5b0eec6725f9eaff8419035d670d34f8",
+      "after": "bd38af39cf3f41e5f8260e367a8cea04694849c8729efc83353976d1b679dda8"
+    },
+    {
+      "path": "site/css/pwa.css",
+      "before": "e09369c720893fa1492428172509ed26d024c174b893cd167b238aaa277e68b3",
+      "after": "2a92d0307c6904048328bb252aa82a8dea2df67bb8257bdea0160df00c038899"
+    },
+    {
+      "path": "site/css/pwa.min.css",
+      "before": "7e2c7a2d6ac551b773840856b32c3f070d3f715cc0b7f21f565cb49588d0dc0f",
+      "after": "68f62148f65067d50ee03da0a0c908b93b7ae56ba05ec849928d5780f894de3b"
+    },
+    {
+      "path": "site/js/account-notifications.js",
+      "before": null,
+      "after": "9325dd1cddc105e240aab999a39a0f2030d3ef0466636fdd03e40c0589e050e5"
+    },
+    {
+      "path": "site/js/account.js",
+      "before": "194f03aac051ed56152cbc35801156decf96bc8572bf9b2e26c3e842b3996106",
+      "after": "45a2d8becd461bb5af022704fbbe7441abe5ac11ef662a1be54e59484489825d"
+    },
+    {
+      "path": "site/js/pwa-navigation.js",
+      "before": null,
+      "after": "4a76b4968f18f07b7ef9bda38731aaf15f3726b3cff74f17dd3a4f6bfdd7b681"
+    },
+    {
+      "path": "site/js/pwa.js",
+      "before": "78760e31e3533c251adb4c3b85aeb896a163dceebf3193ecf21c374935769f5e",
+      "after": "159d9c81230eabcd2d48da91e4dd685ca5b2161766ab417fe5f7e3ceeb0b3265"
+    },
+    {
+      "path": "site/scss/account.scss",
+      "before": "80921a7e2dcb52039ff2cb55bf76f98f4810cbb0d77080bfa0404ebccda50de7",
+      "after": "42f9091d1b3df042bb0b2245e7d4549977f47c28853f1f6a9347ececcc84cdbe"
+    },
+    {
+      "path": "site/scss/cart.scss",
+      "before": "a30af466edb73a03e7be4c3c99644b70568f3ab4c51e54f8d1d916494deafc52",
+      "after": "e619a3b9c72717307fd77741602a7e073ea39189b606d598df4e84e94a50d861"
+    },
+    {
+      "path": "site/scss/pwa.scss",
+      "before": "95061e70aa5ff62f1b800f27ef68b3cbddb5c51bbd88353d41709a33f263689b",
+      "after": "fdfb0fdb675c779b1d5a7d4d3af8aea7eee888b4be421101505407ddf6127c64"
+    },
+    {
+      "path": "tests/account-notifications.test.mjs",
+      "before": null,
+      "after": "e7d7912395e4714b18e7d70f1855937f69beeed607b6efbbb938fa59a1c10270"
+    }
+  ]
+}

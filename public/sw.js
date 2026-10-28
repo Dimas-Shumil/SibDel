@@ -1,5 +1,5 @@
 /* Bump VERSION whenever the offline document or its resources change. */
-const VERSION = '11b-1';
+const VERSION = '11c-1';
 const PREFIX = 'sibdel-pwa-';
 const CACHE = `${PREFIX}${VERSION}`;
 // Exhaustive allowlist. No runtime cache, application JS, prices or user data.

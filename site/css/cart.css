@@ -3240,3 +3240,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     transition-delay: 0s;
   }
 }
+@media (max-width: 767px) {
+  .pwa-has-nav .cart-mobile-bar:not([hidden]) {
+    bottom: calc(var(--pwa-nav-offset) + 8px);
+  }
+  .pwa-has-nav .commerce-toast {
+    bottom: calc(var(--pwa-nav-offset) + 12px);
+  }
+}

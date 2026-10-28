@@ -2,7 +2,7 @@
 <html lang="ru">
  <head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
   <meta content="Личный кабинет покупателя Сибирских Деликатесов: заказы, избранное, адреса, подписка и настройки." name="description"/>
   <link href="/site/css/account.min.css" rel="stylesheet"/>
   <title>
@@ -619,6 +619,38 @@
         </span>
        </section>
       </div>
+      <div class="account-view" data-account-view="notifications" hidden aria-labelledby="notifications-title">
+       <section class="account-panel account-inbox" data-account-inbox>
+        <div class="account-panel__head">
+         <div>
+          <span class="account-panel__eyebrow">Всегда под рукой</span>
+          <h1 class="account-panel__title" id="notifications-title">Уведомления</h1>
+         </div>
+         <a class="account-text-link" href="/account/settings">Настроить PUSH и категории</a>
+        </div>
+        <p class="account-inbox__intro">Статусы заказов, изменения подписки и предложения сохраняются здесь, даже если PUSH не пришёл. Для загрузки нужен интернет.</p>
+        <form class="account-inbox__filters" data-inbox-filters>
+         <label>Категория
+          <select class="account-input" name="category">
+           <option value="">Все категории</option>
+           <option value="ORDER">Заказы</option>
+           <option value="SUBSCRIPTION">Подписка</option>
+           <option value="MARKETING">Предложения</option>
+          </select>
+         </label>
+         <label class="account-inbox__check"><input type="checkbox" name="unread"> Только непрочитанные</label>
+         <button class="account-button account-button--secondary" type="submit">Показать</button>
+        </form>
+        <div class="account-inbox__actions">
+         <button class="account-button account-button--soft" type="button" data-inbox-refresh>Обновить</button>
+         <button class="account-button account-button--soft" type="button" data-inbox-read-all disabled>Отметить всё прочитанным</button>
+        </div>
+        <p class="account-form-status" data-inbox-status role="status" aria-live="polite">Загружаем уведомления…</p>
+        <p class="account-inbox__empty" data-inbox-empty hidden>Здесь пока нет уведомлений. Новые сообщения появятся после событий в магазине.</p>
+        <ul class="account-inbox__list" data-inbox-list aria-label="История уведомлений"></ul>
+        <button class="account-button account-button--secondary" type="button" data-inbox-more hidden>Показать ещё</button>
+       </section>
+      </div>
       <div aria-labelledby="settings-title" class="account-view" data-account-view="settings" hidden="">
        <header class="account-section-head">
         <div>
@@ -740,7 +772,7 @@
           </button>
          </form>
         </section>
-        <section class="account-panel push-settings" data-push-settings aria-labelledby="push-settings-title">
+        <section class="account-panel push-settings" data-push-settings id="push-settings" aria-labelledby="push-settings-title">
          <h2 class="account-panel__title" id="push-settings-title">PUSH-уведомления</h2>
          <p data-push-status role="status" aria-live="polite">Загружаем настройки…</p>
          <div data-push-controls hidden>
@@ -989,6 +1021,7 @@
   <script defer="" src="/site/js/main.js">
   </script>
   <script type="module" src="/site/js/push-settings.js"></script>
+  <script type="module" src="/site/js/account-notifications.js"></script>
   <script defer="" src="/site/js/account.js">
   </script>
  </body>

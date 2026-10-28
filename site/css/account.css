@@ -4009,3 +4009,126 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .push-settings [hidden] {
   display: none;
 }
+
+.account-inbox__intro {
+  margin: 14px 0 22px;
+  max-width: 680px;
+  color: #786047;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.account-inbox__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.account-inbox__filters > label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+}
+.account-inbox__filters select {
+  min-height: 44px;
+  width: 100%;
+}
+.account-inbox__filters .account-inbox__check {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 8px;
+}
+.account-inbox__check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #4f5b24;
+}
+.account-inbox__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+.account-inbox__list {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+  padding: 0;
+  list-style: none;
+}
+.account-inbox__item {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid rgba(100, 70, 40, 0.28);
+  border-radius: 12px;
+  background: rgba(245, 234, 212, 0.5);
+  overflow-wrap: anywhere;
+}
+.account-inbox__item--unread {
+  border-left: 4px solid #4f5b24;
+  background: rgba(79, 91, 36, 0.055);
+}
+.account-inbox__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: #786047;
+  font-size: 12px;
+}
+.account-inbox__title {
+  margin: 12px 0 8px;
+  font-family: "Bodoni Moda", Georgia, serif;
+  font-size: 24px;
+  font-weight: 500;
+}
+.account-inbox__item p {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.account-inbox__image {
+  display: block;
+  width: min(100%, 420px);
+  max-height: 240px;
+  object-fit: cover;
+  margin-top: 14px;
+  border-radius: 8px;
+}
+.account-inbox__empty {
+  padding: 28px 0;
+  color: #786047;
+  line-height: 1.6;
+}
+.account-inbox [hidden] {
+  display: none;
+}
+.account-inbox button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.pwa-has-nav .account-toast {
+  bottom: calc(var(--pwa-nav-offset) + 14px);
+}
+
+@media (max-width: 479px) {
+  .account-inbox__filters {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .account-inbox__item {
+    padding: 16px;
+  }
+  .account-inbox__title {
+    font-size: 23px;
+  }
+  .account-inbox__actions {
+    gap: 10px;
+  }
+  .account-inbox__actions .account-button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}

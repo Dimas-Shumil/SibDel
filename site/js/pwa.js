@@ -1,5 +1,9 @@
+import { mountPwaNavigation } from './pwa-navigation.js';
 import { INSTALL_DELAY_MS, isStandalone, canShowIosHelp, nextVisit,
   excludedPath, installEligible } from './pwa-policy.js';
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountPwaNavigation, { once: true });
+else mountPwaNavigation();
 
 const excluded = excludedPath(location.pathname);
 if (!excluded && window.isSecureContext && 'serviceWorker' in navigator) {

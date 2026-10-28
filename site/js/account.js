@@ -26,6 +26,11 @@ const ACCOUNT_ROUTES = {
     title: 'Адреса доставки — Сибирские Деликатесы',
     mobileTitle: 'Адреса',
   },
+  '/account/notifications': {
+    view: 'notifications',
+    title: 'Уведомления — Сибирские Деликатесы',
+    mobileTitle: 'Уведомления',
+  },
   '/account/settings': {
     view: 'settings',
     title: 'Настройки — Сибирские Деликатесы',
@@ -305,6 +310,7 @@ function updateAccountChrome(type) {
   document.title = route.title;
   setElementText('[data-account-mobile-title]', route.mobileTitle, 'Главная');
   initAccountNavigation(type);
+  document.dispatchEvent(new CustomEvent('sibdel:account-view', { detail: { view: type } }));
 }
 
 function setInitialAccountView(type) {
@@ -1485,6 +1491,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     accountStore.user = user;
     renderAccountUser(user);
+    document.dispatchEvent(new CustomEvent('sibdel:account-ready'));
     initAccountRouter();
     initAccountDrawer();
     initFavoritesActions();

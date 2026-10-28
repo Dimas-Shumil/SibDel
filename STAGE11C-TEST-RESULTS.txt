@@ -1,0 +1,257 @@
+SibDel Stage 11C — results, 2026-10-28
+Environment: Linux, Node v24.22.1, Prisma 7.10.0, headless Chromium 134.
+
+PASS npm run test:unit: 152 tests, 152 pass, 0 fail/skip/cancel.
+PASS inbox browser: 6 groups (real Express/auth/cookies/CSRF/Prisma/PostgreSQL WASM).
+PASS existing PWA browser suite: 9 scenarios.
+PASS existing PUSH browser suite: 4 groups.
+PASS generated expanded/minified CSS for account/cart/PWA.
+PASS responsive inbox at 320, 390, 767 and 1440px; screenshots inspected internally.
+
+New database checks: history with PUSH disabled/no device; isolated DTO; cursor
+paging during a new arrival; idempotent reads; foreign IDs rejected; mark-all
+snapshot boundary; no manufactured PUSH clicks; category/unread filters;
+unsafe stored links/images neutralized; existing route mapping.
+Browser checks also cover strict validation, guest/admin cookies, user isolation,
+textContent XSS handling, filter empty state, mobile standalone navigation,
+focus/keyboard behavior, persisted existing cart, its count and checkout bar,
+checkout exclusion, and existing PUSH category settings without deleting history.
+
+No configured PostgreSQL database, production server, SMTP or external push
+provider was contacted by these tests. All database fixtures are disposable
+PGlite instances behind an ephemeral loopback port; all SQL migrations applied.
+Standalone mode is simulated. Physical iPhone/Android, external PUSH delivery,
+Ubuntu Nginx/PM2 deployment and production acceptance still require manual checks.
+The separate Windows test of Stage 11B was user-reported and is not counted here.
+
+UNIT OUTPUT
+===========
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> siberian-delicacies@1.0.0 test:unit
+> node --experimental-vm-modules --test tests/*.test.mjs
+
+▶ customer inbox: actual PostgreSQL history, ownership, pagination and read isolation
+  ✔ real order event stays in the inbox with no device, disabled PUSH and rejected sends (76.125358ms)
+  ✔ descending cursor pages do not repeat rows after a concurrent new message (32.463349ms)
+  ✔ single read is idempotent, cannot touch another customer and never counts a PUSH click (25.660352ms)
+  ✔ mark-all respects the displayed snapshot and leaves newer/foreign/test messages unread (22.72397ms)
+  ✔ category/unread filters and empty states use only this customer; unsafe stored links are neutralized (19.651751ms)
+✔ customer inbox: actual PostgreSQL history, ownership, pagination and read isolation (8396.362413ms)
+✔ installed navigation maps existing routes and aliases without marking unrelated pages active (0.323186ms)
+✔ sessions list excludes other users and expired sessions; current is marked without exposing tokens or UA (9.968007ms)
+(node:26) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ cannot revoke own current session or another user session (6.96676ms)
+✔ revoke all other sessions keeps current and different users (9.188881ms)
+✔ staff list excludes OWNER/CUSTOMER, secrets and includes last login (10.941209ms)
+(node:27) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ create STAFF only, with password hash and audit; duplicate email never escalates CUSTOMER (8.288799ms)
+✔ edit, block and reset cannot modify OWNER or CUSTOMER (4.928732ms)
+✔ disable staff revokes only that employee sessions and reset tokens (2.026877ms)
+✔ password reset revokes sessions and never records or returns a password (3.262871ms)
+✔ role middleware blocks STAFF and CUSTOMER from OWNER-only endpoints (11.650738ms)
+(node:28) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real checkout router rejects impossible/past dates, accepts valid dates and rejects forged price (211.942347ms)
+(node:34) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ same guest can replay, private hash omitted: initial lookup (20.808147ms)
+✔ another guest cannot replay: initial lookup (4.693538ms)
+✔ guest cannot replay user order: initial lookup (7.898755ms)
+✔ another user cannot replay: initial lookup (9.167875ms)
+✔ same user can replay: initial lookup (5.397789ms)
+✔ legacy order fails closed: initial lookup (3.62436ms)
+✔ same guest can replay, private hash omitted: after P2002 race (3.841864ms)
+✔ another guest cannot replay: after P2002 race (2.374271ms)
+✔ guest cannot replay user order: after P2002 race (2.441732ms)
+✔ another user cannot replay: after P2002 race (2.734363ms)
+✔ same user can replay: after P2002 race (2.351416ms)
+✔ legacy order fails closed: after P2002 race (2.462484ms)
+✔ missing or inconsistent owner is rejected before any database lookup (7.968596ms)
+✔ calendar date validation rejects rollover and accepts leap day (1.442575ms)
+✔ business day switches at midnight Krasnoyarsk, independently of machine timezone (37.089679ms)
+✔ new order persists owner binding and retains reserve/clear transaction (6.342403ms)
+✔ service rejects impossible and past receive dates even without route validation (10.585672ms)
+(node:38) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ customer creation stores a hash, fresh random tokens and a 90-day expiry (15.765092ms)
+✔ customer remains signed in after weeks and renewal supports another 90 idle days (10.811514ms)
+✔ valid legacy sessions upgrade; expired legacy sessions never revive (8.444053ms)
+✔ OWNER uses the existing 30-day fixed policy and cannot authenticate in the public contour (7.025444ms)
+✔ STAFF uses the existing 30-day fixed policy and cannot authenticate in the public contour (14.175635ms)
+✔ customer token cannot be used in the administrative contour (12.528943ms)
+✔ logout and revoke-all are durable; inactive account is rejected (17.062238ms)
+✔ renewal cannot recreate a session deleted by logout/password reset (33.175407ms)
+✔ parallel renewals accept the winning expiry without extending an admin session (9.115535ms)
+✔ renewal throttles writes and rejects malformed/unknown tokens (20.88933ms)
+✔ payable merchandise after promotions determines courier tariff (1.155593ms)
+✔ free delivery is applied at threshold and above (0.203546ms)
+✔ no threshold means paid courier delivery (0.176697ms)
+✔ zero threshold supports permanently free zone (0.113742ms)
+✔ minimum order amount checked AFTER promotions (0.513184ms)
+✔ inactive and unconfigured zones fail closed (0.595007ms)
+✔ snapshot records old conditions after zone settings change (0.203677ms)
+✔ kopeck math avoids fraction drift and invalid amounts (0.153631ms)
+✔ normalize locality case and yo for comparable city names (1.071296ms)
+✔ healthy production response has no fingerprint and no cache (7.304705ms)
+✔ database failure is 503 without error details (0.395686ms)
+✔ hung probe is bounded, coalesced and recovers (17.270797ms)
+✔ test fingerprint remains available only in test mode (1.16745ms)
+(node:103) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ notifications include order snapshot and correct separate links (15.860246ms)
+✔ notification failAdmin is contained (6.648154ms)
+✔ notification failCustomer is contained (5.380904ms)
+✔ notification failRead is contained (15.618076ms)
+✔ tests skip SMTP entirely, guests get no account link, missing email skips customer (11.596095ms)
+✔ subscription generation uses promoted price/delivery; replay has no effects or notifications (19.6964ms)
+✔ PAUSED subscription creates no order or reservation (3.860382ms)
+✔ CANCELLED subscription creates no order or reservation (3.478926ms)
+✔ future generation is rejected without consuming occurrence (10.381174ms)
+✔ subscription retries P2034 before notification (37.870146ms)
+✔ subscription retries P2010 before notification (37.934362ms)
+✔ database outage does not record failed delivery or advance due date (129.867717ms)
+✔ batch continues after business failure and reports it (14.935246ms)
+✔ exhausted raw SQL conflicts leave occurrence due and never notify (84.763237ms)
+✔ operator detail reads only this order audit and exposes subscription without secrets (13.99966ms)
+✔ batch creates the next subscription order after a failed entry (6.902509ms)
+▶ Web Push migrations, transactional events and Prisma outbox integration
+  ✔ additive migration preserves old orders/users and does not send historic events (28.980708ms)
+  ✔ new order is durable, repeated status is idempotent, rollback leaves no event, guests get none (50.125478ms)
+  ✔ subscription changes are transactionally recorded without duplicating order-created events (35.438181ms)
+  ✔ device requires valid session, cannot be stolen by another customer, never exposes keys (37.36332ms)
+  ✔ explicit consent stores evidence, repeated grant is idempotent, service prefs cannot imply marketing (14.857279ms)
+  ✔ worker expands once, claims once across parallel sends and persists accepted status (83.679587ms)
+  ✔ marketing excludes nonconsenting customers; draft/send/cancel repeated calls cannot duplicate (83.811846ms)
+  ✔ future campaigns wait; per-customer 24h cap applies; click attribution is isolated (61.202899ms)
+  ✔ revoked preference/session suppresses service push and logout preserves job history (41.973835ms)
+  ✔ owner test targets only current own session; unknown delivery and expired endpoint never retry (40.910623ms)
+  ✔ subscriber segment, sender-version change, disabled marketing and interrupted jobs are enforced (56.5759ms)
+  ✔ batch gives service jobs priority over earlier marketing jobs and skips stale events (256.312842ms)
+✔ Web Push migrations, transactional events and Prisma outbox integration (8832.508643ms)
+✔ push endpoints allow only known HTTPS push services, blocking SSRF, credentials, ports and suffix tricks (11.175872ms)
+✔ deep links and images reject external/auth/admin/open-redirect/script inputs (1.436876ms)
+✔ send eligibility rechecks recipient, session, activity, per-category settings and marketing consent (0.741718ms)
+✔ ambiguous delivery is UNKNOWN and never classified as safely retryable (0.273993ms)
+(node:122) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ all campaign/test endpoints are OWNER-only; preferences/devices bind identity from auth and validate inputs (233.064333ms)
+(node:141) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ transport creates encrypted VAPID request with bounded TTL/deadline, no redirects, and no response-body leakage (33.452894ms)
+{"level":40,"time":"2026-10-28T12:50:13.887Z","service":"siberian-delicacies","environment":"test","method":"GET","path":"/api/account/sessions","statusCode":401,"errorCode":"UNAUTHORIZED","msg":"Request rejected"}
+✔ real Express app boots and serves PWA with CSP before SEO/static; private endpoints stay protected (1108.915277ms)
+(node:162) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production customer/admin cookies retain HttpOnly/Secure/SameSite; customer expiry follows DB (18.364703ms)
+✔ public middleware reissues only validated customer cookie and propagates server errors (21.586712ms)
+✔ admin context resolves only admin cookie and does not refresh its lifetime (9.146091ms)
+✔ root worker/manifest/offline HTTP headers and private paths prevent caching (197.945001ms)
+✔ manifest links real correctly sized icons and a public same-origin start URL (26.991713ms)
+✔ all public templates include PWA metadata/modules once, admin templates do not (43.379874ms)
+✔ patch installer checks base hashes, backs up, verifies and rolls back without touching protected data (1525.708859ms)
+✔ promotion waits ten seconds, requires support and hides in installed/excluded states (0.959216ms)
+✔ Later, close or swipe persist for internal navigation; a new visit resets the decision (0.24587ms)
+✔ Safari iPhone/iPad help excludes embedded and unsupported browser menus (0.436558ms)
+✔ checkout/admin/auth routes and aliases never show a promotion (0.385882ms)
+✔ install caches only the offline allowlist, omits cookies and never forces activation (35.840039ms)
+✔ worker bypasses API, admin, uploads, POST, external requests and application JS (4.219983ms)
+✔ account, checkout, cart and catalog navigation never cache their network responses (37.797931ms)
+✔ offline fallback is generic; HTTP failures stay HTTP failures; no cache yields 503 (2.667983ms)
+✔ activation cleans only this application cache prefix and preserves unrelated origin caches (1.928288ms)
+✔ JSON-LD never allows CMS content to break out of script (1.217627ms)
+✔ Homepage declares only confirmed OnlineStore and WebSite facts (14.480169ms)
+✔ Product markup uses actual inventory, RUB price and approved rating (47.543471ms)
+✔ Unavailable product reports OutOfStock and no unverified rating (2.996813ms)
+✔ Active category has unique title, visible heading, canonical and sitemap (4.202323ms)
+✔ Faceted filters remain noindex; missing category is not an indexable 200 (9.127309ms)
+✔ FAQ is public crawlable page with unique text and internal links (5.096278ms)
+✔ Local development does not invent a public domain (3.991819ms)
+✔ Structured page API omits broken images and reviews (0.561117ms)
+✔ configured origin rejects credentials, paths, query, localhost and non-HTTPS (32.424262ms)
+✔ product HTTP HTML reflects real data, escapes CMS values, never serves demo (78.185497ms)
+✔ missing/malformed/duplicate product slug gives genuine 404 (90.83063ms)
+✔ database failure gives 503, noindex and no demonstration fallback (46.875009ms)
+✔ catalog page canonical preserves pagination; filters stay noindex and keep working (54.341499ms)
+✔ service routes get noindex including aliases, nested account shell and API case (94.514724ms)
+✔ robots permits crawling so noindex is readable and sitemap contains only public canonical URLs (11.963038ms)
+✔ unset/invalid public domain affects SEO endpoints only, never canonicalizes to Host (16.708781ms)
+✔ extension aliases permanently redirect without losing product identity (5.292411ms)
+✔ HTTP catalog defaults match browser; explicit availability and invalid bounds validated (1.305068ms)
+✔ all public pages serve nonempty HTML with one canonical and meaningful metadata (81.701862ms)
+✔ percent-encoded static paths cannot bypass server rendering or noindex (5.515223ms)
+✔ production and primary database are blocked (2.53931ms)
+✔ HTTP smoke cannot target production port or remote host (0.538323ms)
+✔ fingerprint ignores password rotation and normalizes loopback aliases (1.920857ms)
+✔ wrong server database prevents any direct database query (1.014164ms)
+✔ actual database name is checked before mutations (0.365545ms)
+✔ matching test server and actual database are accepted (0.452185ms)
+(node:281) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ effective price filter precedes count and pagination; ties use ID (16.107784ms)
+✔ discount filter includes Promotions and excludes equal/lower oldPrice (6.476048ms)
+✔ descending price and discount sort use effective prices and relative savings (17.439683ms)
+✔ promotion starts inclusively and ends exclusively; paused/future excluded (7.294199ms)
+✔ best targeted/global/category promotion; zero price is a real discount (2.824547ms)
+✔ quantity limits subtract reserve and remain on minimum/step grid (15.38098ms)
+✔ favorites and cart expose the same promoted prices and available limits (54.7544ms)
+✔ retry is bounded and never retries unknown commit result or business errors (62.055465ms)
+✔ stock receipt/adjustment retry commits exactly one movement and activity (141.797662ms)
+✔ order completion/cancellation retry commits once; same status replay does nothing (50.930122ms)
+✔ decimal subtraction does not hide a purchasable minimum (3.841875ms)
+✔ home hydration escapes API content, preserves Swiper classes and quantity data (4.025299ms)
+✔ cart quantity input preserves minimum precision independently of step precision (2.987139ms)
+✔ raw SQL serialization failure retries at most three times; unrelated raw errors never retry (60.079535ms)
+✔ Prisma 7.10 adapter originalCode controls retry without matching message or kind (61.612763ms)
+✔ actorless stock receipt retries with one movement and no administrator activity (33.269153ms)
+ℹ tests 152
+ℹ suites 0
+ℹ pass 152
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9475.012022
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice
+
+INBOX BROWSER
+=============
+PASS actual inbox UI + PostgreSQL: history, unread badge, paging, explicit read, XSS-safe rendering
+PASS actual auth/CSRF/strict validation: foreign customer, guest, OWNER/STAFF cannot access customer history
+PASS snapshot mark-all, new arrivals remain unread, click marks read without faking PUSH opens, filter empty state
+PASS installed-only mobile nav, keyboard focus, active links, existing persistent cart/count and checkout bar clearance
+PASS responsive 320/390/767/1440, ordinary browser has no duplicate bottom nav, PUSH settings retained without hiding history
+Inbox browser checks passed: 6 groups. No configured database, SMTP or push provider contacted.
+
+PWA BROWSER
+===========
+PASS 10-second delay; Later persists across internal page navigation; 390px layout
+PASS new separate visit shows promotion again; upward swipe dismisses
+PASS install calls deferred prompt only on click; accepted install suppresses later banners
+PASS Safari instructions, close control, 320px layout and reduced motion
+PASS installed PWA never displays installation banner
+PASS checkout/admin have no promotion or new worker registration
+PASS real SW controls navigation; private API never cached; offline fallback and reconnection work
+PASS update waits with unsaved checkout in another tab; activates and cleans old cache after all tabs close
+PASS 1920px panel stays centered at max width; keyboard focus and Escape work
+Browser checks passed: 9
+
+PUSH BROWSER
+============
+PASS real customer UI + auth + Prisma: no automatic permission request, device binding, explicit consent and revoke
+PASS actual push event, notification display and IndexedDB deduplication after dismissal
+PASS real OWNER UI: enrollment, draft preview, own test queued, cancel, responsive 390/1366px
+PASS real cookie/session/RBAC: STAFF page aliases and APIs blocked; customer cannot use OWNER API; CSRF rejected
+Browser push checks passed: 4 groups. No real push service or production server contacted.
+
+INSTALLER VALIDATION
+====================
+PASS final ZIP check/apply/verify/rollback on the exact 464-file Stage 11B baseline.
+PASS mismatch and subsequent-edit refusal before writing; protected .env,
+uploads, node_modules and .git sentinels preserved; all baseline hashes restored.
