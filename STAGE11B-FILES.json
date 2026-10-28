@@ -1,0 +1,366 @@
+{
+  "stage": "11B",
+  "baseline": "103dc89 / Stage 11A",
+  "files": [
+    {
+      "path": ".env.example",
+      "before": "8b19e940c26a84e26e1020bb9d59c52f8df6720ca553cfca84da6ebe6babfd0e",
+      "after": "77839fa8869770ec74f7642b5db43c1971802d631c321afd9015c4ae87c3e1d6"
+    },
+    {
+      "path": "STAGE11B-README.md",
+      "before": null,
+      "after": "ea87770d84791f2b97ce9e30f4bb7835abb1c1f072bbc25ec757391a9b2879a4"
+    },
+    {
+      "path": "STAGE11B-TEST-RESULTS.txt",
+      "before": null,
+      "after": "e0b2464df599cd7aa250412582fdec20feaa6de4bbee59db71e47635fd808266"
+    },
+    {
+      "path": "admin-pages/categories.html",
+      "before": "d017bd323c62241414ec4efa2e4aa07c28e09425b7d33b0aa4285e4fea9caeea",
+      "after": "f8f9f576054c070f439d921b8f7cc6feb18cc8d900b85e2d236cac5d57b77442"
+    },
+    {
+      "path": "admin-pages/customer.html",
+      "before": "d9a46fe895f4122db8d387ad08d10ebb1faadf6edd9af0934621078d3f66fd9b",
+      "after": "64fad47ee47f4ffbfbb5d8b5b35a2f640234adee1248b820fa5e455b4edf4c88"
+    },
+    {
+      "path": "admin-pages/customers.html",
+      "before": "a657cd6a0f752baaa2628693165b2aac3eee6774cfb7d6bcfc05078960169667",
+      "after": "15f4b3d58dd5942dc571cc07c4b740e60fed9ab9b372b49f71dd3b31def8d2f0"
+    },
+    {
+      "path": "admin-pages/dashboard.html",
+      "before": "4e7a57e8b5623a4830e8d5887e9cc4dcbfa130242af963a6276f6a3a573067ec",
+      "after": "fd9625717498b473ce8eebb3c46038dd7d97ed7fcab7b45e518f4fff0682b65e"
+    },
+    {
+      "path": "admin-pages/delivery.html",
+      "before": "1f2f6b2c399b6afbb03eb95469903f0f23eed177c2ae249f70450d69b1fbfe13",
+      "after": "03dd86eb4285c1e216741dc24530a6b1a887828d95596ef009b061a3525e4396"
+    },
+    {
+      "path": "admin-pages/employees.html",
+      "before": "48d546a8a64d66a55756fedd7eed23a849df58b10b30cd1d0487eb9f698495c6",
+      "after": "7c5117bdef5377f56ac05a6ad77d25f272ca5ff349b25c332a810a00d7ce5c87"
+    },
+    {
+      "path": "admin-pages/order.html",
+      "before": "d8b43c5b77ac28006e7f6c91c111692e7f940f867bafffe05e6db85151f84c24",
+      "after": "c78b1a20b1e2b35f70bb85cca847733d0bf2724a4c3894dd2eb5230699079946"
+    },
+    {
+      "path": "admin-pages/orders.html",
+      "before": "6b0631b57936b754656ec1a49bcd9752664cd4915a547da075cd2e592c93da6a",
+      "after": "44fbbdb51d5fd87e3be0a7789b888c55a8bdf2213866260c519ede716656f464"
+    },
+    {
+      "path": "admin-pages/product-edit.html",
+      "before": "32ec36afd41c31baa99f40db29568e357852a20851eaa8ba6f038599d65077a9",
+      "after": "b69c0ce171e219ee9b1676dc0635b503a20fcc14eb05993242775b3b8c29244e"
+    },
+    {
+      "path": "admin-pages/products.html",
+      "before": "b77bfe1771f21ec1a74ede31b1449c837254d1e450fde411eb787b5e277076e1",
+      "after": "d3fbbd6eeac936f2897063407233d9a52d3f8d9d00879742b2e125f76bb79275"
+    },
+    {
+      "path": "admin-pages/promotion-edit.html",
+      "before": "281c621a8e87c40c542762f46c308c8024a45c98221502d101b4455cea1afc49",
+      "after": "719f7c47082f3fd37d373febafe9f424202040b936080f3d741bb184af7b8642"
+    },
+    {
+      "path": "admin-pages/promotions.html",
+      "before": "fec0bc4dea563acfb3408665434e41ca3ad03265d0ec6fd529e9d884631efd2c",
+      "after": "b979d57b8bbe7a510996f336f01a28cefa945120e3570c4ff62ee8556476fdac"
+    },
+    {
+      "path": "admin-pages/push.html",
+      "before": null,
+      "after": "148f9d09eb1e338ac44b3b0a5d251f58978452af93d8093e7b9f005acc116669"
+    },
+    {
+      "path": "admin-pages/reviews.html",
+      "before": "62003fee67fee946d3bc8720ef51d4523156e60e3ef797518e09a9e93219e19d",
+      "after": "5a3c877cd414974e55ce089f4aa00fd78c060becda36fde40c4c2b7f698e89f5"
+    },
+    {
+      "path": "admin-pages/subscriptions.html",
+      "before": "cc469fbf6e16ae10f4aaceaeacae3a7e4e2a1dc5b6e4a44e573383963bde7be3",
+      "after": "d00067bd423c461eba1b4f53a51f0cb5086decec606e00cb4ecc0f680355a91b"
+    },
+    {
+      "path": "admin-pages/warehouse.html",
+      "before": "d05123f96fa7e1174e33c1b2f68adec0b9e8f507cd8b632c1e62aa55f6731dea",
+      "after": "520a96114b70eea793f2fc0bb71612f50f1763a2930b1182b1bcb666c1c7c880"
+    },
+    {
+      "path": "app.js",
+      "before": "3af32ad693cfd0129df06995e1f55fec511f94bb1e32dd85b9e01404cabfc077",
+      "after": "462eb71af441c2d35d1b7fa5d05afc680b8e20c782fe204a851be93ef1fa0a92"
+    },
+    {
+      "path": "config/env.js",
+      "before": "e82285e7dfd19025f863383a1f312a19b1361e5d88858c9fbca8b27368b00515",
+      "after": "8e490b86c052850f1a94bfa2d3c80354f7ff9f2657d36f873db66ce7c7b575a2"
+    },
+    {
+      "path": "config/push.js",
+      "before": null,
+      "after": "efa431b4460b8007231a9acb029981b5121690478610f1e689a73822db713cb8"
+    },
+    {
+      "path": "deploy/production.env.example",
+      "before": "83a0222a250df9b90abee4d9f7b87ce135572a3f7a978f6ee30f12affc5e5136",
+      "after": "58b2c21e1168042d8e5b5cecbc8f4bdb76259914952cdc3ba0e99eac42c802fe"
+    },
+    {
+      "path": "deploy/sibdel-push.service",
+      "before": null,
+      "after": "3752a2ad3dbe9213da28fb5464d6d5e695da2ea04a88498df57fbe182c4d7ebb"
+    },
+    {
+      "path": "deploy/sibdel-push.timer",
+      "before": null,
+      "after": "c457785fead8a54aa8344c5f9a4c96a9ecb111e550d5d177e22561cfeb2c2363"
+    },
+    {
+      "path": "generated/prisma/browser.ts",
+      "before": "cf7ace0cad29b6234ede097c70b716656149b9f0d7be285ef00ba2d314821bcc",
+      "after": "eb6e2915597bd72707173d3a931b649c6e48898a157bdfc2285380afa9840bca"
+    },
+    {
+      "path": "generated/prisma/client.ts",
+      "before": "2f737ccc35bf5035c79edc4cd552ae3961bf11b53d418be8c968776c301eaf0e",
+      "after": "be8e333af16dea48ba52e8511455d9b18713870ab26b55191cbc77fa0b1ac16f"
+    },
+    {
+      "path": "generated/prisma/internal/class.ts",
+      "before": "fcca4c8a7b8d13fc3c57b36c4e135055b176fca06a14b50ec686139d6f4e9a08",
+      "after": "43f976e5cab2e5b2af526b3e821ebf13a33078b705140b5b1031a0ec46ff5124"
+    },
+    {
+      "path": "generated/prisma/internal/prismaNamespace.ts",
+      "before": "996e88fe98b408cf4ed564fbfd153b0d71e772332ba67caa84b62e59818635df",
+      "after": "929892fe5655b740aa0b2e7ec27c05247dc8d88cc757640121516d331bd94416"
+    },
+    {
+      "path": "generated/prisma/internal/prismaNamespaceBrowser.ts",
+      "before": "7e89d7b7489c80fbe398026e73e71cf696fc9bf0a7a7435c2ee9b906fd43a5bd",
+      "after": "e2cd562db2ef62968fd7f1090f0e2d53a08f7deeb139a6006ef3b4206711a927"
+    },
+    {
+      "path": "generated/prisma/models.ts",
+      "before": "e51fc486618304c026a606459d75582a36caf39fdd1f2151b802a2b6153f47a6",
+      "after": "d71296ad891902c17bd1c57526dea34e13bf7a7bc1b5fa218e180848f19cd5c6"
+    },
+    {
+      "path": "generated/prisma/models/CustomerNotification.ts",
+      "before": null,
+      "after": "1c15a38bedce3ca4b4ef5d194005f0985e270ea92e12148c7416107eaf1eed39"
+    },
+    {
+      "path": "generated/prisma/models/PushCampaign.ts",
+      "before": null,
+      "after": "6357623e09b494be8041ccffb31457cbaf7d09af955f6e911acb2e49c30bd849"
+    },
+    {
+      "path": "generated/prisma/models/PushConsent.ts",
+      "before": null,
+      "after": "b3139d551455d04e3db530ff5ba1d2cd40e4a73dcaf50b54df242c8a04102426"
+    },
+    {
+      "path": "generated/prisma/models/PushDevice.ts",
+      "before": null,
+      "after": "2384c5c8f60af2686e7fdb3b53148180d5cabd9031ce2e7d8af23ccfa6882dd3"
+    },
+    {
+      "path": "generated/prisma/models/PushJob.ts",
+      "before": null,
+      "after": "ce2a524e7309b25744345cb657cb8891203bfa8ce625be466df1d3146f5aca3c"
+    },
+    {
+      "path": "generated/prisma/models/PushPreference.ts",
+      "before": null,
+      "after": "e3f939346d007b07cb8a351dea6df460cba33379eaff8d21b6c946efc7468670"
+    },
+    {
+      "path": "generated/prisma/models/PushSubscriptionState.ts",
+      "before": null,
+      "after": "d4a7752b3ef75d55b92d73bd87727811a1ad3b5509d6956b71a25f47b0a88f70"
+    },
+    {
+      "path": "generated/prisma/models/User.ts",
+      "before": "14b2fb25bcb3278efadf363a4b81428c737058006c5a0aed130174fa84a63bc5",
+      "after": "a1f016276dcb4879a663392d6b6c0175aea0888fc5132a8720f2c569839be4a9"
+    },
+    {
+      "path": "generated/prisma/models/UserSession.ts",
+      "before": "757c213e630877836b0e857dcc56ec838d58f02c2836d743492d7744676a3992",
+      "after": "72f423406cd6f4a6db1a9419834e186605c77497c3798421778d6ce5e3943f5e"
+    },
+    {
+      "path": "generated/prisma/models/UserSubscription.ts",
+      "before": "a15f72477f4daac5bc5141fbaa83809a41706821fa218586ded4137397a5bb54",
+      "after": "de33ec46cd966ac0e4c4bd7cd3e172e5a3f28cf80462f941699cf2fba95d00a9"
+    },
+    {
+      "path": "package-lock.json",
+      "before": "c92cc09e6dc606097da25bbfd6833439609b01791ceb56bafdf39a57688e9e3a",
+      "after": "a8fe8cb91ed40fc931e3fb8c60150ebbe505b20610de2d3706f3ab5f44b47834"
+    },
+    {
+      "path": "package.json",
+      "before": "94ab6381c7c66a4a96264667d953720b71560adb0d8c72d1d190f9babd814c2a",
+      "after": "504c64e6e1ffded8dcb99301b75e783dac95e1777f1da21b3e49acb80dfb057e"
+    },
+    {
+      "path": "prisma/migrations/20261028110000_web_push/migration.sql",
+      "before": null,
+      "after": "5ebe07f0bdf868764a63e4ab79ec5b77efdab257e7505a8350afd430272f270b"
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "before": "0a73438df3c5fee1a047b7873df7e1a029aae385b0832a4ec9f635f9465eff80",
+      "after": "44aa7de77aa8088753c2cc02b3e7fe3b57836f412daae122afd0f572fc780d9a"
+    },
+    {
+      "path": "public/account/index.html",
+      "before": "e2916b3cc76f9667d05fabe47077128ab35acd2c29acf7b8e1fca4d091345b3d",
+      "after": "7fda7bc807ed0f40f2c11ebebc7e35ce4b61570abfb6259d6c6cd14112faf5da"
+    },
+    {
+      "path": "public/privacy-policy.html",
+      "before": "f2c3db54a74190afa84c047fc3e08eb3e5946bbdd9e247ad97b9f173462b9dc4",
+      "after": "ccfa6271339642073dc9da9761c71d6aaa265dae9ddadcde4022dcdce4130cb4"
+    },
+    {
+      "path": "public/sw.js",
+      "before": "904a8a2d8229bd135c67cb8c261872e1f2e43be75b96d1c8d00268d30282085f",
+      "after": "b9d72c2fca9953e091c615473e127a96053b389b96e5f69412ca71e2c63ac596"
+    },
+    {
+      "path": "routes/push.routes.js",
+      "before": null,
+      "after": "2051102cbd09171ab1389fa967250f7ce03bb3621d45c37067189182a9b58eb7"
+    },
+    {
+      "path": "scripts/process-push.mjs",
+      "before": null,
+      "after": "ba96f52b948f93e685fb366b8120276ce90b9181d2169b7fff80310a2ef5ff6f"
+    },
+    {
+      "path": "scripts/smoke-push.mjs",
+      "before": null,
+      "after": "f5f1abda68dab2738f64c209380a55cf63071697adef246f7170d989dabf9b7d"
+    },
+    {
+      "path": "scripts/smoke-pwa.mjs",
+      "before": "0b2b2a1f74072fd5988df181dde97e534a4cca0a564b10da2fe8ef44b9189f8f",
+      "after": "ba10a13d6c5efaefa35060ca97c4ee32ca87053bf9b785b8090b81744d3aceee"
+    },
+    {
+      "path": "scripts/stage11b-patch.mjs",
+      "before": null,
+      "after": "ea60ce4ee8aa389df80525e03e3fd5f5d8e37eb8d030cf95257814aae7324e65"
+    },
+    {
+      "path": "services/push-transport.js",
+      "before": null,
+      "after": "4a5ed6ed653785a2a23041153e08f6fe345b8b49d0e1eeb45fadb46af396c850"
+    },
+    {
+      "path": "services/push-worker.service.js",
+      "before": null,
+      "after": "f6f32ed8d010f9f830983b02b5b303e7d67cc85dd6757a9b8e86113224a7a091"
+    },
+    {
+      "path": "services/push.service.js",
+      "before": null,
+      "after": "a721d24cf06b032592b33da1882e38681984ad3a6eb20aeb27985f19bdeed5ed"
+    },
+    {
+      "path": "site/css/account.css",
+      "before": "382597fc3dff2022ed15a8f8586d49be97823b0ee4fbc1bc76ce25ba889a4fbe",
+      "after": "0e9c73dcfd722c1da1ce77cb388797b71ea73d66d0cabced111b8b792b2f4887"
+    },
+    {
+      "path": "site/css/account.min.css",
+      "before": "2eaf3a953414e5f0e2f2a958ca412ef3047c158caf24062dd6f6db5c17138a8e",
+      "after": "a7f50fa8bcb7fe06b69f51303dc99eec90bb0416418251c8b17e1e7714f994f6"
+    },
+    {
+      "path": "site/css/admin.css",
+      "before": "19fdf1a8c352d51f55ab4e6fc70f244db7987a648e48dc78086201a5bce784a3",
+      "after": "20ef57d0ee4ae976066c907e70e7792806385748d8426ebf8901507f10eeb158"
+    },
+    {
+      "path": "site/css/admin.min.css",
+      "before": "e9b6f21f92eba9d0e18f47abdaf42babb871441ab30b6dd6eddbb7818f06be57",
+      "after": "2399a17d9a4e898c8abd10902ed995781c325b7b9cbdd50ae0cf7e6d296fde51"
+    },
+    {
+      "path": "site/js/admin-push.js",
+      "before": null,
+      "after": "6b52c83ea2c90d65b94c6555fc210d16664bc57991e1517266e2e1d8606b7dda"
+    },
+    {
+      "path": "site/js/push-client.js",
+      "before": null,
+      "after": "8797aa2aeeeedd421b2710f837d73592e5282937538f8bc374903f5de957c1e6"
+    },
+    {
+      "path": "site/js/push-settings.js",
+      "before": null,
+      "after": "c587bac10dff84f3bf867cfbf28ad4a1bd5ea6202fcd96780278ebd2b977304d"
+    },
+    {
+      "path": "site/js/pwa-policy.js",
+      "before": "d41427c13086dab847507db11bdfa7da3d2b6827811605fb63401bc7d9d15a91",
+      "after": "1a6f7b5a32c1fb122121aa44ed195d824b2d0f9f5776cdabb3506e5e01ad5ff7"
+    },
+    {
+      "path": "site/scss/account.scss",
+      "before": "0b1d18fe88a59500735a4cd045d9af8a6ba7966a6d5a33e852e30c6359aa8f65",
+      "after": "80921a7e2dcb52039ff2cb55bf76f98f4810cbb0d77080bfa0404ebccda50de7"
+    },
+    {
+      "path": "site/scss/admin.scss",
+      "before": "c8980e106669a15a2ff720e150b8cba2c454fee3ae7565f88a12926c7b451ea7",
+      "after": "6b467d2c728951ad8761154bedccb5f8c4ad74b7dacbadfecbddb6c3195b3848"
+    },
+    {
+      "path": "tests/push-database.test.mjs",
+      "before": null,
+      "after": "e0ddff98efacc8bf5cacb31d054c91316bb050cb53a1f85a066d69add679758a"
+    },
+    {
+      "path": "tests/push-policy.test.mjs",
+      "before": null,
+      "after": "aeb8f70ff8967af7aa51af8862dcdb3856c7fac5b2cd55e5f0e6c6980b160104"
+    },
+    {
+      "path": "tests/push-routes.test.mjs",
+      "before": null,
+      "after": "97373ebca7331e4935d2e25a48797713204c2b2ef64629073ae2709eabd6c991"
+    },
+    {
+      "path": "tests/push-transport.test.mjs",
+      "before": null,
+      "after": "cf48ec557e78e0568f3175595a4792b7be45771a11688686e91ac7420468a438"
+    },
+    {
+      "path": "tests/pwa-worker.test.mjs",
+      "before": "19408e056aeb0106c3ca9f60bb70dd5e32a34a4fd3d511729cd95783ac15ef0e",
+      "after": "1baab4baf78da91feae7087c4f1be5c8ddd8f90e3ad73a15094aad3090f26ab0"
+    },
+    {
+      "path": "utils/push-policy.js",
+      "before": null,
+      "after": "b8d1a7416ed0e766526398bfc15648595cffff195ac8373652f394169fac7c67"
+    }
+  ]
+}

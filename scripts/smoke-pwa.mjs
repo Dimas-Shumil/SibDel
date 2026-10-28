@@ -14,7 +14,7 @@ app.get('/sw.js', async (_req, res, next) => {
   const code = await readFile(`${root}/public/sw.js`, 'utf8');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Service-Worker-Allowed', '/');
-  res.type('application/javascript').send(code.replace("const VERSION = '11a-1'", `const VERSION = '${testWorkerVersion}'`));
+  res.type('application/javascript').send(code.replace(/const VERSION = '[^']+'/, `const VERSION = '${testWorkerVersion}'`));
 });
 app.use(pwaMiddleware(`${root}/public`));
 app.use('/site', express.static(`${root}/site`));

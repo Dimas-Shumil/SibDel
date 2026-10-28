@@ -1,0 +1,8 @@
+[Unit]
+Description=Process SibDel PUSH every minute
+[Timer]
+OnCalendar=*-*-* *:*:00
+Persistent=true
+Unit=sibdel-push.service
+[Install]
+WantedBy=timers.target

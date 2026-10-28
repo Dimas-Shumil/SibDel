@@ -41,7 +41,11 @@
     "seo:live-check": "node scripts/seo-live-check.mjs",
     "test:pwa": "node --experimental-vm-modules --test tests/pwa-*.test.mjs tests/customer-sessions.test.mjs",
     "test:unit": "node --experimental-vm-modules --test tests/*.test.mjs",
-    "test:pwa-browser": "node scripts/smoke-pwa.mjs"
+    "test:pwa-browser": "node scripts/smoke-pwa.mjs",
+    "push:process": "node scripts/process-push.mjs 100",
+    "push:keys": "web-push generate-vapid-keys --json",
+    "test:push": "node --experimental-vm-modules --test tests/push-*.test.mjs",
+    "test:push-browser": "node scripts/smoke-push.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -59,9 +63,12 @@
     "pino-http": "^11.0.0",
     "sharp": "^0.35.4",
     "swiper": "^14.2.0",
+    "web-push": "3.6.7",
     "zod": "^4.6.6"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.4.3",
+    "@electric-sql/pglite-socket": "0.1.3",
     "prisma": "^7.10.0",
     "sass": "^1.103.1"
   },

@@ -60,6 +60,13 @@ const envSchema = z
     CUSTOMER_SESSION_TTL_DAYS: z.coerce
       .number().int().min(1).max(90).default(90),
 
+    PUSH_ENABLED: booleanFromEnv.default(false),
+    PUSH_MARKETING_ENABLED: booleanFromEnv.default(false),
+    PUSH_MARKETING_SENDER: z.string().trim().max(300).default(""),
+    VAPID_PUBLIC_KEY: z.string().trim().default(""),
+    VAPID_PRIVATE_KEY: z.string().trim().default(""),
+    VAPID_SUBJECT: z.string().trim().default(""),
+
     TRUST_PROXY: z
       .enum(["0", "1"])
       .default("0")
@@ -108,6 +115,12 @@ const envSchema = z
       .email("TO_EMAIL must be a valid email address"),
   })
   .superRefine((env, ctx) => {
+    if (env.PUSH_MARKETING_ENABLED && (!env.PUSH_ENABLED || env.PUSH_MARKETING_SENDER.length < 5)) ctx.addIssue({ code: "custom", path: ["PUSH_MARKETING_SENDER"], message: "Marketing requires PUSH_ENABLED and the actual legal sender name" });
+    if (env.PUSH_ENABLED) {
+      if (!/^[A-Za-z0-9_-]{87}$/.test(env.VAPID_PUBLIC_KEY)) ctx.addIssue({ code: "custom", path: ["VAPID_PUBLIC_KEY"], message: "Valid VAPID public key required" });
+      if (!/^[A-Za-z0-9_-]{43}$/.test(env.VAPID_PRIVATE_KEY)) ctx.addIssue({ code: "custom", path: ["VAPID_PRIVATE_KEY"], message: "Valid VAPID private key required" });
+      if (!/^(mailto:[^\s@]+@[^\s@]+|https:\/\/[^\s]+)$/.test(env.VAPID_SUBJECT)) ctx.addIssue({ code: "custom", path: ["VAPID_SUBJECT"], message: "VAPID subject must be mailto or HTTPS" });
+    }
     if (env.NODE_ENV !== "production") {
       return;
     }

@@ -26,7 +26,7 @@ export function nextVisit(previous, now) {
 }
 
 export function excludedPath(pathname) {
-  return /^\/(?:admin|checkout|login|register|forgot-password|reset-password)(?:\/|\.html|$)/.test(pathname);
+  return /^\/(?:admin|checkout|login|register|forgot-password|reset-password)(?:\/|\.html|$)/i.test(pathname);
 }
 
 export function installEligible({ standalone, installed, handled, elapsed, supported, visible, excluded }) {

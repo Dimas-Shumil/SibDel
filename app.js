@@ -18,6 +18,7 @@ import { apiRateLimiter } from "./middleware/rate-limit.js";
 import { authMiddleware } from "./middleware/auth.js";
 import { adminSessionContext } from "./middleware/admin-auth.js";
 import { csrfProtection } from "./middleware/csrf.js";
+import { customerPushRouter, adminPushRouter } from "./routes/push.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import accountRouter from "./routes/account.routes.js";
@@ -221,6 +222,8 @@ app.use(
   adminRouter,
 );
 
+app.use("/api/push", customerPushRouter);
+app.use("/api/admin/push", adminPushRouter);
 app.use("/api/catalog", catalogRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/products", productsRouter);
@@ -271,8 +274,11 @@ app.use(
   requireAdminPage,
   (req, res, next) => {
     // Do not serve the staff-management HTML to STAFF accounts.
-    if ((req.path === "/employees" || req.path === "/employees.html") && req.adminUser?.role !== "OWNER") {
-      return res.status(403).send("Недостаточно прав для управления сотрудниками.");
+    let pagePath;
+    try { pagePath = decodeURIComponent(req.path).toLowerCase().replace(/\/+$/, ""); }
+    catch { return res.status(400).send("Некорректный адрес."); }
+    if (["/employees", "/employees.html", "/push", "/push.html"].includes(pagePath) && req.adminUser?.role !== "OWNER") {
+      return res.status(403).send("Недостаточно прав для этого раздела.");
     }
     return next();
   },

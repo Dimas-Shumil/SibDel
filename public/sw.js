@@ -1,5 +1,5 @@
 /* Bump VERSION whenever the offline document or its resources change. */
-const VERSION = '11a-1';
+const VERSION = '11b-1';
 const PREFIX = 'sibdel-pwa-';
 const CACHE = `${PREFIX}${VERSION}`;
 // Exhaustive allowlist. No runtime cache, application JS, prices or user data.
@@ -56,4 +56,81 @@ self.addEventListener('fetch', (event) => {
       return cached || Response.error();
     }));
   }
+});
+
+// UI verifies that the active worker can receive push before subscribing.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SIBDEL_PUSH_VERSION' && event.ports?.[0]) event.ports[0].postMessage({ version: VERSION, push: true });
+});
+
+async function notificationDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('sibdel-push-received', 1);
+    request.onupgradeneeded = () => request.result.createObjectStore('received', { keyPath: 'id' });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(Error('Notification storage unavailable'));
+  });
+}
+async function reserveNotification(id) {
+  const db = await notificationDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction('received', 'readwrite');
+      const store = tx.objectStore('received');
+      let duplicate = false;
+      const get = store.get(id);
+      get.onsuccess = () => {
+        duplicate = Boolean(get.result);
+        if (!duplicate) store.put({ id, at: Date.now() });
+      };
+      // Bound receipt storage without keeping message contents/URLs/user data.
+      const cursor = store.openCursor();
+      cursor.onsuccess = () => {
+        const item = cursor.result;
+        if (item) { if (item.value.at < Date.now() - 30 * 86400_000) item.delete(); item.continue(); }
+      };
+      tx.oncomplete = () => resolve(!duplicate);
+      tx.onerror = () => reject(Error('Notification storage failure'));
+      tx.onabort = () => reject(Error('Notification storage failure'));
+    });
+  } finally { db.close(); }
+}
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let data;
+    try { data = event.data?.json(); } catch { return; }
+    if (!Number.isInteger(data?.id) || data.id <= 0 || typeof data.title !== 'string'
+      || typeof data.body !== 'string') return;
+    // A receipt contains only an ID/time; no offline notification inbox/cache.
+    let fresh;
+    try { fresh = await reserveNotification(data.id); }
+    catch { fresh = !(await self.registration.getNotifications({ tag: `sibdel-${data.id}` })).length; }
+    if (!fresh) return;
+    await self.registration.showNotification(data.title.slice(0, 80), {
+      body: data.body.slice(0, 240), icon: '/pwa/icon-192.png', badge: '/pwa/icon-192.png',
+      ...(typeof data.image === 'string' && /^\/(site\/images|uploads\/products)\//.test(data.image) && !data.image.includes('..') ? { image: data.image } : {}),
+      tag: `sibdel-${data.id}`, renotify: false,
+      data: { id: data.id, url: data.url, openPath: data.openPath },
+    });
+  })());
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const data = event.notification.data || {};
+    let target;
+    try { target = new URL(data.url || '/account', self.location.origin); } catch { target = new URL('/account', self.location.origin); }
+    const allowed = ['/', '/catalog.html', '/promotions.html', '/product.html', '/subscription.html', '/account', '/account/orders', '/account/order', '/account/subscription'];
+    if (target.origin !== self.location.origin || !allowed.includes(target.pathname)) target = new URL('/account', self.location.origin);
+    let tracking = Promise.resolve();
+    if (Number.isInteger(data.id) && ['/api/push/open','/api/admin/push/open'].includes(data.openPath)) {
+      // Actual click, not delivery/open inference. Ownership checked on the server.
+      try { tracking = fetch(data.openPath, { signal: AbortSignal.timeout(3000), method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data.id }) }).catch(() => {}); } catch { /* Offline click cannot be counted. */ }
+    }
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const existing = windows.find((client) => client.url === target.href);
+    if (existing) await existing.focus();
+    else await self.clients.openWindow(target.href);
+    await tracking;
+  })());
 });

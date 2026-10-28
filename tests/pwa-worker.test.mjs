@@ -49,7 +49,8 @@ test('install caches only the offline allowlist, omits cookies and never forces 
     assert.equal(call.cache, 'reload');
     assert.ok(!/^\/(api|account|admin|checkout|cart|catalog)/.test(new URL(call.url).pathname));
   }
-  assert.equal(f.handlers.has('message'), false);
+  assert.equal(f.handlers.has('message'), true);
+  assert.equal(f.handlers.has('push'), true);
 });
 
 test('worker bypasses API, admin, uploads, POST, external requests and application JS', async () => {

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/site/css/admin.css" />
+    <title>PUSH-рассылки — Сибирские Деликатесы</title>
+  </head>
+  <body class="admin-page" data-admin-app data-admin-page="push">
+    <div class="admin-layout">
+      <aside class="admin-sidebar" data-admin-sidebar>
+        <a class="admin-brand" href="/admin/">
+          <span class="admin-brand__mark" aria-hidden="true">▲</span>
+          <span>
+            <strong>Сибирские</strong>
+            <strong>Деликатесы</strong>
+          </span>
+        </a>
+
+        <nav class="admin-nav" aria-label="Административная навигация">
+          <a class="admin-nav__link" href="/admin/" data-admin-nav="dashboard"><span>Обзор</span></a>
+          <a class="admin-nav__link" href="/admin/orders" data-admin-nav="orders"><span>Заказы</span><span class="admin-nav__badge" data-admin-new-orders hidden></span></a>
+          <a class="admin-nav__link" href="/admin/products" data-admin-nav="products"><span>Товары</span></a>
+          <a class="admin-nav__link" href="/admin/categories" data-admin-nav="categories"><span>Категории</span></a>
+          <a class="admin-nav__link" href="/admin/warehouse" data-admin-nav="warehouse"><span>Склад</span></a>
+          <a class="admin-nav__link" href="/admin/customers" data-admin-nav="customers"><span>Клиенты</span></a>
+          <a class="admin-nav__link" href="/admin/employees" data-admin-nav="employees" data-owner-only><span>Сотрудники</span></a>
+          <a class="admin-nav__link" href="/admin/push" data-admin-nav="push" data-owner-only><span>PUSH-рассылки</span></a>
+          <a class="admin-nav__link" href="/admin/promotions" data-admin-nav="promotions"><span>Акции</span></a>
+          <a class="admin-nav__link" href="/admin/reviews" data-admin-nav="reviews"><span>Отзывы</span></a>
+          <a class="admin-nav__link" href="/admin/subscriptions" data-admin-nav="subscriptions"><span>Подписки</span></a>
+          <a class="admin-nav__link" href="/admin/delivery" data-admin-nav="delivery"><span>Доставка</span></a>
+        </nav>
+
+        <div class="admin-sidebar__user">
+          <span class="admin-sidebar__role" data-admin-user-role>...</span>
+          <strong data-admin-user-name>Загрузка...</strong>
+          <span data-admin-user-email></span>
+          <button class="admin-link-button" type="button" data-admin-logout>Выйти</button>
+        </div>
+      </aside>
+
+      <main class="admin-main" data-push-admin>
+        <header class="admin-header"><div><p class="admin-eyebrow">Связь с покупателями</p><h1>PUSH-рассылки</h1><p class="admin-header__lead">Черновики, отправка и история. Массовые сообщения получают только покупатели с действующим рекламным согласием.</p></div></header>
+        <p class="admin-form-note" data-push-status role="status" aria-live="polite">Загружаем настройки…</p>
+        <section class="admin-panel admin-push"><h2>Своё устройство</h2>
+          <p>Подключите устройство владельца для теста. Если браузер уже подключён к покупателю, используйте отдельный профиль браузера.</p>
+          <button class="admin-button" data-push-enable type="button" disabled>Подключить это устройство</button>
+          <ul class="admin-push__devices" data-push-devices></ul>
+        </section>
+        <section class="admin-panel admin-push"><h2>Новая рассылка</h2>
+          <form data-push-campaign-form class="admin-push__form">
+            <label>Заголовок <input name="title" maxlength="80" required></label>
+            <label>Текст (без личных данных покупателей) <textarea name="body" maxlength="240" rows="3" required></textarea></label>
+            <label>Внутренняя ссылка <input name="url" maxlength="500" required value="/promotions.html" placeholder="/promotions.html"></label>
+            <label>Изображение (необязательно) <input name="imageUrl" maxlength="500" placeholder="/uploads/products/имя.webp"></label>
+            <p class="admin-form-note">Укажите путь изображения, уже загруженного в товары, или из /site/images/. Поддержка изображения зависит от браузера получателя.</p>
+            <label>Получатели <select name="audience"><option value="ALL">Все покупатели с рекламным согласием</option><option value="SUBSCRIBERS">Покупатели с активной регулярной подпиской и согласием</option></select></label>
+            <div class="admin-push__actions"><button class="admin-button" type="submit">Сохранить черновик</button><button class="admin-button admin-button--secondary" data-push-test type="button">Тест на своё устройство</button></div>
+          </form>
+        </section>
+        <section class="admin-panel admin-push"><div class="admin-panel__head"><h2>История рассылок</h2><button class="admin-button admin-button--secondary" data-push-refresh type="button">Обновить</button></div>
+          <p>Время указано по Красноярску (UTC+7). Не чаще одной рекламной рассылки в сутки для каждого покупателя.</p>
+          <div class="admin-push__history" data-push-history></div>
+          <div class="admin-push__actions"><button class="admin-button admin-button--secondary" data-push-prev type="button">Назад</button><span data-push-page></span><button class="admin-button admin-button--secondary" data-push-next type="button">Далее</button></div>
+          <p class="admin-form-note">«Принято сервисом» не означает доставку на телефон. Клики учитываются при нажатии на PUSH, если событие удалось передать серверу. Неопределённые отправки автоматически не повторяются.</p>
+        </section>
+      </main>
+    </div>
+    <script src="/site/js/admin.js" defer></script>
+    <script type="module" src="/site/js/admin-push.js"></script>
+  </body>
+</html>

@@ -137,6 +137,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  pushPreference PushPreference?
+  pushConsents PushConsent[]
+  pushDevices PushDevice[]
+  pushCampaigns PushCampaign[]
+  notifications CustomerNotification[]
+
   sessions            UserSession[]
   passwordResetTokens PasswordResetToken[]
   addresses           Address[]
@@ -155,6 +161,7 @@ model User {
 }
 
 model UserSession {
+  pushDevices PushDevice[]
   id Int @id @default(autoincrement())
 
   userId Int
@@ -696,6 +703,7 @@ model SubscriptionPlan {
 }
 
 model UserSubscription {
+  pushState PushSubscriptionState?
   id Int @id @default(autoincrement())
 
   userId Int
@@ -930,4 +938,110 @@ model BusinessRequest {
 
   @@index([status, createdAt])
   @@index([createdAt])
+}
+
+// Stage 11B: additive Web Push infrastructure; existing commerce data untouched.
+model PushPreference {
+  userId Int @id
+  orders Boolean @default(true)
+  subscriptions Boolean @default(true)
+  marketing Boolean @default(false)
+  marketingVersion String? @db.VarChar(50)
+  lastMarketingAt DateTime?
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PushConsent {
+  id Int @id @default(autoincrement())
+  userId Int
+  sessionId Int
+  granted Boolean
+  version String @db.VarChar(50)
+  text String @db.Text
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+}
+
+model PushDevice {
+  id Int @id @default(autoincrement())
+  userId Int
+  sessionId Int
+  disabledAt DateTime?
+  endpointHash String @unique @db.VarChar(64)
+  endpoint String @db.VarChar(2048)
+  p256dh String @db.VarChar(100)
+  auth String @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  jobs PushJob[]
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model PushCampaign {
+  id Int @id @default(autoincrement())
+  requestKey String @unique @db.VarChar(64)
+  creatorId Int?
+  title String @db.VarChar(80)
+  body String @db.VarChar(240)
+  url String @db.VarChar(500)
+  imageUrl String? @db.VarChar(500)
+  audience String @default("ALL") @db.VarChar(30)
+  status String @default("DRAFT") @db.VarChar(30)
+  scheduledAt DateTime?
+  cursorUserId Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creator User? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  notifications CustomerNotification[]
+  @@index([status, scheduledAt])
+}
+
+model CustomerNotification {
+  id Int @id @default(autoincrement())
+  eventKey String @unique @db.VarChar(191)
+  userId Int
+  campaignId Int?
+  category String @db.VarChar(30)
+  title String @db.VarChar(80)
+  body String @db.VarChar(240)
+  url String @db.VarChar(500)
+  imageUrl String? @db.VarChar(500)
+  queuedAt DateTime?
+  createdAt DateTime @default(now())
+  readAt DateTime?
+  openedAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign PushCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  jobs PushJob[]
+  @@index([userId, createdAt])
+  @@index([queuedAt, id])
+  @@index([campaignId])
+}
+
+model PushJob {
+  id Int @id @default(autoincrement())
+  notificationId Int
+  deviceId Int?
+  status String @default("PENDING") @db.VarChar(30)
+  attempts Int @default(0)
+  attemptedAt DateTime?
+  finishedAt DateTime?
+  errorCode String? @db.VarChar(50)
+  createdAt DateTime @default(now())
+  notification CustomerNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  device PushDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  @@unique([notificationId, deviceId])
+  @@index([status, id])
+}
+
+model PushSubscriptionState {
+  subscriptionId Int @id
+  fingerprint String @db.VarChar(64)
+  revision Int @default(1)
+  subscription UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 }

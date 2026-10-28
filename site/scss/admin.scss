@@ -523,3 +523,17 @@ button { border: 0; }
   .admin-toolbar--staff .admin-search { min-width: 100%; }
   .admin-toolbar--staff .admin-select-wrap { flex: 1; min-width: 120px; }
 }
+
+.admin-push {
+  &__form { display: grid; gap: 16px; max-width: 760px; }
+  &__form label, &__actions label { display: grid; gap: 6px; min-width: 0; }
+  &__form input, &__form textarea, &__form select, &__actions input {
+    box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px;
+    border: 1px solid #d8dce3; border-radius: 10px; background: #fff; color: #192330; font: inherit;
+  }
+  &__actions { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+  &__devices { list-style: none; padding: 0; }
+  &__devices li { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+  &__history { display: grid; gap: 16px; }
+  &__campaign { padding: 20px; border: 1px solid #d8dce3; border-radius: 14px; overflow-wrap: anywhere; }
+}
