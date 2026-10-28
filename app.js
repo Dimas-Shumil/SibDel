@@ -12,6 +12,7 @@ import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { prisma } from "./lib/prisma.js";
 
+import { pwaMiddleware } from "./middleware/pwa.js";
 import { securityMiddleware } from "./middleware/security.js";
 import { apiRateLimiter } from "./middleware/rate-limit.js";
 import { authMiddleware } from "./middleware/auth.js";
@@ -105,6 +106,7 @@ const httpLogger = pinoHttp({
 
 app.use(securityMiddleware);
 app.use(httpLogger);
+app.use(pwaMiddleware(publicPath));
 
 const publicProductWhere = { isActive: true, category: { isActive: true } };
 app.use(seoMiddleware({

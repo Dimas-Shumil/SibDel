@@ -181,7 +181,7 @@ export async function login(
     res.cookie(
       authConfig.sessionCookieName,
       session.token,
-      getSessionCookieOptions(),
+      getSessionCookieOptions(session.expiresAt),
     );
 
     await mergeGuestCommerceAfterAuthentication(req, res, user.id);
@@ -254,7 +254,7 @@ export async function register(
     res.cookie(
       authConfig.sessionCookieName,
       session.token,
-      getSessionCookieOptions(),
+      getSessionCookieOptions(session.expiresAt),
     );
 
     await mergeGuestCommerceAfterAuthentication(req, res, user.id);

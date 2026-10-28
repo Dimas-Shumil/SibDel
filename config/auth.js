@@ -18,6 +18,7 @@ export const authConfig = Object.freeze({
   sessionCookieName: env.SESSION_COOKIE_NAME,
   adminSessionCookieName: `${env.SESSION_COOKIE_NAME}_admin`,
   sessionTtlMs,
+  customerSessionTtlMs: env.CUSTOMER_SESSION_TTL_DAYS * DAY_IN_MS,
   sessionTouchIntervalMs: 15 * 60 * 1000,
   maxSessionsPerUser: 10,
   passwordResetTokenTtlMs: 30 * MINUTE_IN_MS,
@@ -25,9 +26,13 @@ export const authConfig = Object.freeze({
   maxActivePasswordResetTokens: 1,
 });
 
-export function getSessionCookieOptions() {
+export function getSessionCookieOptions(expiresAt = null) {
   return {
     ...sessionCookieOptions,
+    // Cookie lifetime must never exceed the expiry validated on the server.
+    maxAge: expiresAt
+      ? Math.max(0, new Date(expiresAt).getTime() - Date.now())
+      : authConfig.customerSessionTtlMs,
   };
 }
 

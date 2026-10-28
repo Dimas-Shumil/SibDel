@@ -1,0 +1,99 @@
+@use 'variables' as *;
+
+.pwa-panel {
+  box-sizing: border-box;
+  position: fixed;
+  z-index: 900;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(560px, calc(100% - 24px));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px;
+  border: 1px solid $color-border;
+  border-radius: 18px;
+  background: $color-text-light;
+  color: $color-text;
+  box-shadow: 0 10px 36px $color-shadow;
+  font: 14px/1.5 $font-text;
+
+  &--install {
+    top: max(12px, env(safe-area-inset-top));
+    animation: pwa-enter 260ms $ease-premium both;
+    touch-action: pan-x;
+  }
+
+  &--help {
+    display: grid;
+    grid-template-columns: 48px 1fr 44px;
+    align-items: start;
+
+    .pwa-panel__content { display: contents; }
+    .pwa-panel__content strong { grid-column: 2; grid-row: 1; align-self: center; }
+    .pwa-panel__content p { grid-column: 1 / -1; grid-row: 2; margin: 0; }
+    .pwa-panel__actions { grid-column: 1 / -1; grid-row: 3; }
+    .pwa-panel__close { grid-column: 3; grid-row: 1; }
+  }
+
+  &--update { bottom: max(16px, env(safe-area-inset-bottom)); }
+  &__icon { flex-shrink: 0; border-radius: 12px; }
+  &__content { flex: 1; min-width: 0; }
+  &__content strong { font-size: 15px; }
+  &__content p { margin: 5px 0 10px; }
+  &__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  &__button, &__link, &__close {
+    box-sizing: border-box;
+    min-height: 44px;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 10px;
+    color: $color-text-light;
+    background: $color-forest;
+    text-decoration: none;
+  }
+  &__button:hover { background: $color-forest-dark; }
+  &__link { padding: 10px; color: $color-text; background: transparent; text-decoration: underline; }
+  &__close { flex-shrink: 0; width: 44px; margin: -8px -8px 0 0; font-size: 26px; background: transparent; color: $color-text; }
+  &__button:focus-visible, &__link:focus-visible, &__close:focus-visible { outline: 3px solid $color-forest; outline-offset: 3px; }
+}
+
+.pwa-offline {
+  margin: 0;
+  min-height: 100svh;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  background: $bgr-page;
+  color: $color-text;
+  font: 16px/1.6 $font-text;
+
+  &__card { max-width: 440px; text-align: center; }
+  &__card img { border-radius: 20px; }
+  &__card h1 { margin: 16px 0 8px; font: 600 32px/1.2 $font-title; }
+  &__card .pwa-panel__link { display: block; width: max-content; margin: 8px auto 0; }
+  &__brand { font-size: 14px; color: $color-text-soft; }
+}
+
+@keyframes pwa-enter {
+  from { opacity: 0; transform: translate(-50%, -120%); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 380px) {
+  .pwa-panel { gap: 8px; padding: 12px; }
+  .pwa-panel__icon { width: 36px; height: 36px; }
+  .pwa-panel--help { grid-template-columns: 36px 1fr 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-panel--install { animation: none; }
+}

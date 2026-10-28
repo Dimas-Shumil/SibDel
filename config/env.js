@@ -57,6 +57,9 @@ const envSchema = z
       .max(365)
       .default(30),
 
+    CUSTOMER_SESSION_TTL_DAYS: z.coerce
+      .number().int().min(1).max(90).default(90),
+
     TRUST_PROXY: z
       .enum(["0", "1"])
       .default("0")

@@ -16,9 +16,9 @@
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js",
     "admin:create-owner": "node prisma/create-owner.js",
-    "scss": "sass --no-source-map --style=expanded site/scss:site/css && sass --no-source-map --style=compressed site/scss/main.scss:site/css/main.min.css site/scss/catalog.scss:site/css/catalog.min.css site/scss/product.scss:site/css/product.min.css site/scss/cart.scss:site/css/cart.min.css site/scss/checkout.scss:site/css/checkout.min.css site/scss/account.scss:site/css/account.min.css site/scss/admin.scss:site/css/admin.min.css",
+    "scss": "sass --no-source-map --style=expanded site/scss:site/css && sass --no-source-map --style=compressed site/scss/main.scss:site/css/main.min.css site/scss/catalog.scss:site/css/catalog.min.css site/scss/product.scss:site/css/product.min.css site/scss/cart.scss:site/css/cart.min.css site/scss/checkout.scss:site/css/checkout.min.css site/scss/account.scss:site/css/account.min.css site/scss/admin.scss:site/css/admin.min.css site/scss/pwa.scss:site/css/pwa.min.css",
     "css": "npm run scss",
-    "scss:watch": "sass --watch --no-source-map --style=compressed site/scss/main.scss:site/css/main.min.css site/scss/catalog.scss:site/css/catalog.min.css site/scss/product.scss:site/css/product.min.css site/scss/cart.scss:site/css/cart.min.css site/scss/checkout.scss:site/css/checkout.min.css site/scss/account.scss:site/css/account.min.css site/scss/admin.scss:site/css/admin.min.css",
+    "scss:watch": "sass --watch --no-source-map --style=compressed site/scss/main.scss:site/css/main.min.css site/scss/catalog.scss:site/css/catalog.min.css site/scss/product.scss:site/css/product.min.css site/scss/cart.scss:site/css/cart.min.css site/scss/checkout.scss:site/css/checkout.min.css site/scss/account.scss:site/css/account.min.css site/scss/admin.scss:site/css/admin.min.css site/scss/pwa.scss:site/css/pwa.min.css",
     "css:watch": "npm run scss:watch",
     "security:audit": "npm audit --omit=dev",
     "test:checkout-smoke": "node scripts/smoke-checkout.mjs",
@@ -38,7 +38,10 @@
     "test:delivery-smoke": "node scripts/smoke-delivery.mjs",
     "test:staff-unit": "node --experimental-vm-modules --test tests/admin-staff.test.mjs",
     "test:seo": "node --test tests/seo.test.mjs tests/seo-stage10.test.mjs",
-    "seo:live-check": "node scripts/seo-live-check.mjs"
+    "seo:live-check": "node scripts/seo-live-check.mjs",
+    "test:pwa": "node --experimental-vm-modules --test tests/pwa-*.test.mjs tests/customer-sessions.test.mjs",
+    "test:unit": "node --experimental-vm-modules --test tests/*.test.mjs",
+    "test:pwa-browser": "node scripts/smoke-pwa.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

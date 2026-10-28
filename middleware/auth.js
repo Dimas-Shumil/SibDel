@@ -1,6 +1,7 @@
 import {
   authConfig,
   getClearSessionCookieOptions,
+  getSessionCookieOptions,
 } from "../config/auth.js";
 
 import {
@@ -38,7 +39,7 @@ export async function authMiddleware(
 
   try {
     const auth =
-      await resolveSessionToken(token);
+      await resolveSessionToken(token, { audience: "customer" });
 
     if (!auth) {
       res.clearCookie(
@@ -49,6 +50,11 @@ export async function authMiddleware(
       return next();
     }
 
+    // Reissue only after server validation, using its exact expiry. Browser/PWA
+    // restarts keep the same opaque token; there is no localStorage credential.
+    res.cookie(authConfig.sessionCookieName, token,
+      getSessionCookieOptions(auth.session.expiresAt));
+    res.setHeader("Cache-Control", "no-store");
     req.auth = auth;
     req.user = auth.user;
 

@@ -22,7 +22,7 @@ export async function adminSessionContext(req, res, next) {
   }
 
   try {
-    const auth = await resolveSessionToken(token);
+    const auth = await resolveSessionToken(token, { audience: "admin" });
 
     if (!auth) {
       res.clearCookie(

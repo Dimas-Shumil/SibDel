@@ -91,7 +91,7 @@ export async function changePassword(req, res, next) {
     res.cookie(
       authConfig.sessionCookieName,
       session.token,
-      getSessionCookieOptions(),
+      getSessionCookieOptions(session.expiresAt),
     );
 
     return res.status(200).json({

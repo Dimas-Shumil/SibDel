@@ -241,14 +241,25 @@ export async function createSession({
 
   const now = new Date();
 
-  const expiresAt = new Date(
-    now.getTime() + authConfig.sessionTtlMs,
-  );
+  let expiresAt;
 
   const token = generateSessionToken();
   const tokenHash = hashSessionToken(token);
 
   await prisma.$transaction(async (transaction) => {
+    // Resolve policy from the stored role, never from client/controller input.
+    const user = await transaction.user.findUnique({
+      where: { id: userId }, select: { role: true, isActive: true },
+    });
+    if (!user?.isActive) {
+      const error = new Error("User is unavailable.");
+      error.statusCode = 401;
+      error.code = "UNAUTHORIZED";
+      throw error;
+    }
+    expiresAt = new Date(now.getTime() + (
+      user.role === "CUSTOMER" ? authConfig.customerSessionTtlMs : authConfig.sessionTtlMs
+    ));
     await transaction.userSession.deleteMany({
       where: {
         userId,
@@ -304,7 +315,7 @@ export async function createSession({
   };
 }
 
-export async function resolveSessionToken(token) {
+export async function resolveSessionToken(token, { audience = "any" } = {}) {
   if (
     typeof token !== "string" ||
     token.length === 0 ||
@@ -337,6 +348,10 @@ export async function resolveSessionToken(token) {
   }
 
   const now = new Date();
+  const roleAllowed = (user) => audience === "any"
+    || (audience === "customer" && user.role === "CUSTOMER")
+    || (audience === "admin" && ["OWNER", "STAFF"].includes(user.role));
+  if (!roleAllowed(session.user)) return null;
 
   if (
     session.expiresAt <= now ||
@@ -356,18 +371,39 @@ export async function resolveSessionToken(token) {
       authConfig.sessionTouchIntervalMs,
   );
 
-  if (session.lastUsedAt < touchThreshold) {
-    await prisma.userSession.updateMany({
+  const customer = session.user.role === "CUSTOMER";
+  // A valid legacy customer session upgrades on first use. Expired/revoked
+  // sessions are never recreated. Administrative expiry stays fixed.
+  const needsUpgrade = customer && session.expiresAt.getTime()
+    < now.getTime() + authConfig.customerSessionTtlMs - authConfig.sessionTouchIntervalMs;
+  if (session.lastUsedAt < touchThreshold || needsUpgrade) {
+    const expiresAt = customer
+      ? new Date(now.getTime() + authConfig.customerSessionTtlMs)
+      : session.expiresAt;
+    const updated = await prisma.userSession.updateMany({
       where: {
-        id: session.id,
-        lastUsedAt: {
-          lt: touchThreshold,
-        },
+        id: session.id, tokenHash, expiresAt: { gt: now },
+        lastUsedAt: session.lastUsedAt,
+        user: { isActive: true, role: session.user.role },
       },
-      data: {
-        lastUsedAt: now,
-      },
+      data: { lastUsedAt: now, ...(customer ? { expiresAt } : {}) },
     });
+    if (updated.count === 1) {
+      session.expiresAt = expiresAt;
+      session.lastUsedAt = now;
+    } else {
+      // Concurrent renewal is fine; logout/password reset/block must win.
+      const current = await prisma.userSession.findUnique({
+        where: { tokenHash },
+        select: { id: true, expiresAt: true, lastUsedAt: true,
+          user: { select: SAFE_USER_SELECT } },
+      });
+      if (!current || current.expiresAt <= new Date()
+        || !current.user.isActive || !roleAllowed(current.user)) return null;
+      session.expiresAt = current.expiresAt;
+      session.lastUsedAt = current.lastUsedAt;
+      session.user = current.user;
+    }
   }
 
   return {

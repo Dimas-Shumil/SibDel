@@ -1,0 +1,321 @@
+{
+  "stage": "11A",
+  "baseline": "sibDel — копия(20261028-073648).zip",
+  "files": [
+    {
+      "path": ".env.example",
+      "before": "6d32e751e8c8abf7db27b063255d1ccb75aaa8378494b361ebe23ac256c08a5b",
+      "after": "8b19e940c26a84e26e1020bb9d59c52f8df6720ca553cfca84da6ebe6babfd0e"
+    },
+    {
+      "path": "STAGE11A-README.md",
+      "before": null,
+      "after": "b0783680f0b856f33df0fcbe0d7e93c65ed6c34eca97bd4107122823f7d8de7e"
+    },
+    {
+      "path": "STAGE11A-TEST-RESULTS.txt",
+      "before": null,
+      "after": "66b4541bbb443086db9d955a28251a50e985c282e94a34ee2d0b620f1075e7ed"
+    },
+    {
+      "path": "app.js",
+      "before": "106eeaa442bf724a75f53a163bf77362e576dfd8f168db157c5bd3415fc92958",
+      "after": "3af32ad693cfd0129df06995e1f55fec511f94bb1e32dd85b9e01404cabfc077"
+    },
+    {
+      "path": "config/auth.js",
+      "before": "f1db321878954c8d87155531ff30a48e6f167017e7445394586705e4c98b9432",
+      "after": "6a1f913aba25b8a96e47974fde5290cc3af5aa3420f7a52d7befe2c6d0207b06"
+    },
+    {
+      "path": "config/env.js",
+      "before": "6606fbe51de4b126e9be4a91531f0cf80f7b091c8080b961461375141c3bf489",
+      "after": "e82285e7dfd19025f863383a1f312a19b1361e5d88858c9fbca8b27368b00515"
+    },
+    {
+      "path": "controllers/account.controller.js",
+      "before": "0a6648c807d34b46afa8d71130290b26cbdb929439318b2791ae962b6a73cfa2",
+      "after": "ffcdff6b9f5ae8d3a4ae86059e27961e0b4b99c37ba0ff756d8b316da49be78f"
+    },
+    {
+      "path": "controllers/auth.controller.js",
+      "before": "f53207afd7fb49147c588b6f0dda60a199c17b4b57ecd3759a6822d843de2374",
+      "after": "47f53a23409dce0a8548901be8d18bfc58cf4d311c4fb77b14f273073356f0a0"
+    },
+    {
+      "path": "deploy/production.env.example",
+      "before": "7cbdfd2874623c86a0d7896a20ab64c9e276a9a0e36363968d761d185ed8dbc1",
+      "after": "83a0222a250df9b90abee4d9f7b87ce135572a3f7a978f6ee30f12affc5e5136"
+    },
+    {
+      "path": "deploy/pwa-retire.js",
+      "before": null,
+      "after": "e60bd40d4384f868a22d3c0eb871ad9eda8b78bc353f47a22d50c1a2a55a955c"
+    },
+    {
+      "path": "middleware/admin-auth.js",
+      "before": "6ba931fa29d61103b626ccc0583fee7e59c60f09fe1a41e350e630c99bc446f7",
+      "after": "da07d86ebe0f9b034f1102c1e11a3c56fc7034d584a9d2bdf4219e321660d4fa"
+    },
+    {
+      "path": "middleware/auth.js",
+      "before": "ae9cc2663c7fe351a5abaf4b179b050e0048a191f6a47f0e6a9aac60515751c0",
+      "after": "e7003930928b909502d09b21aad5ae9df467dea9de1e325f4752a1a5ea232a4b"
+    },
+    {
+      "path": "middleware/pwa.js",
+      "before": null,
+      "after": "faf3f80d37f2469603edcca36db87e2a2b8440043b7cc9baae9732fa32de161e"
+    },
+    {
+      "path": "middleware/security.js",
+      "before": "c887601d7c9e1700ebe84bdd4c568319a198b83bafab32aa3386f986967b4c3a",
+      "after": "a9ca44ed72986e3fae408d07ea3e7797b3be7fe9677cbe27c75fc0c4ffae9b24"
+    },
+    {
+      "path": "package.json",
+      "before": "cd864ca017919cc5ae7b5a1748da64a8ecea410c108265e2c9405ce8b0152b2c",
+      "after": "94ab6381c7c66a4a96264667d953720b71560adb0d8c72d1d190f9babd814c2a"
+    },
+    {
+      "path": "public/about.html",
+      "before": "b0a9fb33803d41051ab6a3058dde8d9936e3d6366cfcfe511caabe89051b92fe",
+      "after": "4bc32f030c9dec3f2c9d40e0a5ec3726126c1a01dba086c961a40d1f4e39bf59"
+    },
+    {
+      "path": "public/account/index.html",
+      "before": "27f0d1b8addaa77d9b50cffccd28a2a0f0e2814a0b725d7abd0c8d4cb2bf5d98",
+      "after": "e2916b3cc76f9667d05fabe47077128ab35acd2c29acf7b8e1fca4d091345b3d"
+    },
+    {
+      "path": "public/business.html",
+      "before": "d61e846de227b43401fca42a200b3dc7962d022fa08e2b220ebaa3ee3ddc45e2",
+      "after": "dae34e1799c7e4df2aade09fe19aac2d057e90b164620d85dfff22853b76ff19"
+    },
+    {
+      "path": "public/cart.html",
+      "before": "e5f40d1436580476fc8255ae04b7f5ae83b5ebc7f7fb21f3e54f037779f5c61a",
+      "after": "a3606a5f240e00a295ccdf28cc97b050c0deec688068ee9ae4ed194942bd3eff"
+    },
+    {
+      "path": "public/catalog.html",
+      "before": "2cdbcf818e9a2f80063b20618b61549ba354f8f5fa0d00a18e14356e1d6db922",
+      "after": "546d1d7a0d1e0d5ec524c3267e1f02f95d1dc71817c0aff4d07578bb5b3739ff"
+    },
+    {
+      "path": "public/checkout.html",
+      "before": "ae85ee061c0891c1ecd6087d95690f920cdd807a8bab3ed824554787f4c0e3af",
+      "after": "c078994b327237041cfeaeeb176e6bcf5992516180247207a770742f5bcccbae"
+    },
+    {
+      "path": "public/contacts.html",
+      "before": "93ea822b31d5ca453af08e04c82beebbc60c1bf5e9921dffc43f7b666f89cae7",
+      "after": "7af2b380ce9cf16786b1816b67870d653982177ae5f1f22fd7e77abcb8f7bfb8"
+    },
+    {
+      "path": "public/delivery-terms.html",
+      "before": "019265b87c4eea192a6999f9e2c33f60a3d11331a9820c3c20062a628b0aa66d",
+      "after": "fe54ba8fec258b5abcb6eb5246d3f0335bef38124f74f96a3b64d3c6b1c27162"
+    },
+    {
+      "path": "public/delivery.html",
+      "before": "6eba1b60367078e839248481c3815c9d0ebbf2231fdc38475b5a2a6c9a2b2913",
+      "after": "da9b380258de0accaa646d2312a1d1fd36a67673a1abd5b2ae00dd528a5f13bc"
+    },
+    {
+      "path": "public/faq.html",
+      "before": "9a44ab21d4b8f32ef25f8b99d5ee88eee87efc7aae64950299127c47f92e0266",
+      "after": "67ed2f6469a1ca006b809f983f0b412fa4ee1d2e3b88540217c3ec5754e71071"
+    },
+    {
+      "path": "public/favorites.html",
+      "before": "f216347385251d8d766ad228811412fde613d961a4019c12d92beda19c5a8a90",
+      "after": "ebff83feddfe5ce6bdfd1a6ce0c696509f0bb7d4e39cff4e32a83bc944babb81"
+    },
+    {
+      "path": "public/forgot-password.html",
+      "before": "fe6c8e3ff112a7eb4ce06827820b47c318c3f6440ebc1a2cab75adf47a529e37",
+      "after": "58aad7b6db15d3436bd8d1e849781d71eadb43fc1bb48937a6c69aa09bc25425"
+    },
+    {
+      "path": "public/how-to-order.html",
+      "before": "e0dfb988dbfd22a7eb6550f3a9bb4491703fb796a2a71a5437713788ed6f373c",
+      "after": "336b829756ce950d922ac7e6c37ab3c30d7a34c92fa4216b79f0497123a5021b"
+    },
+    {
+      "path": "public/index.html",
+      "before": "2a52bc8fab8a1a771f92cbbb599d2485d4638b7eefb2ceba6435b946eea75152",
+      "after": "1e08606fab8c8df7b3d33c6b6bf673bd302c382aef09d987750498993f038275"
+    },
+    {
+      "path": "public/login.html",
+      "before": "3aded01be328c4a8a07e6c0b28516be4a0502cd828ec50a5befccea1a09e84a3",
+      "after": "2bbbbcd13873f9922accb43ec791db5108d2f617e8542c8d7df8e9362b203340"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "before": null,
+      "after": "76d15f0c8b6ed02372ec024f079ec4b015d1a5813cc9215226d35b5bd4917f6b"
+    },
+    {
+      "path": "public/offer.html",
+      "before": "2fc390e273e449363dbd67c30c1e061f7775ee4dcfd4bc4be456e43c1eae7181",
+      "after": "5d591853202b6be5f865e52524d1917d8e5075d6c2aee87e55ff93d838a6bbd1"
+    },
+    {
+      "path": "public/offline.html",
+      "before": null,
+      "after": "eb5d62cb6cecac7795649424ba57fd532369a599e54a647f5da89a1d39d04386"
+    },
+    {
+      "path": "public/personal-data-consent.html",
+      "before": "d693af54987cb5937a96f4ed37d87b3d5b30dfcf8ab75538ad2f281b18683fd0",
+      "after": "16565a4c4d5540f230d07894d5df605d6f318590eb26d2f0ee412bb4c12cf80a"
+    },
+    {
+      "path": "public/privacy-policy.html",
+      "before": "a6bf099d76952fe002df4bf46ee5b4353b052eac0e61857e673b453390d23621",
+      "after": "f2c3db54a74190afa84c047fc3e08eb3e5946bbdd9e247ad97b9f173462b9dc4"
+    },
+    {
+      "path": "public/product.html",
+      "before": "7ec1205acf2568bd293ecea05153ab5cc058524f33c258fedd41f22c257c6670",
+      "after": "7662f5602cee872c2be43d4ec36e919d9c3be25b0a90156402a0d2846363ded5"
+    },
+    {
+      "path": "public/production.html",
+      "before": "a3af519d4a274b0bac9a310300feeb103b4892d46788069e5c70df9937b926b3",
+      "after": "4b3c5267a5586e32867559232b54eab7702dfeef26f4d3628d1de6f27eb0f840"
+    },
+    {
+      "path": "public/promotions.html",
+      "before": "1b2daf84387bdc80b19f7d224ac82daeed3f0e22efed691423690678aae23245",
+      "after": "2e337d3c997caa590196d64649c2e77cb6b7e5dc0ddee20c0b7127f7074bb778"
+    },
+    {
+      "path": "public/pwa/apple-touch-icon.png",
+      "before": null,
+      "after": "2d9cbee5c4b169436096455f0f281f3952f2f652535e751950e65e0d84b6c5bd"
+    },
+    {
+      "path": "public/pwa/icon-192.png",
+      "before": null,
+      "after": "f9b178f395257411936db39d9bf3a675ba2eb21767ab7fc72240e04523f8db5f"
+    },
+    {
+      "path": "public/pwa/icon-512.png",
+      "before": null,
+      "after": "fa1ca3f3fa769dbbfcfcd5505e4bc711cc791f8c9aeedcb1b19d440314811789"
+    },
+    {
+      "path": "public/pwa/icon.svg",
+      "before": null,
+      "after": "a41cca88689c726a5bf493307761a0a3b906b8a9815bf58e78e8e63e7e5b16ae"
+    },
+    {
+      "path": "public/pwa/maskable-512.png",
+      "before": null,
+      "after": "fa1ca3f3fa769dbbfcfcd5505e4bc711cc791f8c9aeedcb1b19d440314811789"
+    },
+    {
+      "path": "public/register.html",
+      "before": "5e98892ab32505bdc759a853bbbcd6ddb73d09dff88da7b96774b1826863a112",
+      "after": "ed7942c82ff224ce50fdee34880a6a2cfe764b11754ad941d58f203f85808c19"
+    },
+    {
+      "path": "public/reset-password.html",
+      "before": "b6121ff9dbdef10e4f4088109463ed9123fb09119456988ec6c1b47c18b0bb74",
+      "after": "a5940be84ad6e7192eb665c834ecdd19cc71c621d5d20b3f808119a2e5153b69"
+    },
+    {
+      "path": "public/reviews.html",
+      "before": "2c34ff22f8389a93bf40ab288eb1bf1f4e6c1146fa439cfa98e28a02c4c2f637",
+      "after": "a797b561560c543dadc76236f696ece11b7a91d2dabf5d5e0830f31d16f4da67"
+    },
+    {
+      "path": "public/subscription.html",
+      "before": "9f0fffb8bf5cd79141c4936e6e42f93b2a620faa3f86dc4f33e4ae11b6f0d35d",
+      "after": "3ff6471478007d8452dda4c71c9f4f1538ee341ddfd15d9661149670182ec5cf"
+    },
+    {
+      "path": "public/sw.js",
+      "before": null,
+      "after": "904a8a2d8229bd135c67cb8c261872e1f2e43be75b96d1c8d00268d30282085f"
+    },
+    {
+      "path": "scripts/smoke-pwa.mjs",
+      "before": null,
+      "after": "0b2b2a1f74072fd5988df181dde97e534a4cca0a564b10da2fe8ef44b9189f8f"
+    },
+    {
+      "path": "scripts/stage11a-patch.mjs",
+      "before": null,
+      "after": "79496d23ddd9bde7795807eb7f2fef806930f1ac2c6d6588035ed263fd3657dd"
+    },
+    {
+      "path": "services/auth.service.js",
+      "before": "0995e4e0fd118bb2f31d0783b5b80fc6bdef1f2f5a4dfd54d4e5d8f1bc9a190e",
+      "after": "447ba4b9f40e491d37905f30d12458d329a63f1935af9f4105f73e21f3eed407"
+    },
+    {
+      "path": "site/css/pwa.css",
+      "before": null,
+      "after": "e09369c720893fa1492428172509ed26d024c174b893cd167b238aaa277e68b3"
+    },
+    {
+      "path": "site/css/pwa.min.css",
+      "before": null,
+      "after": "7e2c7a2d6ac551b773840856b32c3f070d3f715cc0b7f21f565cb49588d0dc0f"
+    },
+    {
+      "path": "site/js/pwa-policy.js",
+      "before": null,
+      "after": "d41427c13086dab847507db11bdfa7da3d2b6827811605fb63401bc7d9d15a91"
+    },
+    {
+      "path": "site/js/pwa.js",
+      "before": null,
+      "after": "78760e31e3533c251adb4c3b85aeb896a163dceebf3193ecf21c374935769f5e"
+    },
+    {
+      "path": "site/scss/pwa.scss",
+      "before": null,
+      "after": "95061e70aa5ff62f1b800f27ef68b3cbddb5c51bbd88353d41709a33f263689b"
+    },
+    {
+      "path": "tests/customer-sessions.test.mjs",
+      "before": null,
+      "after": "a91c445a73ab20d48c73c84723a406c22617da9fac1b9f6c62aa45e954891ea1"
+    },
+    {
+      "path": "tests/pwa-app.test.mjs",
+      "before": null,
+      "after": "3a7145c9f6e7e7408ecdd8f888d17f7f0c4f123dc54d5becbff4b4cb5aa9d8bb"
+    },
+    {
+      "path": "tests/pwa-cookies.test.mjs",
+      "before": null,
+      "after": "83404c856e2e67b5525fd197cc9dfd22b284af2f83a9c2ffdf0bf04f7ba1084a"
+    },
+    {
+      "path": "tests/pwa-http.test.mjs",
+      "before": null,
+      "after": "d383e19847dbc11f03132d07a9fb75115ba40b91200169592888149ed99618fc"
+    },
+    {
+      "path": "tests/pwa-patch.test.mjs",
+      "before": null,
+      "after": "386910e787f9daf1778d79448030202551732ccdb65e8001450de7e7f4075fba"
+    },
+    {
+      "path": "tests/pwa-policy.test.mjs",
+      "before": null,
+      "after": "7bfb9fe396ab09e7ee7fe4f175cb2b75cee7f5b0565154fd2790fb2e764cf624"
+    },
+    {
+      "path": "tests/pwa-worker.test.mjs",
+      "before": null,
+      "after": "19408e056aeb0106c3ca9f60bb70dd5e32a34a4fd3d511729cd95783ac15ef0e"
+    }
+  ]
+}

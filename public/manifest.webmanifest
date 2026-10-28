@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "Сибирские Деликатесы",
+  "short_name": "СибДел",
+  "description": "Каталог продуктов, корзина и личный кабинет Сибирских Деликатесов",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5ead4",
+  "theme_color": "#4f5b24",
+  "icons": [
+    { "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Каталог", "url": "/catalog.html" },
+    { "name": "Корзина", "url": "/cart.html" },
+    { "name": "Личный кабинет", "url": "/account" }
+  ]
+}

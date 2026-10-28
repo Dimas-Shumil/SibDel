@@ -18,6 +18,8 @@ const helmetMiddleware = helmet({
       frameAncestors: ["'none'"],
 
       scriptSrc: ["'self'"],
+      workerSrc: ["'self'"],
+      manifestSrc: ["'self'"],
       scriptSrcAttr: ["'none'"],
 
       styleSrc: ["'self'", "'unsafe-inline'"],
