@@ -1,0 +1,49 @@
+warning: in the working copy of 'site/css/account.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/admin.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/auth.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/cart.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/catalog.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/checkout.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/information.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/main.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/product.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'site/css/pwa.css', LF will be replaced by CRLF the next time Git touches it
+ admin-pages/categories.html     |   5 [32m++[m
+ admin-pages/customer.html       |   5 [32m++[m
+ admin-pages/customers.html      |   5 [32m++[m
+ admin-pages/dashboard.html      |   5 [32m++[m
+ admin-pages/delivery.html       |   5 [32m++[m
+ admin-pages/employees.html      |   5 [32m++[m
+ admin-pages/order.html          |   5 [32m++[m
+ admin-pages/orders.html         |   5 [32m++[m
+ admin-pages/product-edit.html   |   5 [32m++[m
+ admin-pages/products.html       |   5 [32m++[m
+ admin-pages/promotion-edit.html |   5 [32m++[m
+ admin-pages/promotions.html     |   5 [32m++[m
+ admin-pages/push.html           |   5 [32m++[m
+ admin-pages/reviews.html        |   5 [32m++[m
+ admin-pages/subscriptions.html  |   5 [32m++[m
+ admin-pages/warehouse.html      |   5 [32m++[m
+ middleware/pwa.js               |   1 [32m+[m
+ site/css/account.css            |   2 [32m+[m[31m-[m
+ site/css/account.min.css        |   2 [32m+[m[31m-[m
+ site/css/admin.css              |   2 [32m+[m[31m-[m
+ site/css/admin.min.css          |   2 [32m+[m[31m-[m
+ site/css/auth.css               |   2 [32m+[m[31m-[m
+ site/css/auth.min.css           |   2 [32m+[m[31m-[m
+ site/css/cart.css               |   2 [32m+[m[31m-[m
+ site/css/cart.min.css           |   2 [32m+[m[31m-[m
+ site/css/catalog.css            |   2 [32m+[m[31m-[m
+ site/css/catalog.min.css        |   2 [32m+[m[31m-[m
+ site/css/checkout.css           |   2 [32m+[m[31m-[m
+ site/css/checkout.min.css       |   2 [32m+[m[31m-[m
+ site/css/information.css        |   2 [32m+[m[31m-[m
+ site/css/main.css               |   2 [32m+[m[31m-[m
+ site/css/main.min.css           |   2 [32m+[m[31m-[m
+ site/css/product.css            |   2 [32m+[m[31m-[m
+ site/css/product.min.css        |   2 [32m+[m[31m-[m
+ site/css/pwa.css                |   2 [32m+[m[31m-[m
+ site/css/pwa.min.css            |   2 [32m+[m[31m-[m
+ site/js/pwa.js                  | 116 [32m+++[m[31m-------------------------------------[m
+ tests/pwa-http.test.mjs         |  37 [32m+++++++++++[m[31m--[m
+ 38 files changed, 141 insertions(+), 131 deletions(-)
