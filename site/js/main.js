@@ -1626,3 +1626,81 @@ async function hydratePublicDelivery() {
   }
 }
 document.addEventListener('DOMContentLoaded', () => { void hydratePublicDelivery(); });
+
+// BEGIN ADMIN QUICK CATEGORIES
+function renderFeaturedCategoryTiles(categories, mode = 'home') {
+  const home = mode === 'home';
+  const root = document.querySelector(home ? '.quick-categories' : '.catalog-categories');
+  const list = root?.querySelector(home ? '.quick-categories__list' : '.catalog-categories__list');
+  if (!root || !list) return;
+  const items = (Array.isArray(categories) ? categories : [])
+    .filter((category) => category.isFeatured === true && category.isActive !== false &&
+      typeof category.slug === 'string' && category.slug && typeof category.name === 'string')
+    .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0) ||
+      a.name.localeCompare(b.name, 'ru') || Number(a.id || 0) - Number(b.id || 0));
+  const selected = new URLSearchParams(window.location.search).get('category');
+  const fragment = document.createDocumentFragment();
+  items.forEach((category) => {
+    const card = document.createElement('a');
+    card.className = home ? 'quick-categories__item' : 'catalog-category';
+    card.href = '/catalog.html?' + new URLSearchParams({ category: category.slug });
+    if (!home && category.slug === selected) {
+      card.classList.add('catalog-category--active');
+      card.setAttribute('aria-current', 'true');
+    }
+    const imageWrap = document.createElement(home ? 'div' : 'span');
+    imageWrap.className = home ? 'quick-categories__image-wrapper' : 'catalog-category__image-wrap';
+    let imageUrl = null;
+    if (typeof category.imageUrl === 'string' && category.imageUrl.trim()) {
+      try {
+        const url = new URL(category.imageUrl.trim(), window.location.origin);
+        if (url.origin === window.location.origin && ['http:', 'https:'].includes(url.protocol)) {
+          imageUrl = url.href;
+        }
+      } catch { /* A category can be displayed without an image. */ }
+    }
+    const showPlaceholder = () => {
+      imageWrap.textContent = category.name.trim().charAt(0).toUpperCase();
+      imageWrap.setAttribute('aria-hidden', 'true');
+    };
+    if (imageUrl) {
+      const image = document.createElement('img');
+      image.className = home ? 'quick-categories__image' : 'catalog-category__image';
+      image.alt = '';
+      image.width = 110;
+      image.height = 110;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.addEventListener('error', showPlaceholder, { once: true });
+      image.src = imageUrl;
+      imageWrap.append(image);
+    } else { showPlaceholder(); }
+    const name = document.createElement('span');
+    name.className = home ? 'quick-categories__name' : 'catalog-category__name';
+    name.textContent = category.name;
+    card.append(imageWrap, name);
+    fragment.append(card);
+  });
+  list.replaceChildren(fragment);
+  root.hidden = items.length === 0;
+}
+
+async function hydrateHomeQuickCategories() {
+  const root = document.querySelector('.quick-categories');
+  if (!root) return;
+  root.hidden = true;
+  try {
+    const response = await fetch('/api/categories', {
+      credentials: 'same-origin', cache: 'no-store', headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) throw new Error('Не удалось загрузить быстрые категории.');
+    const payload = await response.json();
+    if (!Array.isArray(payload.categories)) throw new Error('Некорректный список категорий.');
+    renderFeaturedCategoryTiles(payload.categories, 'home');
+  } catch (error) {
+    root.hidden = true;
+    console.error('Быстрые категории:', error);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => { void hydrateHomeQuickCategories(); });
+// END ADMIN QUICK CATEGORIES

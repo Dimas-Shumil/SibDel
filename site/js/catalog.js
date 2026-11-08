@@ -69,10 +69,12 @@ const CATALOG_CATEGORY_ALIASES = Object.freeze({
 
 function normalizeCatalogCategorySlug(slug) {
   const normalized = String(slug || "").trim();
-  return CATALOG_CATEGORY_ALIASES[normalized] || normalized;
+  return catalogCategoriesCache.some((item) => item.slug === normalized)
+    ? normalized : CATALOG_CATEGORY_ALIASES[normalized] || normalized;
 }
 
 function syncTopCategoryLinks(categories = catalogCategoriesCache) {
+  renderFeaturedCategoryTiles(categories, "catalog");
   const categorySlugs = new Set(categories.map((category) => category.slug));
   const selected = normalizeCatalogCategorySlug(
     new URLSearchParams(window.location.search).get("category") || "all",
