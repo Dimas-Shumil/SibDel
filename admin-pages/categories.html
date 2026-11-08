@@ -35,7 +35,7 @@
       </aside>
 
       <main class="admin-main">
-        <header class="admin-header"><div><p class="admin-eyebrow">CMS · Categories</p><h1>Категории</h1><p class="admin-header__lead">Структура каталога без опасного удаления связанных товаров.</p></div><div class="admin-header__actions"><a class="admin-button admin-button--secondary" href="/admin/products">Товары</a></div></header>
+        <header class="admin-header"><div><p class="admin-eyebrow">CMS · Categories</p><h1>Категории</h1><p class="admin-header__lead">Структура каталога без опасного удаления связанных товаров.</p></div><div class="admin-header__actions"><a class="admin-button admin-button--secondary" href="#production-cards">Карточки «О продукции»</a><a class="admin-button admin-button--secondary" href="/admin/products">Товары</a></div></header>
 
         <section class="admin-grid admin-grid--categories">
           <article class="admin-panel">
@@ -45,13 +45,20 @@
               <label class="admin-field"><span>Название *</span><input name="name" maxlength="150" required /></label>
               <label class="admin-field"><span>Slug *</span><input name="slug" maxlength="191" required /></label>
               <label class="admin-field"><span>Описание</span><textarea name="description" rows="5"></textarea></label>
-              <label class="admin-field"><span>URL изображения</span><input name="imageUrl" maxlength="500" placeholder="/uploads/... или /site/img/..." /></label>
+              <input name="imageUrl" type="hidden" />
+              <div class="admin-image-picker">
+                <label class="admin-field"><span>Фото категории · для главной и каталога</span><input type="file" accept="image/jpeg,image/png,image/webp" data-category-file /></label>
+                <p class="admin-form-note">Выберите фото с компьютера: JPG, PNG или WebP до 8 МБ. Загрузится при сохранении категории.</p>
+                <img class="admin-image-picker__preview" data-category-preview alt="Предпросмотр фото категории" width="240" height="160" hidden />
+                <p class="admin-form-note" data-category-image-status role="status" aria-live="polite">Фото пока не выбрано.</p>
+                <button class="admin-button admin-button--secondary" type="button" data-category-remove-image>Убрать фото</button>
+              </div>
               <label class="admin-field"><span>Порядок</span><input name="sortOrder" type="number" step="1" value="0" /></label>
               <div class="admin-check-grid admin-check-grid--category">
                 <label class="admin-check"><input type="checkbox" name="isActive" checked /><span>Активна</span></label>
                 <label class="admin-check"><input type="checkbox" name="isFeatured" /><span>Показывать в быстрых категориях</span></label>
               </div>
-              <p class="admin-form-note">Активная категория с этой галочкой появится на главной и сверху в каталоге. Порядок задаётся числом: меньше — раньше. Укажите путь к картинке на сайте, например /site/images/categories/lolbasy.webp. Без картинки отображается первая буква названия.</p>
+              <p class="admin-form-note">Активная категория с этой галочкой появится на главной и сверху в каталоге. Порядок задаётся числом: меньше — раньше. Загрузите фото выше — оно появится в карточке. Без фото отображается первая буква названия.</p>
               <button class="admin-button admin-button--full" type="submit" data-category-save>Сохранить категорию</button>
             </form>
           </article>
@@ -63,6 +70,23 @@
             </div>
             <p class="admin-form-note admin-category-delete-note">Если у категории есть товары, OWNER не удаляет её физически: система переводит категорию в неактивное состояние.</p>
           </article>
+        </section>
+        <section class="admin-panel" id="production-cards" aria-labelledby="production-editor-title">
+          <div class="admin-panel__head"><div><h2 id="production-editor-title">О продукции · главная страница</h2><p>Карточки управляются независимо от быстрых категорий. Меньший порядок — раньше. Удаление доступно владельцу.</p></div></div>
+          <form class="admin-category-form" data-production-form>
+            <input type="hidden" name="id" />
+            <label class="admin-field"><span>Название *</span><input name="name" required minlength="2" maxlength="200" /></label>
+            <label class="admin-field"><span>Куда перейти</span><select name="target" required data-production-target></select></label>
+            <label class="admin-field"><span>Изображение</span><select name="imageUrl" required data-production-image></select></label>
+            <label class="admin-field"><span>Загрузить фото с компьютера · JPG, PNG, WebP до 8 МБ</span><input type="file" accept="image/jpeg,image/png,image/webp" data-production-file /></label><p class="admin-form-note">Выберите готовое изображение из списка или своё фото. Файл загрузится при сохранении карточки.</p>
+            <img class="admin-image-picker__preview" data-production-preview alt="Предпросмотр изображения карточки" width="160" height="120" hidden />
+            <label class="admin-field"><span>Порядок</span><input name="sortOrder" type="number" min="-100000" max="100000" step="1" value="0" required /></label>
+            <label class="admin-check"><input name="isActive" type="checkbox" checked /><span>Показывать на главной</span></label>
+            <p class="admin-form-note" data-production-status role="status" aria-live="polite"></p>
+            <button class="admin-button" type="submit" data-production-save>Сохранить карточку</button>
+            <button class="admin-button admin-button--secondary" type="button" data-production-reset>Новая карточка</button>
+          </form>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Карточка</th><th>Переход</th><th>Порядок</th><th>Показ</th><th>Действия</th></tr></thead><tbody data-production-list></tbody></table></div>
         </section>
         <div class="admin-toast" role="status" aria-live="polite" data-admin-toast hidden></div>
       </main>

@@ -1,3 +1,4 @@
+import { productionAdminRouter, productionPublicRouter } from "./routes/production-cards.routes.js";
 import { createHealthHandler } from "./middleware/health.js";
 import express from "express";
 import { testDatabaseFingerprint } from "./utils/test-environment.js";
@@ -230,6 +231,8 @@ app.use("/api/push", customerPushRouter);
 app.use("/api/admin/push", adminPushRouter);
 app.use("/api/catalog", catalogRouter);
 app.use("/api/categories", categoriesRouter);
+app.use("/api/production-cards", productionPublicRouter);
+app.use("/api/admin/catalog/production-cards", productionAdminRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/commerce", commerceRouter);
 app.use("/api/cart", cartRouter);

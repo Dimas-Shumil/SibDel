@@ -1391,6 +1391,7 @@ function resetCategoryForm() {
   const title = document.querySelector("[data-category-form-title]");
   if (title) title.textContent = "Новая категория";
   categorySlugTouched = false;
+  refreshCategoryImagePreview();
 }
 
 function renderAdminCategories(categories) {
@@ -1412,10 +1413,13 @@ function renderAdminCategories(categories) {
 
   body.querySelectorAll("[data-category-edit]").forEach((button) => {
     button.addEventListener("click", () => {
+      if (document.querySelector('[data-category-save]')?.disabled) return;
       const category = adminCatalogCategories.find((item) => item.id === Number(button.dataset.categoryEdit));
       const form = document.querySelector("[data-category-form]");
       if (!category || !(form instanceof HTMLFormElement)) return;
+      form.querySelector("[data-category-file]").value = "";
       ["id", "name", "slug", "description", "imageUrl", "sortOrder", "isActive", "isFeatured"].forEach((name) => setProductField(form, name, category[name]));
+      refreshCategoryImagePreview();
       categorySlugTouched = true;
       const title = document.querySelector("[data-category-form-title]");
       if (title) title.textContent = `Редактирование: ${category.name}`;
@@ -1425,6 +1429,7 @@ function renderAdminCategories(categories) {
 
   body.querySelectorAll("[data-category-delete]").forEach((button) => {
     button.addEventListener("click", async () => {
+      if (document.querySelector('[data-category-save]')?.disabled) return;
       const category = adminCatalogCategories.find((item) => item.id === Number(button.dataset.categoryDelete));
       if (!category) return;
       const message = category.productsCount > 0
@@ -1444,6 +1449,7 @@ function renderAdminCategories(categories) {
 async function loadAdminCategoriesPage() {
   await fetchAdminCatalogCategories();
   renderAdminCategories(adminCatalogCategories);
+  document.dispatchEvent(new Event('admin:categories-changed'));
 }
 
 async function initAdminCategories() {
@@ -1465,7 +1471,14 @@ async function initAdminCategories() {
       if (!categorySlugTouched) slugInput.value = slugifyAdmin(nameInput.value);
     });
   }
-  reset?.addEventListener("click", resetCategoryForm);
+  reset?.addEventListener("click", () => { if (!document.querySelector("[data-category-save]")?.disabled) resetCategoryForm(); });
+  form.querySelector('[data-category-file]')?.addEventListener('change', refreshCategoryImagePreview);
+  form.querySelector('[data-category-remove-image]')?.addEventListener('click', () => {
+    form.elements.imageUrl.value = '';
+    form.querySelector('[data-category-file]').value = '';
+    refreshCategoryImagePreview();
+  });
+  refreshCategoryImagePreview();
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1481,8 +1494,22 @@ async function initAdminCategories() {
       isFeatured: data.get("isFeatured") === "on",
     };
     const save = document.querySelector("[data-category-save]");
+    if (save?.disabled) return;
     if (save instanceof HTMLButtonElement) save.disabled = true;
+    const controls = [...form.querySelectorAll('input, textarea, button')];
+    const previousDisabled = controls.map(control => control.disabled);
+    controls.forEach(control => { control.disabled = true; });
     try {
+      const fileInput = form.querySelector('[data-category-file]');
+      if (fileInput?.files[0]) {
+        validateAdminImageFile(fileInput.files[0]);
+        const body = new FormData(); body.append('image', fileInput.files[0]);
+        const result = await adminFetch('/api/admin/catalog/categories/image', { method: 'POST', body });
+        payload.imageUrl = result.imageUrl;
+        form.elements.imageUrl.value = result.imageUrl;
+        fileInput.value = '';
+        refreshCategoryImagePreview();
+      }
       await adminFetch(Number.isInteger(id) && id > 0 ? `/api/admin/catalog/categories/${id}` : "/api/admin/catalog/categories", {
         method: Number.isInteger(id) && id > 0 ? "PATCH" : "POST",
         body: JSON.stringify(payload),
@@ -1493,6 +1520,7 @@ async function initAdminCategories() {
     } catch (error) {
       showAdminToast(error.message, "error");
     } finally {
+      controls.forEach((control, index) => { control.disabled = previousDisabled[index]; });
       if (save instanceof HTMLButtonElement) save.disabled = false;
     }
   });
@@ -2714,6 +2742,7 @@ async function initAdminApplication() {
     initAdminProducts(),
     initAdminProductEditor(),
     initAdminCategories(),
+    initAdminProductionCards(),
     initAdminCustomers(),
     initAdminCustomerDetail(),
     initAdminPromotions(),
@@ -2902,4 +2931,141 @@ async function initAdminStaff() {
 
   try { await Promise.all([reloadStaff(), reloadActivity()]); }
   catch (error) { showAdminToast(error.message, "error"); }
+}
+
+async function initAdminProductionCards() {
+  const form = document.querySelector('[data-production-form]');
+  if (!form) return;
+  const list = document.querySelector('[data-production-list]');
+  const target = form.elements.target;
+  const image = form.elements.imageUrl;
+  const file = form.querySelector('[data-production-file]');
+  const preview = form.querySelector('[data-production-preview]');
+  const save = form.querySelector('[data-production-save]');
+  const status = form.querySelector('[data-production-status]');
+  let cards = [];
+  let pages = {};
+  let pendingCategoryRefresh = false;
+  let busy = false;
+  const showImage = () => showAdminImagePreview(preview, file.files[0], image.value);
+  const reset = () => { form.reset(); form.elements.id.value = ''; status.textContent = ''; showImage(); };
+  const option = (value, label) => new Option(label, value);
+  function updateTargets(categories) {
+    const selected = target.value;
+    target.replaceChildren(...Object.entries(pages).map(([path, name]) => option('page:' + path, name)),
+      ...categories.filter(c => c.isActive).map(c => option('category:' + c.id, 'Категория: ' + c.name)));
+    if (selected) target.value = selected;
+  }
+  async function refreshTargets() {
+    if (busy) { pendingCategoryRefresh = true; return; }
+    pendingCategoryRefresh = false;
+    try {
+      const catalog = await adminFetch('/api/admin/catalog/categories?includeInactive=true');
+      if (Object.keys(pages).length) updateTargets(catalog.categories);
+    } catch (error) { status.textContent = error.message; }
+  }
+  document.addEventListener('admin:categories-changed', () => { void refreshTargets(); });
+  async function load() {
+    const [data, catalog] = await Promise.all([
+      adminFetch('/api/admin/catalog/production-cards'),
+      adminFetch('/api/admin/catalog/categories?includeInactive=true'),
+    ]);
+    cards = data.cards;
+    pages = data.pages;
+    updateTargets(catalog.categories);
+    const images = new Map(data.images.map(i => [i.url, i.name]));
+    cards.forEach(c => { if (!images.has(c.imageUrl)) images.set(c.imageUrl, 'Загруженное: ' + c.name); });
+    image.replaceChildren(...[...images].map(([url, name]) => option(url, name)));
+    list.innerHTML = cards.length ? cards.map(c => `<tr><td>${escapeAdminHtml(c.name)}</td><td>${escapeAdminHtml(c.category?.name || data.pages[c.pagePath] || 'Категория удалена')}${c.href ? '' : ' · переход недоступен'}</td><td>${c.sortOrder}</td><td>${c.isActive ? 'Включён' : 'Выключен'}</td><td><button type="button" class="admin-icon-button" data-production-edit="${c.id}">Изменить</button>${currentAdminUser?.role === 'OWNER' ? `<button type="button" class="admin-icon-button admin-icon-button--danger" data-production-delete="${c.id}">Удалить</button>` : ''}</td></tr>`).join('') : '<tr><td colspan="5">Карточек нет</td></tr>';
+  }
+  image.addEventListener('change', () => { file.value = ''; showImage(); });
+  form.querySelector('[data-production-reset]').addEventListener('click', () => { if (!busy) reset(); });
+  file.addEventListener('change', () => { showImage(); status.textContent = file.files[0] ? 'Изображение будет загружено при сохранении.' : ''; });
+  list.addEventListener('click', async (event) => {
+    if (busy) return;
+    const edit = event.target.closest('[data-production-edit]');
+    const remove = event.target.closest('[data-production-delete]');
+    const card = cards.find(c => c.id === Number(edit?.dataset.productionEdit || remove?.dataset.productionDelete));
+    if (!card) return;
+    if (edit) {
+      reset();
+      ['id', 'name', 'sortOrder', 'imageUrl'].forEach(key => { form.elements[key].value = card[key]; });
+      form.elements.isActive.checked = card.isActive;
+      target.value = card.categoryId ? 'category:' + card.categoryId : 'page:' + card.pagePath;
+      showImage(); form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      form.elements.name.focus({ preventScroll: true });
+    } else if (confirm(`Удалить карточку «${card.name}» с главной?`)) {
+      busy = true;
+      try { await adminFetch('/api/admin/catalog/production-cards/' + card.id, { method: 'DELETE' }); await load(); reset(); }
+      catch (error) { status.textContent = error.message; }
+      finally { busy = false; if (pendingCategoryRefresh) void refreshTargets(); }
+    }
+  });
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (busy || !form.reportValidity()) return;
+    busy = true; save.disabled = true; status.textContent = 'Сохраняем…';
+    const controls = [...form.querySelectorAll('input, select, button')];
+    const previousDisabled = controls.map(control => control.disabled);
+    controls.forEach(control => { control.disabled = true; });
+    try {
+      if (file.files[0]) {
+        validateAdminImageFile(file.files[0]);
+        const body = new FormData(); body.append('image', file.files[0]);
+        const result = await adminFetch('/api/admin/catalog/production-cards/image', { method: 'POST', body });
+        image.add(option(result.imageUrl, 'Новое загруженное изображение')); image.value = result.imageUrl;
+        file.value = ''; showImage();
+      }
+      const id = form.elements.id.value;
+      const isCategory = target.value.startsWith('category:');
+      await adminFetch('/api/admin/catalog/production-cards' + (id ? '/' + id : ''), {
+        method: id ? 'PUT' : 'POST',
+        body: JSON.stringify({ name: form.elements.name.value.trim(), imageUrl: image.value,
+          categoryId: isCategory ? Number(target.value.slice(9)) : null,
+          pagePath: isCategory ? null : target.value.slice(5),
+          sortOrder: Number(form.elements.sortOrder.value), isActive: form.elements.isActive.checked }),
+      });
+      await load(); reset(); status.textContent = 'Карточка сохранена.';
+    } catch (error) { status.textContent = error.message; }
+    finally { controls.forEach((control, index) => { control.disabled = previousDisabled[index]; }); busy = false; save.disabled = false; if (pendingCategoryRefresh) void refreshTargets(); }
+  });
+  try { await load(); reset(); } catch (error) { status.textContent = error.message; }
+}
+
+function validateAdminImageFile(file) {
+  if (file.size > 8 * 1024 * 1024) throw new Error('Файл должен быть не больше 8 МБ.');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Выберите изображение JPG, PNG или WebP.');
+}
+
+function showAdminImagePreview(preview, file, savedUrl) {
+  if (!preview) return;
+  if (preview.dataset.objectUrl) { URL.revokeObjectURL(preview.dataset.objectUrl); delete preview.dataset.objectUrl; }
+  preview.hidden = true;
+  preview.removeAttribute('src');
+  if (file) {
+    try { validateAdminImageFile(file); } catch { return; }
+    preview.dataset.objectUrl = URL.createObjectURL(file);
+    preview.src = preview.dataset.objectUrl;
+  } else if (savedUrl) {
+    try {
+      const url = new URL(savedUrl, location.origin);
+      if (url.origin !== location.origin || !['http:', 'https:'].includes(url.protocol)) return;
+      preview.src = url.href;
+    } catch { return; }
+  } else return;
+  preview.hidden = false;
+  preview.onerror = () => { preview.hidden = true; };
+}
+
+function refreshCategoryImagePreview() {
+  const form = document.querySelector('[data-category-form]');
+  if (!form) return;
+  const file = form.querySelector('[data-category-file]')?.files[0];
+  const savedUrl = form.elements.imageUrl.value;
+  const status = form.querySelector('[data-category-image-status]');
+  if (file) {
+    try { validateAdminImageFile(file); status.textContent = 'Выбрано: ' + file.name + '. Сохраните категорию.'; }
+    catch (error) { status.textContent = error.message; }
+  } else status.textContent = savedUrl ? 'Текущее фото категории.' : 'Фото пока не выбрано.';
+  showAdminImagePreview(form.querySelector('[data-category-preview]'), file, savedUrl);
 }

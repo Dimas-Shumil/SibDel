@@ -537,3 +537,13 @@ button { border: 0; }
   &__history { display: grid; gap: 16px; }
   &__campaign { padding: 20px; border: 1px solid #d8dce3; border-radius: 14px; overflow-wrap: anywhere; }
 }
+
+.admin-image-picker { display: grid; gap: 12px; }
+.admin-image-picker__preview { display: block; width: min(100%, 300px); height: auto; max-height: 220px; object-fit: contain; border-radius: 12px; background: #f7eedc; }
+.admin-image-picker__preview[hidden] { display: none; }
+#production-cards { margin-top: 24px; scroll-margin-top: 24px; }
+
+.admin-grid--categories > .admin-panel { min-width: 0; }
+.admin-category-form { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.admin-category-form .admin-field, .admin-image-picker { min-width: 0; }
+.admin-category-form input[type="file"] { min-width: 0; max-width: 100%; }

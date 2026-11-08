@@ -247,6 +247,7 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  productionCards ProductionCard[]
   products            Product[]
   promotionCategories PromotionCategory[]
 
@@ -1044,4 +1045,18 @@ model PushSubscriptionState {
   fingerprint String @db.VarChar(64)
   revision Int @default(1)
   subscription UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+}
+
+model ProductionCard {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(200)
+  imageUrl String @db.VarChar(500)
+  categoryId Int?
+  pagePath String? @db.VarChar(200)
+  sortOrder Int @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  @@index([isActive, sortOrder])
 }

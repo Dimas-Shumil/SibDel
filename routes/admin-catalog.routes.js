@@ -1,3 +1,4 @@
+import { saveCatalogImage, isSafeCatalogImagePath } from "../services/catalog-image.service.js";
 import { Router } from "express";
 import { z } from "zod";
 
@@ -145,7 +146,7 @@ const categoryBodySchema = z
     description: z.union([z.string().trim().max(10000), z.null()]).optional().transform((value) =>
       value === undefined ? undefined : value || null,
     ),
-    imageUrl: optionalNullableText(500),
+    imageUrl: optionalNullableText(500).refine(isSafeCatalogImagePath, "Используйте изображение, загруженное на сайт."),
     isActive: z.boolean(),
     sortOrder: z.coerce.number().int().min(-100000).max(100000),
     isFeatured: z.boolean(),
@@ -227,6 +228,11 @@ router.delete(
   validate({ params: productImageParamsSchema }),
   deleteProductImage,
 );
+
+router.post("/categories/image", adminMutationRateLimiter, productImageUpload.single("image"), async (req, res, next) => {
+  try { return res.status(201).json({ ok: true, imageUrl: await saveCatalogImage(req.file, "categories") }); }
+  catch (error) { return next(error); }
+});
 
 router.get("/categories", validate({ query: categoryListQuerySchema }), getCategories);
 router.post("/categories", adminMutationRateLimiter, validate({ body: categoryBodySchema }), postCategory);

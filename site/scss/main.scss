@@ -1048,6 +1048,29 @@ $hero-burn-ember: #e78b35;
   }
 }
 
+// Фото категории заполняет верх карточки, как в блоке «О продукции».
+.quick-categories__item--photo {
+  padding: 0;
+
+  .quick-categories__image-wrapper {
+    height: auto;
+    aspect-ratio: 1.4 / 1;
+    margin-bottom: 0;
+    overflow: hidden;
+  }
+
+  .quick-categories__image {
+    display: block;
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: none;
+  }
+
+  .quick-categories__name { padding: 12px 8px; }
+}
+
 // собственное производство
 
 .production {

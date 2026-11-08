@@ -1660,10 +1660,12 @@ function renderFeaturedCategoryTiles(categories, mode = 'home') {
       } catch { /* A category can be displayed without an image. */ }
     }
     const showPlaceholder = () => {
+      if (home) card.classList.remove('quick-categories__item--photo');
       imageWrap.textContent = category.name.trim().charAt(0).toUpperCase();
       imageWrap.setAttribute('aria-hidden', 'true');
     };
     if (imageUrl) {
+      if (home) card.classList.add('quick-categories__item--photo');
       const image = document.createElement('img');
       image.className = home ? 'quick-categories__image' : 'catalog-category__image';
       image.alt = '';
@@ -1704,3 +1706,32 @@ async function hydrateHomeQuickCategories() {
 }
 document.addEventListener('DOMContentLoaded', () => { void hydrateHomeQuickCategories(); });
 // END ADMIN QUICK CATEGORIES
+
+async function hydrateProductionCards() {
+  const mount = document.querySelector('[data-production-cards]');
+  if (!mount) return;
+  try {
+    const response = await fetch('/api/production-cards', { cache: 'no-store', headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('Не удалось загрузить блок «О продукции».');
+    const data = await response.json();
+    if (!data.ok || !Array.isArray(data.cards)) throw new Error('Некорректный ответ блока «О продукции».');
+    const fragment = document.createDocumentFragment();
+    for (const card of data.cards) {
+      const url = new URL(card.href, location.origin);
+      const imageUrl = new URL(card.imageUrl, location.origin);
+      if (url.origin !== location.origin || imageUrl.origin !== location.origin) continue;
+      const link = document.createElement('a'); link.className = 'production__card'; link.href = url.pathname + url.search;
+      const wrapper = document.createElement('div'); wrapper.className = 'production__image-wrapper';
+      const image = document.createElement('img'); image.className = 'production__image';
+      image.src = imageUrl.pathname; image.alt = card.name; image.loading = 'lazy'; image.decoding = 'async'; image.width = 1448; image.height = 1086;
+      image.addEventListener('error', () => { image.hidden = true; }, { once: true });
+      wrapper.append(image);
+      const content = document.createElement('div'); content.className = 'production__card-content';
+      const title = document.createElement('h3'); title.className = 'production__card-title'; title.textContent = card.name;
+      content.append(title); link.append(wrapper, content); fragment.append(link);
+    }
+    mount.querySelectorAll('.production__card').forEach(card => card.remove());
+    mount.prepend(fragment);
+  } catch (error) { console.error(error); }
+}
+document.addEventListener('DOMContentLoaded', () => { void hydrateProductionCards(); });
