@@ -26,6 +26,10 @@ test('root worker/manifest/offline HTTP headers and private paths prevent cachin
     assert.equal(manifest.status, 200);
     assert.match(manifest.headers.get('content-type'), /manifest\+json/);
     assert.equal(manifest.headers.get('cache-control'), 'no-cache');
+    const adminManifest = await get('/admin.webmanifest');
+    assert.equal(adminManifest.status, 200);
+    assert.match(adminManifest.headers.get('content-type'), /manifest\+json/);
+    assert.equal(adminManifest.headers.get('x-robots-tag'), 'noindex, nofollow');
     const offline = await get('/offline.html');
     assert.match(offline.headers.get('x-robots-tag'), /noindex/);
     assert.match(await offline.text(), /Пока нет подключения/);
@@ -50,7 +54,7 @@ test('manifest links real correctly sized icons and a public same-origin start U
   assert.ok(manifest.icons.some((icon) => icon.purpose === 'maskable'));
 });
 
-test('all public templates include PWA metadata/modules once, admin templates do not', async () => {
+test('shop and authenticated admin templates link their own app; login has no install UI', async () => {
   const files = (await readdir(root)).filter((file) => file.endsWith('.html') && file !== 'offline.html');
   files.push('account/index.html');
   for (const file of files) {
@@ -59,9 +63,36 @@ test('all public templates include PWA metadata/modules once, admin templates do
     assert.equal((html.match(/src="\/site\/js\/pwa.js"/g) || []).length, 1, file);
     assert.match(html, /apple-touch-icon/);
   }
-  const admin = await readFile(new URL('../admin-pages/login.html', import.meta.url), 'utf8');
-  assert.equal(admin.includes('/site/js/pwa.js'), false);
+  const adminRoot = new URL('../admin-pages/', import.meta.url);
+  const adminFiles = (await readdir(adminRoot)).filter((file) => file.endsWith('.html'));
+  for (const file of adminFiles) {
+    const html = await readFile(new URL(file, adminRoot), 'utf8');
+    assert.doesNotMatch(html, /src="\/site\/js\/pwa\.js"/, file);
+    if (html.includes('data-admin-app')) {
+      assert.match(html, /rel="manifest" href="\/admin\.webmanifest"/, file);
+      assert.match(html, /src="\/site\/js\/admin-pwa\.js"/, file);
+    } else {
+      assert.doesNotMatch(html, /rel="manifest"|admin-pwa\.js/, file);
+    }
+  }
   const css = await readFile(new URL('../site/css/pwa.min.css', import.meta.url), 'utf8');
   assert.equal(css.includes('!important'), false);
   assert.match(css, /prefers-reduced-motion/);
+});
+
+test('admin manifest has its own identity, authenticated launch URL and icon sizes', async () => {
+  const manifest = JSON.parse(await readFile(`${root}/admin.webmanifest`, 'utf8'));
+  assert.equal(manifest.id, '/admin/');
+  assert.equal(manifest.scope, '/admin/');
+  assert.equal(manifest.start_url, '/admin/');
+  assert.equal(manifest.display, 'standalone');
+  assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ['192x192', '512x512']);
+  for (const icon of manifest.icons) {
+    assert.match(icon.src, /^\/pwa\/admin-icon-/);
+    const bytes = await readFile(`${root}${icon.src}`);
+    const [width, height] = icon.sizes.split('x').map(Number);
+    assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
+    assert.equal(bytes.readUInt32BE(16), width);
+    assert.equal(bytes.readUInt32BE(20), height);
+  }
 });

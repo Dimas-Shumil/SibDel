@@ -5,6 +5,7 @@ export function pwaMiddleware(publicPath) {
   const resources = new Map([
     ['/sw.js', ['sw.js', 'application/javascript', 'no-store']],
     ['/manifest.webmanifest', ['manifest.webmanifest', 'application/manifest+json', 'no-cache']],
+    ['/admin.webmanifest', ['admin.webmanifest', 'application/manifest+json', 'no-cache']],
     ['/offline.html', ['offline.html', 'text/html', 'no-cache']],
   ]);
   return (req, res, next) => {
