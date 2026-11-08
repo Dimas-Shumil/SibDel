@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 
 import {
+  deleteProduct,
   deleteCategory,
   deleteProductImage,
   getCategories,
@@ -192,6 +193,8 @@ router.use((_req, res, next) => {
 
 router.get("/products", validate({ query: productListQuerySchema }), getProducts);
 router.get("/products/:productId", validate({ params: productParamsSchema }), getProduct);
+router.delete("/products/:productId", requireRoles("OWNER"), sensitiveRateLimiter,
+  validate({ params: productParamsSchema }), deleteProduct);
 router.post("/products", adminMutationRateLimiter, validate({ body: productBodySchema }), postProduct);
 router.patch(
   "/products/:productId",

@@ -741,3 +741,37 @@ export async function deleteAdminProductImage(productId, imageId, actor) {
     await fs.unlink(absolutePath).catch(() => {});
   }
 }
+
+// Historical records must never be removed through catalog deletion.
+export async function deleteAdminProduct(productId, context = {}) {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: { id: productId },
+        include: { _count: { select: {
+          orderItems: true, subscriptionItems: true, inventoryReservations: true,
+          inventoryMovements: true, reviews: true,
+        } } },
+      });
+      if (!product) throw createCatalogError("Товар не найден.", 404, "PRODUCT_NOT_FOUND");
+      if (Number(product.reservedQuantity) > 0 || Object.values(product._count).some((count) => count > 0)) {
+        throw createCatalogError(
+          "Удаление невозможно: у товара есть заказы, подписки, отзывы или складская история. Снимите галочки «Опубликован» и «Доступен к заказу» в карточке товара и сохраните её.",
+          409, "PRODUCT_HAS_HISTORY",
+        );
+      }
+      await tx.product.delete({ where: { id: productId } });
+      await writeActivity(tx, {
+        ...context, action: "PRODUCT_DELETE", entityType: "Product", entityId: productId,
+        description: `Удалён товар «${product.name}»`,
+        metadata: { sku: product.sku, slug: product.slug },
+      });
+      return { deleted: true };
+    }, { isolationLevel: "Serializable" });
+  } catch (error) {
+    if (error.code === "P2003" || error.code === "P2034") {
+      throw createCatalogError("Товар используется или изменился. Обновите список и повторите действие; товар с историей можно только скрыть.", 409, "PRODUCT_DELETE_CONFLICT");
+    }
+    throw error;
+  }
+}

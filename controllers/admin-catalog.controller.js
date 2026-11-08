@@ -1,4 +1,5 @@
 import {
+  deleteAdminProduct,
   createAdminCategory,
   createAdminProduct,
   deleteAdminProductImage,
@@ -162,4 +163,11 @@ export async function deleteProductImage(req, res, next) {
   } catch (error) {
     return next(error);
   }
+}
+
+export async function deleteProduct(req, res, next) {
+  try {
+    const result = await deleteAdminProduct(req.validated.params.productId, requestContext(req));
+    return res.status(200).json({ ok: true, ...result });
+  } catch (error) { return next(error); }
 }
