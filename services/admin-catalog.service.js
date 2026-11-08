@@ -749,28 +749,41 @@ export async function deleteAdminProduct(productId, context = {}) {
       const product = await tx.product.findUnique({
         where: { id: productId },
         include: { _count: { select: {
-          orderItems: true, subscriptionItems: true, inventoryReservations: true,
-          inventoryMovements: true, reviews: true,
+          orderItems: true, subscriptionItems: true, inventoryReservations: true, reviews: true,
         } } },
       });
       if (!product) throw createCatalogError("Товар не найден.", 404, "PRODUCT_NOT_FOUND");
-      if (Number(product.reservedQuantity) > 0 || Object.values(product._count).some((count) => count > 0)) {
+      const blockedMovement = await tx.inventoryMovement.findFirst({
+        where: { productId, OR: [
+          { orderId: { not: null } }, { orderItemId: { not: null } },
+          { type: { notIn: ["RECEIPT", "ADJUSTMENT"] } },
+          { reservedDelta: { not: 0 } },
+        ] }, select: { id: true },
+      });
+      if (Number(product.reservedQuantity) > 0 || blockedMovement ||
+          Object.values(product._count).some((count) => count > 0)) {
         throw createCatalogError(
-          "Удаление невозможно: у товара есть заказы, подписки, отзывы или складская история. Снимите галочки «Опубликован» и «Доступен к заказу» в карточке товара и сохраните её.",
+          "Товар связан с заказами, подписками, отзывами или резервами. Полное удаление запрещено. Снимите галочки «Опубликован» и «Доступен к заказу» и сохраните товар.",
           409, "PRODUCT_HAS_HISTORY",
         );
       }
+      const movements = await tx.inventoryMovement.deleteMany({
+        where: { productId, orderId: null, orderItemId: null,
+          type: { in: ["RECEIPT", "ADJUSTMENT"] }, reservedDelta: 0 },
+      });
       await tx.product.delete({ where: { id: productId } });
       await writeActivity(tx, {
         ...context, action: "PRODUCT_DELETE", entityType: "Product", entityId: productId,
-        description: `Удалён товар «${product.name}»`,
-        metadata: { sku: product.sku, slug: product.slug },
+        description: `Удалён товар «${product.name}» и его ручные складские записи`,
+        metadata: { sku: product.sku, slug: product.slug,
+          stockQuantity: product.stockQuantity == null ? null : String(product.stockQuantity),
+          deletedManualMovements: movements.count },
       });
       return { deleted: true };
     }, { isolationLevel: "Serializable" });
   } catch (error) {
     if (error.code === "P2003" || error.code === "P2034") {
-      throw createCatalogError("Товар используется или изменился. Обновите список и повторите действие; товар с историей можно только скрыть.", 409, "PRODUCT_DELETE_CONFLICT");
+      throw createCatalogError("Товар используется или изменился. Обновите список и повторите действие; товар с заказами или резервами можно только скрыть.", 409, "PRODUCT_DELETE_CONFLICT");
     }
     throw error;
   }

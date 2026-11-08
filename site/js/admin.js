@@ -660,7 +660,6 @@ function renderInventoryList(products) {
       <td><strong>${escapeAdminHtml(formatAdminQuantity(product.availableQuantity))}</strong></td>
       <td>${inventoryStatus(product)}</td>
       <td>${escapeAdminHtml(formatAdminDate(product.updatedAt))}</td>
-        <td>${currentAdminUser?.role === "OWNER" ? `<button class="admin-icon-button admin-icon-button--danger" type="button" data-product-delete="${product.id}" data-product-name="${escapeAdminHtml(product.name)}">Удалить</button>` : "—"}</td>
     </tr>
   `).join("");
 
@@ -976,6 +975,7 @@ function renderAdminProducts(products) {
         <td><strong>${escapeAdminHtml(formatAdminQuantity(product.availableQuantity))}</strong></td>
         <td>${productVisibilityMarkup(product)}</td>
         <td>${escapeAdminHtml(formatAdminDate(product.updatedAt))}</td>
+        <td>${currentAdminUser?.role === "OWNER" ? `<button class="admin-icon-button admin-icon-button--danger" type="button" data-product-delete="${product.id}" data-product-name="${escapeAdminHtml(product.name)}">Удалить</button>` : "—"}</td>
       </tr>`;
   }).join("");
 }
@@ -1026,7 +1026,7 @@ async function initAdminProducts() {
   document.querySelector("[data-products-list]")?.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-product-delete]");
     if (!(button instanceof HTMLButtonElement) || button.disabled) return;
-    if (!window.confirm(`Удалить товар «${button.dataset.productName}» навсегда? Товары с историей удалить нельзя.`)) return;
+    if (!window.confirm(`Удалить товар «${button.dataset.productName}» навсегда вместе с его остатком, ручными поступлениями и корректировками? Действие необратимо. Товар с заказами, подписками, отзывами или резервами удалить нельзя.`)) return;
     button.disabled = true;
     try {
       await adminFetch(`/api/admin/catalog/products/${button.dataset.productDelete}`, { method: "DELETE" });
